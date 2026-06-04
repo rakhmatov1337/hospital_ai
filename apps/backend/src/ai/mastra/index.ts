@@ -9,6 +9,11 @@ import { clinicalAdvisorAgent } from './agents/clinical-advisor.agent';
 import { kbIngestionWorkflow } from './workflows/kb-ingestion.workflow';
 import { patientOnboardingWorkflow } from './workflows/patient-onboarding.workflow';
 import { dailyCheckInWorkflow } from './workflows/daily-checkin.workflow';
+import {
+  medicalSafetyScorer,
+  answerRelevancyScorer,
+  toxicityScorer,
+} from '../evals/scorers';
 
 /**
  * Central Mastra instance (also what `mastra dev` Studio loads). Agents,
@@ -24,6 +29,11 @@ export const mastra = new Mastra({
     dailyCheckInWorkflow,
   },
   vectors: { pgVector },
+  scorers: {
+    'medical-safety': medicalSafetyScorer,
+    'answer-relevancy-scorer': answerRelevancyScorer(),
+    'toxicity-scorer': toxicityScorer(),
+  },
   storage: new LibSQLStore({ id: 'wf-store', url: 'file:./hospital-mastra.db' }),
   logger: new PinoLogger({ name: 'HospitalAI', level: 'info' }),
 });
