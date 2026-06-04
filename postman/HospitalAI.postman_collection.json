@@ -1,0 +1,189 @@
+{
+  "info": {
+    "name": "Hospital AI",
+    "description": "AI post-surgical recovery platform. Run top-to-bottom (Collection Runner) for the golden flow: doctor login -> create patient (AI care plan) -> patient login -> check-in -> AI risk -> doctor alert. Tokens/ids are captured automatically. Seed first: `npm run build && npm run seed` (doctor demo@hospital.ai / demo123).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api/v1" },
+    { "key": "doctorToken", "value": "" },
+    { "key": "patientToken", "value": "" },
+    { "key": "surgeryTypeId", "value": "" },
+    { "key": "patientId", "value": "" },
+    { "key": "accessCode", "value": "" },
+    { "key": "alertId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01 Auth - Register doctor (optional; seed also creates)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+        "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"Dr. Demo\",\n  \"email\": \"demo@hospital.ai\",\n  \"password\": \"demo123\"\n}" }
+      }
+    },
+    {
+      "name": "02 Auth - Doctor login",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "const j = pm.response.json();",
+        "if (j.accessToken) pm.collectionVariables.set('doctorToken', j.accessToken);",
+        "pm.test('got doctor token', () => pm.expect(j.accessToken).to.be.ok);"
+      ] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"demo@hospital.ai\",\n  \"password\": \"demo123\"\n}" }
+      }
+    },
+    {
+      "name": "03 Surgery types - list",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "const a = pm.response.json();",
+        "const c = a.find(t => (t.name || '').includes('Cesarean')) || a[0];",
+        "if (c) pm.collectionVariables.set('surgeryTypeId', c.id);"
+      ] } }],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/surgery-types", "host": ["{{baseUrl}}"], "path": ["surgery-types"] }
+      }
+    },
+    {
+      "name": "04 Patients - create (doctor) -> access code + AI care plan",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "const j = pm.response.json();",
+        "if (j.patient) pm.collectionVariables.set('patientId', j.patient.id);",
+        "if (j.accessCode) pm.collectionVariables.set('accessCode', j.accessCode);",
+        "pm.test('patient + accessCode', () => pm.expect(j.accessCode).to.be.ok);"
+      ] } }],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{doctorToken}}" }
+        ],
+        "url": { "raw": "{{baseUrl}}/patients", "host": ["{{baseUrl}}"], "path": ["patients"] },
+        "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"Nilufar Tosheva\",\n  \"phone\": \"+998901234567\",\n  \"surgeryTypeId\": \"{{surgeryTypeId}}\",\n  \"surgeryDate\": \"2026-06-01\"\n}" }
+      }
+    },
+    {
+      "name": "05 Patients - doctor list (status + last check-in)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{doctorToken}}" }],
+        "url": { "raw": "{{baseUrl}}/patients", "host": ["{{baseUrl}}"], "path": ["patients"] }
+      }
+    },
+    {
+      "name": "06 Patients - detail",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{doctorToken}}" }],
+        "url": { "raw": "{{baseUrl}}/patients/{{patientId}}", "host": ["{{baseUrl}}"], "path": ["patients", "{{patientId}}"] }
+      }
+    },
+    {
+      "name": "07 Care plan - for patient (doctor, grouped by day)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{doctorToken}}" }],
+        "url": { "raw": "{{baseUrl}}/patients/{{patientId}}/care-plan", "host": ["{{baseUrl}}"], "path": ["patients", "{{patientId}}", "care-plan"] }
+      }
+    },
+    {
+      "name": "08 Auth - patient login (access code)",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "const j = pm.response.json();",
+        "if (j.accessToken) pm.collectionVariables.set('patientToken', j.accessToken);",
+        "pm.test('got patient token', () => pm.expect(j.accessToken).to.be.ok);"
+      ] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/auth/patient-login", "host": ["{{baseUrl}}"], "path": ["auth", "patient-login"] },
+        "body": { "mode": "raw", "raw": "{\n  \"accessCode\": \"{{accessCode}}\"\n}" }
+      }
+    },
+    {
+      "name": "09 Care plan - today (patient)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{patientToken}}" }],
+        "url": { "raw": "{{baseUrl}}/care-plan/today", "host": ["{{baseUrl}}"], "path": ["care-plan", "today"] }
+      }
+    },
+    {
+      "name": "10 Check-in - create (patient) -> AI risk + auto alert",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "const j = pm.response.json();",
+        "pm.test('risk scored', () => pm.expect(j.riskLevel).to.be.ok);"
+      ] } }],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{patientToken}}" }
+        ],
+        "url": { "raw": "{{baseUrl}}/check-ins", "host": ["{{baseUrl}}"], "path": ["check-ins"] },
+        "body": { "mode": "raw", "raw": "{\n  \"painLevel\": 9,\n  \"temperature\": 38.9,\n  \"symptoms\": [\"heavy bleeding\", \"pus\"],\n  \"mood\": \"anxious\"\n}" }
+      }
+    },
+    {
+      "name": "11 Alerts - doctor list (unread first)",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "const a = pm.response.json();",
+        "if (a[0]) pm.collectionVariables.set('alertId', a[0].id);"
+      ] } }],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{doctorToken}}" }],
+        "url": { "raw": "{{baseUrl}}/alerts", "host": ["{{baseUrl}}"], "path": ["alerts"] }
+      }
+    },
+    {
+      "name": "12 Alerts - mark read",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Authorization", "value": "Bearer {{doctorToken}}" }],
+        "url": { "raw": "{{baseUrl}}/alerts/{{alertId}}/read", "host": ["{{baseUrl}}"], "path": ["alerts", "{{alertId}}", "read"] }
+      }
+    },
+    {
+      "name": "13 Check-ins - for patient (doctor)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{doctorToken}}" }],
+        "url": { "raw": "{{baseUrl}}/patients/{{patientId}}/check-ins", "host": ["{{baseUrl}}"], "path": ["patients", "{{patientId}}", "check-ins"] }
+      }
+    },
+    {
+      "name": "AI - nurse chat (grounded, trilingual)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/ai/chat", "host": ["{{baseUrl}}"], "path": ["ai", "chat"] },
+        "body": { "mode": "raw", "raw": "{\n  \"messages\": [{ \"role\": \"user\", \"content\": \"Can I take a bath on day 4 after my c-section?\" }],\n  \"surgeryType\": \"cesarean\",\n  \"recoveryDay\": 4\n}" }
+      }
+    },
+    {
+      "name": "AI - care plan (standalone)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/ai/care-plan", "host": ["{{baseUrl}}"], "path": ["ai", "care-plan"] },
+        "body": { "mode": "raw", "raw": "{\n  \"surgeryType\": \"cesarean\",\n  \"surgeryDate\": \"2026-06-01\"\n}" }
+      }
+    },
+    {
+      "name": "AI - risk score (standalone, confidence)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/ai/risk-score", "host": ["{{baseUrl}}"], "path": ["ai", "risk-score"] },
+        "body": { "mode": "raw", "raw": "{\n  \"painLevel\": 9,\n  \"temperature\": 38.7,\n  \"symptoms\": [\"heavy bleeding\", \"chills\"],\n  \"recoveryDay\": 2\n}" }
+      }
+    }
+  ]
+}
