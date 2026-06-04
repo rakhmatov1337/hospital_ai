@@ -1,16 +1,27 @@
 import { ModelRouterEmbeddingModel } from '@mastra/core/llm';
 
+type ModelEntry = { model: string; maxRetries: number };
+
 /**
- * 3-provider fallback chain. Mastra tries the primary first; on 500 / rate-limit /
- * timeout it falls over to the next provider automatically (AI-01).
- * Verify the exact array shape against the Mastra MCP (`getMastraExportDetails` on
- * @mastra/core Agent) — v1 fallback config.
+ * Build the provider fallback chain from the keys that are actually configured (AI-01).
+ * Order = priority: OpenAI (primary) → Anthropic → Gemini. Missing keys are skipped so
+ * we never waste retries on an unconfigured provider. App-level fallbacks (templates /
+ * rules) still sit on top of this.
  */
-export const FALLBACK_MODELS = [
-  { model: 'openai/gpt-5.4-mini', maxRetries: 2 }, // primary: fast + cheap
-  { model: 'anthropic/claude-sonnet-4-6', maxRetries: 1 }, // backup 1
-  { model: 'google/gemini-2.5-flash', maxRetries: 1 }, // backup 2
-];
+export function resolveFallbackModels(): ModelEntry[] {
+  const chain: ModelEntry[] = [];
+  if (process.env.OPENAI_API_KEY)
+    chain.push({ model: 'openai/gpt-5.4-mini', maxRetries: 2 });
+  if (process.env.ANTHROPIC_API_KEY)
+    chain.push({ model: 'anthropic/claude-sonnet-4-6', maxRetries: 1 });
+  if (process.env.GOOGLE_GENERATIVE_AI_API_KEY)
+    chain.push({ model: 'google/gemini-2.5-flash', maxRetries: 1 });
+  if (chain.length === 0)
+    throw new Error(
+      'No AI provider key configured — set OPENAI_API_KEY at minimum.',
+    );
+  return chain;
+}
 
 /** Embedding model for RAG + memory. text-embedding-3-small => 1536 dims. */
 export const EMBEDDER = () =>

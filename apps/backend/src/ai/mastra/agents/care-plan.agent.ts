@@ -1,11 +1,12 @@
 import { Agent } from '@mastra/core/agent';
-import { FALLBACK_MODELS } from '../providers';
+import { resolveFallbackModels } from '../providers';
 import { kbQueryTool } from '../tools/kb-query.tool';
 
 /**
  * AI-02: care-plan agent. Grounds plans in the cesarean KB (AI-08) via the query
- * tool, over the 3-provider fallback chain (AI-01). Used by care-plan.service which
- * adds the deterministic BE-07 fallback on failure.
+ * tool, over the 3-provider fallback chain (AI-01). Model is resolved at call time
+ * so it adapts to whichever provider keys are configured. Used by care-plan.service
+ * which adds the deterministic BE-07 fallback on failure.
  */
 export const carePlanAgent = new Agent({
   id: 'care-plan-agent',
@@ -16,6 +17,6 @@ export const carePlanAgent = new Agent({
     'Output a structured recovery plan covering the full period: medications, diet,',
     'activities, check-ups, and restrictions, each with a dayOffset from the surgery date.',
   ].join(' '),
-  model: FALLBACK_MODELS,
+  model: () => resolveFallbackModels(),
   tools: { kbQuery: kbQueryTool },
 });
