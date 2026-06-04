@@ -1,15 +1,11 @@
-import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { User } from '../entities/user.entity';
 import { Patient } from '../entities/patient.entity';
-import { RegisterDto, LoginDto, PatientLoginDto } from './auth.dto';
+import { LoginDto, PatientLoginDto } from './auth.dto';
 import { JwtPayload } from './auth.types';
 
 @Injectable()
@@ -31,37 +27,35 @@ export class AuthService {
       email: u.email,
       phone: u.phone,
       role: u.role,
+      title: u.title,
+      locale: u.locale,
+      hospitalId: u.hospitalId,
     };
   }
 
-  async register(dto: RegisterDto) {
-    const exists = await this.users.findOne({ where: { email: dto.email } });
-    if (exists) throw new ConflictException('Email already registered');
-    const user = await this.users.save(
-      this.users.create({
-        fullName: dto.fullName,
-        email: dto.email,
-        passwordHash: bcrypt.hashSync(dto.password, 10),
-        role: 'DOCTOR',
-      }),
-    );
-    return {
-      accessToken: this.sign({ sub: user.id, role: user.role }),
-      user: this.safeUser(user),
-    };
-  }
-
+  // Email + password login for SUPERADMIN / HOSPITAL_ADMIN / DOCTOR.
   async login(dto: LoginDto) {
     const user = await this.users.findOne({ where: { email: dto.email } });
-    if (!user?.passwordHash || !bcrypt.compareSync(dto.password, user.passwordHash)) {
+    if (
+      !user?.passwordHash ||
+      !bcrypt.compareSync(dto.password, user.passwordHash)
+    ) {
       throw new UnauthorizedException('Invalid credentials');
     }
+    if (user.role === 'PATIENT') {
+      throw new UnauthorizedException('Patients must use the access code login');
+    }
     return {
-      accessToken: this.sign({ sub: user.id, role: user.role }),
+      accessToken: this.sign({
+        sub: user.id,
+        role: user.role,
+        hospitalId: user.hospitalId ?? null,
+      }),
       user: this.safeUser(user),
     };
   }
 
+  // Access-code login for patients.
   async patientLogin(dto: PatientLoginDto) {
     const patient = await this.patients.findOne({
       where: { accessCode: dto.accessCode },
@@ -73,6 +67,7 @@ export class AuthService {
       accessToken: this.sign({
         sub: user.id,
         role: 'PATIENT',
+        hospitalId: patient.hospitalId,
         patientId: patient.id,
       }),
       user: this.safeUser(user),

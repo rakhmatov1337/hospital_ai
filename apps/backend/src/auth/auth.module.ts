@@ -5,7 +5,7 @@ import { User } from '../entities/user.entity';
 import { Patient } from '../entities/patient.entity';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { JwtAuthGuard, RolesGuard } from './guards';
+import { JwtAuthGuard, RolesGuard, TenantGuard } from './guards';
 import { env } from '../config/env';
 
 @Global()
@@ -18,7 +18,7 @@ import { env } from '../config/env';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtAuthGuard, RolesGuard],
-  exports: [JwtModule, JwtAuthGuard, RolesGuard],
+  providers: [AuthService, JwtAuthGuard, RolesGuard, TenantGuard],
+  exports: [JwtModule, JwtAuthGuard, RolesGuard, TenantGuard],
 })
 export class AuthModule {}

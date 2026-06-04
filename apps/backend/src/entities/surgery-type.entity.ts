@@ -8,15 +8,20 @@ export class SurgeryType {
   @Column()
   name!: string;
 
-  @Column({ nullable: true })
-  nameRu?: string;
+  @Column({ type: 'varchar', nullable: true })
+  nameRu?: string | null;
 
-  @Column({ nullable: true })
-  nameUz?: string;
+  @Column({ type: 'varchar', nullable: true })
+  nameUz?: string | null;
 
-  @Column({ nullable: true })
-  category?: string;
+  @Column({ type: 'varchar', nullable: true })
+  category?: string | null;
 
   @Column({ type: 'int', default: 42 })
   avgRecoveryDays!: number;
+
+  // pgvector index name backing this surgery's RAG knowledge base.
+  // Only Appendectomy is wired to a real KB for the hackathon.
+  @Column({ type: 'varchar', nullable: true })
+  kbIndex?: string | null;
 }

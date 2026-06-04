@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 import { SurgeryType } from './surgery-type.entity';
@@ -16,16 +17,20 @@ export class Patient {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
+  // human-friendly id shown in the UI, e.g. PX-1000
+  @Column({ type: 'varchar', unique: true })
+  publicId!: string;
+
   @ManyToOne(() => User, { eager: true })
   @JoinColumn({ name: 'userId' })
   user!: User;
   @Column()
   userId!: string;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'doctorId' })
-  doctor!: User;
-  @Column()
+  @Column({ type: 'uuid' })
+  hospitalId!: string;
+
+  @Column({ type: 'uuid' })
   doctorId!: string;
 
   @ManyToOne(() => SurgeryType, { eager: true })
@@ -37,12 +42,22 @@ export class Patient {
   @Column({ type: 'date' })
   surgeryDate!: string;
 
-  @Column({ type: 'varchar', default: 'PRE_OP' })
+  @Column({ type: 'varchar', default: 'RECOVERING' })
   status!: PatientStatus;
 
-  @Column({ unique: true })
+  @Column({ type: 'varchar', unique: true })
   accessCode!: string;
+
+  @Column({ type: 'int', nullable: true })
+  age?: number | null;
+
+  // 0-100 rolling recovery score (drives analytics + status)
+  @Column({ type: 'int', default: 60 })
+  recoveryScore!: number;
 
   @CreateDateColumn()
   createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
 }
