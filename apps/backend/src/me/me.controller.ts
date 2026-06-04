@@ -7,11 +7,19 @@ import {
   Patch,
   Post,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { MeService } from './me.service';
 import { CompleteItemDto, CheckInDto } from './me.dto';
+import { ChatDto } from '../ai/chat/chat.dto';
+import {
+  createChatStream,
+  logChatInteraction,
+  chatHistory,
+} from '../ai/chat/chat.service';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
 import { CurrentUser, Roles } from '../auth/auth.decorators';
 import type { JwtPayload } from '../auth/auth.types';
@@ -75,5 +83,61 @@ export class MeController {
   @Post('check-in')
   checkIn(@CurrentUser() user: JwtPayload, @Body() dto: CheckInDto) {
     return this.me.createCheckIn(this.pid(user), dto);
+  }
+
+  @Get('chat/history')
+  history(@CurrentUser() user: JwtPayload) {
+    return chatHistory(this.pid(user));
+  }
+
+  // Streaming nurse chat over Server-Sent Events.
+  @Post('chat')
+  async chat(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: ChatDto,
+    @Res() res: Response,
+  ) {
+    const patientId = this.pid(user);
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders?.();
+
+    const t0 = Date.now();
+    const lastUser =
+      [...dto.messages].reverse().find((m) => m.role === 'user')?.content ?? '';
+    let full = '';
+    let modelUsed = 'unknown';
+    let fallbackUsed = false;
+
+    try {
+      const { stream, modelUsed: m } = await createChatStream({
+        patientId,
+        messages: dto.messages,
+      });
+      modelUsed = m;
+      for await (const chunk of stream.textStream) {
+        full += chunk;
+        res.write(`data: ${JSON.stringify({ delta: chunk })}\n\n`);
+      }
+    } catch {
+      fallbackUsed = true;
+      if (!full) {
+        full =
+          'I had trouble responding just now. Please try again, or contact your care team if it is urgent.';
+        res.write(`data: ${JSON.stringify({ delta: full })}\n\n`);
+      }
+    }
+
+    res.write(`data: ${JSON.stringify({ done: true, modelUsed })}\n\n`);
+    res.end();
+    void logChatInteraction({
+      patientId,
+      input: lastUser,
+      output: full,
+      modelUsed,
+      latencyMs: Date.now() - t0,
+      fallbackUsed,
+    });
   }
 }

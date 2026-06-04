@@ -4,6 +4,7 @@ import { LibSQLStore } from '@mastra/libsql';
 import { pgVector } from './vectors';
 import { carePlanAgent } from './agents/care-plan.agent';
 import { riskAgent } from './agents/risk.agent';
+import { nurseChatAgent } from './agents/nurse-chat.agent';
 import { kbIngestionWorkflow } from './workflows/kb-ingestion.workflow';
 import { patientOnboardingWorkflow } from './workflows/patient-onboarding.workflow';
 import { dailyCheckInWorkflow } from './workflows/daily-checkin.workflow';
@@ -15,7 +16,7 @@ import { dailyCheckInWorkflow } from './workflows/daily-checkin.workflow';
  * LibSQL storage makes workflow runs durable + inspectable.
  */
 export const mastra = new Mastra({
-  agents: { carePlanAgent, riskAgent },
+  agents: { carePlanAgent, riskAgent, nurseChatAgent },
   workflows: {
     kbIngestionWorkflow,
     patientOnboardingWorkflow,
