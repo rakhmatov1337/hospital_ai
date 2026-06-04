@@ -7,6 +7,7 @@ import { Hospital } from '../entities/hospital.entity';
 import { SurgeryType } from '../entities/surgery-type.entity';
 import { KbDocument } from '../entities/kb-document.entity';
 import { AiInteraction } from '../entities/ai-interaction.entity';
+import { ScoreLog } from '../entities/score-log.entity';
 import {
   CreateHospitalDto,
   CreateSurgeryTypeDto,
@@ -34,6 +35,8 @@ export class SuperadminService {
     private readonly kbDocs: Repository<KbDocument>,
     @InjectRepository(AiInteraction)
     private readonly interactions: Repository<AiInteraction>,
+    @InjectRepository(ScoreLog)
+    private readonly scoreLogs: Repository<ScoreLog>,
   ) {}
 
   // ---- hospitals ----
@@ -192,5 +195,52 @@ export class SuperadminService {
       order: { createdAt: 'DESC' },
       take: limit,
     });
+  }
+
+  /** Aggregate AI quality metrics for the superadmin dashboard. */
+  async metrics() {
+    const logs = await this.scoreLogs.find();
+    const byScorer: Record<string, { avg: number; count: number }> = {};
+    const acc: Record<string, { sum: number; count: number }> = {};
+    for (const l of logs) {
+      acc[l.scorer] ??= { sum: 0, count: 0 };
+      acc[l.scorer].sum += l.score;
+      acc[l.scorer].count += 1;
+    }
+    for (const [k, v] of Object.entries(acc)) {
+      byScorer[k] = {
+        avg: Math.round((v.sum / v.count) * 100) / 100,
+        count: v.count,
+      };
+    }
+
+    const interactions = await this.interactions.find();
+    const withConf = interactions.filter((i) => i.confidence != null);
+    const avgConfidence = withConf.length
+      ? Math.round(
+          (withConf.reduce((s, i) => s + (i.confidence ?? 0), 0) /
+            withConf.length) *
+            100,
+        ) / 100
+      : null;
+    const fallbackRate = interactions.length
+      ? Math.round(
+          (interactions.filter((i) => i.fallbackUsed).length /
+            interactions.length) *
+            100,
+        ) / 100
+      : 0;
+    const byAgent: Record<string, number> = {};
+    for (const i of interactions) byAgent[i.agent] = (byAgent[i.agent] ?? 0) + 1;
+
+    return {
+      scorers: byScorer,
+      interactions: {
+        total: interactions.length,
+        byAgent,
+        avgConfidence,
+        fallbackRate,
+      },
+    };
   }
 }

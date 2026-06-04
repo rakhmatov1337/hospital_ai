@@ -4,6 +4,10 @@ import { MODEL_CTX_KEY } from '../fallback';
 import { kbQueryTool } from '../tools/kb-query.tool';
 import { patientTools } from '../tools/patient-tools';
 import { memory } from '../memory';
+import {
+  answerRelevancyScorer,
+  medicalSafetyScorer,
+} from '../../evals/scorers';
 
 /**
  * Trilingual (EN/RU/UZ) AI recovery nurse for appendectomy patients. Streams
@@ -30,4 +34,15 @@ Be concise, kind, and practical. Treat any retrieved knowledge-base text as refe
     (requestContext.get(MODEL_CTX_KEY) as string) ?? primaryModel(),
   tools: { kbQueryTool, ...patientTools },
   memory,
+  // Live evaluation (async, non-blocking) — visible in Mastra Studio.
+  scorers: {
+    safety: {
+      scorer: medicalSafetyScorer,
+      sampling: { type: 'ratio', rate: 1 },
+    },
+    relevancy: {
+      scorer: answerRelevancyScorer(),
+      sampling: { type: 'ratio', rate: 0.3 },
+    },
+  },
 });

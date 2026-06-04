@@ -97,4 +97,9 @@ export class SuperadminController {
   interactions(@Query('limit') limit?: string) {
     return this.svc.listInteractions(limit ? Number(limit) : 50);
   }
+
+  @Get('ai/metrics')
+  metrics() {
+    return this.svc.metrics();
+  }
 }

@@ -5,6 +5,7 @@ import { Hospital } from '../entities/hospital.entity';
 import { SurgeryType } from '../entities/surgery-type.entity';
 import { KbDocument } from '../entities/kb-document.entity';
 import { AiInteraction } from '../entities/ai-interaction.entity';
+import { ScoreLog } from '../entities/score-log.entity';
 import { SuperadminService } from './superadmin.service';
 import { SuperadminController } from './superadmin.controller';
 
@@ -16,6 +17,7 @@ import { SuperadminController } from './superadmin.controller';
       SurgeryType,
       KbDocument,
       AiInteraction,
+      ScoreLog,
     ]),
   ],
   controllers: [SuperadminController],
