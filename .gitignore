@@ -21,6 +21,8 @@ out/
 # Databases (local dev stores)
 *.db
 *.db-journal
+*.db-shm
+*.db-wal
 *.sqlite
 *.sqlite3
 
