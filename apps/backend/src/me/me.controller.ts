@@ -5,12 +5,13 @@ import {
   Get,
   Param,
   Patch,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { MeService } from './me.service';
-import { CompleteItemDto } from './me.dto';
+import { CompleteItemDto, CheckInDto } from './me.dto';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
 import { CurrentUser, Roles } from '../auth/auth.decorators';
 import type { JwtPayload } from '../auth/auth.types';
@@ -69,5 +70,10 @@ export class MeController {
   @Get('profile')
   profile(@CurrentUser() user: JwtPayload) {
     return this.me.profile(this.pid(user));
+  }
+
+  @Post('check-in')
+  checkIn(@CurrentUser() user: JwtPayload, @Body() dto: CheckInDto) {
+    return this.me.createCheckIn(this.pid(user), dto);
   }
 }

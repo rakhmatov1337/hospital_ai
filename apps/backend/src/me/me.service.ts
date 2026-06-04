@@ -6,7 +6,9 @@ import { CarePlan } from '../entities/care-plan.entity';
 import { CarePlanItem } from '../entities/care-plan-item.entity';
 import { ItemCompletion } from '../entities/item-completion.entity';
 import { CheckIn } from '../entities/check-in.entity';
-import { CompleteItemDto } from './me.dto';
+import { CompleteItemDto, CheckInDto } from './me.dto';
+import { mastra } from '../ai/mastra';
+import { dailyCheckInWorkflow } from '../ai/mastra/workflows/daily-checkin.workflow';
 
 const DIET_TIPS = [
   {
@@ -202,6 +204,45 @@ export class MeService {
       .filter((i) => i.type === 'DIET')
       .map((i) => ({ title: i.title, description: i.description }));
     return { prescribed, tips: DIET_TIPS };
+  }
+
+  /** Record a daily check-in and run the AI risk workflow (alerts + score). */
+  async createCheckIn(patientId: string, dto: CheckInDto) {
+    const p = await this.getPatient(patientId);
+    const date = today();
+    const recoveryDay = Math.max(0, daysBetween(p.surgeryDate, date));
+    const checkIn = await this.checkIns.save(
+      this.checkIns.create({
+        patientId,
+        date,
+        painLevel: dto.painLevel,
+        temperature: dto.temperature ?? null,
+        symptoms: dto.symptoms,
+        mood: dto.mood ?? null,
+        bpm: dto.bpm ?? null,
+        spo2: dto.spo2 ?? null,
+        source: 'MANUAL',
+      }),
+    );
+
+    void mastra; // ensure the Mastra instance is constructed + workflow wired
+    const run = await dailyCheckInWorkflow.createRun();
+    const result = await run.start({
+      inputData: {
+        checkInId: checkIn.id,
+        patientId,
+        painLevel: dto.painLevel,
+        temperature: dto.temperature ?? null,
+        symptoms: dto.symptoms,
+        mood: dto.mood ?? null,
+        recoveryDay,
+      },
+    });
+
+    return {
+      checkIn: { id: checkIn.id, date, painLevel: dto.painLevel },
+      risk: result.status === 'success' ? result.result : null,
+    };
   }
 
   async profile(patientId: string) {

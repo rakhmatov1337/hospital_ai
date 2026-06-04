@@ -3,8 +3,10 @@ import { PinoLogger } from '@mastra/loggers';
 import { LibSQLStore } from '@mastra/libsql';
 import { pgVector } from './vectors';
 import { carePlanAgent } from './agents/care-plan.agent';
+import { riskAgent } from './agents/risk.agent';
 import { kbIngestionWorkflow } from './workflows/kb-ingestion.workflow';
 import { patientOnboardingWorkflow } from './workflows/patient-onboarding.workflow';
+import { dailyCheckInWorkflow } from './workflows/daily-checkin.workflow';
 
 /**
  * Central Mastra instance (also what `mastra dev` Studio loads). Agents,
@@ -13,8 +15,12 @@ import { patientOnboardingWorkflow } from './workflows/patient-onboarding.workfl
  * LibSQL storage makes workflow runs durable + inspectable.
  */
 export const mastra = new Mastra({
-  agents: { carePlanAgent },
-  workflows: { kbIngestionWorkflow, patientOnboardingWorkflow },
+  agents: { carePlanAgent, riskAgent },
+  workflows: {
+    kbIngestionWorkflow,
+    patientOnboardingWorkflow,
+    dailyCheckInWorkflow,
+  },
   vectors: { pgVector },
   storage: new LibSQLStore({ id: 'wf-store', url: 'file:./hospital-mastra.db' }),
   logger: new PinoLogger({ name: 'HospitalAI', level: 'info' }),
