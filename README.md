@@ -21,21 +21,32 @@ hospital-ai/
    └─ BACKEND_AI_PLAN.md   # backend + AI implementation plan
 ```
 
-## Run
+## Run (backend)
 
-Postgres is **Neon** (cloud) — no Docker needed. Set `DATABASE_URL` + the 3 provider keys in `apps/backend/.env` (see `.env.example`).
+Set `DATABASE_URL` (local Postgres or Neon) + `OPENAI_API_KEY` in `apps/backend/.env` (see `.env.example`). For RAG, enable pgvector once: `CREATE EXTENSION IF NOT EXISTS vector;`
 
 ```bash
-cd apps/backend && npm i && npm run start:dev   # http://localhost:3000/api/docs
-npx mastra dev                                   # Mastra Studio at http://localhost:4111
-cd apps/frontend && npm i && npm run dev         # http://localhost:5173
+cd apps/backend
+npm install
+npm run build         # compile (tsc emits decorator metadata)
+npm run seed          # surgery types + doctor demo@hospital.ai / demo123
+npm run ingest        # load the cesarean KB into pgvector (RAG)
+npm run start:dev     # API + Swagger: http://localhost:3000/api/docs
+npx mastra dev        # Mastra Studio: http://localhost:4111
 ```
+
+Frontend: `cd apps/frontend && npm i && npm run dev` (http://localhost:5173).
 
 ## Demo credentials
 
-Doctor: `demo@hospital.ai` / `demo123` · Patients log in with a 6-digit access code.
+Doctor: `demo@hospital.ai` / `demo123` · Patients log in with a 6-digit access code (returned when a doctor creates them).
+
+## API testing
+
+- **Swagger UI:** http://localhost:3000/api/docs (`docs/openapi.json`)
+- **Postman:** import `postman/HospitalAI.postman_collection.json` — run top-to-bottom for the full golden flow (tokens auto-captured).
 
 ## Docs
 
-- **[Backend + AI Implementation Plan](docs/BACKEND_AI_PLAN.md)**
-- Architecture, schema & frozen API contract live in the Notion War Room.
+- **[Demo cheat-sheet](docs/DEMO.md)** · **[Backend + AI Implementation Plan](docs/BACKEND_AI_PLAN.md)**
+- Architecture, schema & API contract live in the Notion War Room.
