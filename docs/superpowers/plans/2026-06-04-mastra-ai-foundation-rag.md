@@ -1,4 +1,4 @@
-# Mastra AI Foundation + RAG Ingest Implementation Plan
+✗ Failed to restart all active workflow runs: TypeError: fetch failed# Mastra AI Foundation + RAG Ingest Implementation Plan
 
 > **For agentic workers:** implement task-by-task. Steps use checkbox (`- [ ]`) syntax. **Verify every Mastra v1 API against the Mastra MCP docs server (`getMastraExportDetails`) or the `mastra` skill before coding — signatures changed in v1.**
 > **Workflow rule (user):** after EACH task's commit, **push to GitHub** (`git push`). Non-negotiable.
