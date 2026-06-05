@@ -2,8 +2,7 @@ import { stepCountIs } from 'ai';
 import { nurseChatAgent } from '../mastra/agents/nurse-chat.agent';
 import { withModelFallback } from '../mastra/fallback';
 import { PATIENT_CTX_KEY } from '../mastra/tools/patient-tools';
-import { getAiDataSource } from '../mastra/db';
-import { AiInteraction } from '../../entities/ai-interaction.entity';
+import { q, uuid } from '../mastra/db';
 
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
@@ -48,18 +47,20 @@ export async function logChatInteraction(opts: {
   fallbackUsed: boolean;
 }): Promise<void> {
   try {
-    const ds = await getAiDataSource();
-    await ds.getRepository(AiInteraction).save(
-      ds.getRepository(AiInteraction).create({
-        agent: 'chat',
-        patientId: opts.patientId ?? null,
-        threadId: opts.patientId ?? null,
-        input: opts.input,
-        output: opts.output,
-        modelUsed: opts.modelUsed,
-        latencyMs: opts.latencyMs,
-        fallbackUsed: opts.fallbackUsed,
-      }),
+    await q(
+      `INSERT INTO ai_interactions
+         (id,agent,"patientId","threadId",input,output,"modelUsed","latencyMs","fallbackUsed")
+       VALUES ($1,'chat',$2,$3,$4,$5,$6,$7,$8)`,
+      [
+        uuid(),
+        opts.patientId ?? null,
+        opts.patientId ?? null,
+        opts.input,
+        opts.output,
+        opts.modelUsed,
+        opts.latencyMs,
+        opts.fallbackUsed,
+      ],
     );
   } catch {
     /* logging is best-effort */
@@ -68,15 +69,11 @@ export async function logChatInteraction(opts: {
 
 /** Recent chat turns for a patient (used by GET /me/chat/history). */
 export async function chatHistory(patientId: string, limit = 20) {
-  const ds = await getAiDataSource();
-  const rows = await ds.getRepository(AiInteraction).find({
-    where: { agent: 'chat', patientId },
-    order: { createdAt: 'ASC' },
-    take: limit,
-  });
-  return rows.map((r) => ({
-    input: r.input,
-    output: r.output,
-    createdAt: r.createdAt,
-  }));
+  return q(
+    `SELECT input, output, "createdAt" AS "createdAt"
+     FROM ai_interactions
+     WHERE agent='chat' AND "patientId"=$1
+     ORDER BY "createdAt" ASC LIMIT $2`,
+    [patientId, limit],
+  );
 }

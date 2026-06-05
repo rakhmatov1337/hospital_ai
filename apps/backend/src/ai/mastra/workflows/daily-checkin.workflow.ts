@@ -1,12 +1,7 @@
 import { createWorkflow, createStep } from '@mastra/core/workflows';
 import { z } from 'zod';
 import { assessRisk } from '../../risk/risk.service';
-import { getAiDataSource } from '../db';
-import { Patient } from '../../../entities/patient.entity';
-import { CheckIn } from '../../../entities/check-in.entity';
-import { RiskAssessment } from '../../../entities/risk-assessment.entity';
-import { Alert } from '../../../entities/alert.entity';
-import { RecoveryPoint } from '../../../entities/recovery-point.entity';
+import { q, one, uuid } from '../db';
 
 /**
  * Daily check-in pipeline: AI risk triage -> persist assessment -> update the
@@ -76,63 +71,62 @@ const persistStep = createStep({
   }),
   execute: async ({ inputData }) => {
     const { risk } = inputData;
-    const ds = await getAiDataSource();
-    const patients = ds.getRepository(Patient);
-    const checkIns = ds.getRepository(CheckIn);
-    const risks = ds.getRepository(RiskAssessment);
-    const alerts = ds.getRepository(Alert);
-    const points = ds.getRepository(RecoveryPoint);
 
-    const patient = await patients.findOne({
-      where: { id: inputData.patientId },
-    });
+    const patient = await one<{
+      doctorId: string;
+      hospitalId: string;
+      status: string;
+    }>(
+      `SELECT "doctorId", "hospitalId", status FROM patients WHERE id=$1`,
+      [inputData.patientId],
+    );
     if (!patient) throw new Error('Patient not found');
 
-    await risks.save(
-      risks.create({
-        checkInId: inputData.checkInId,
-        patientId: inputData.patientId,
-        riskLevel: risk.riskLevel,
-        advice: risk.advice,
-        alertDoctor: risk.alertDoctor,
-        confidence: risk.confidence,
-        modelUsed: risk.modelUsed,
-        fallbackUsed: risk.fallbackUsed,
-      }),
+    await q(
+      `INSERT INTO risk_assessments
+         (id,"checkInId","patientId","riskLevel",advice,"alertDoctor",confidence,"modelUsed","fallbackUsed")
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+      [
+        uuid(),
+        inputData.checkInId,
+        inputData.patientId,
+        risk.riskLevel,
+        risk.advice,
+        risk.alertDoctor,
+        risk.confidence,
+        risk.modelUsed,
+        risk.fallbackUsed,
+      ],
     );
 
-    await checkIns.update(
-      { id: inputData.checkInId },
-      { riskLevel: risk.riskLevel },
-    );
+    await q(`UPDATE check_ins SET "riskLevel"=$1 WHERE id=$2`, [
+      risk.riskLevel,
+      inputData.checkInId,
+    ]);
 
     const recoveryScore = computeScore(
       inputData.painLevel,
       inputData.temperature ?? null,
       risk.riskLevel,
     );
-    patient.recoveryScore = recoveryScore;
-    if (risk.riskLevel === 'HIGH') patient.status = 'AT_RISK';
-    else if (patient.status !== 'RECOVERED') patient.status = 'RECOVERING';
-    await patients.save(patient);
+    const newStatus =
+      risk.riskLevel === 'HIGH'
+        ? 'AT_RISK'
+        : patient.status !== 'RECOVERED'
+          ? 'RECOVERING'
+          : 'RECOVERED';
+    await q(
+      `UPDATE patients SET "recoveryScore"=$1, status=$2, "updatedAt"=now() WHERE id=$3`,
+      [recoveryScore, newStatus, inputData.patientId],
+    );
 
     const date = new Date().toISOString().slice(0, 10);
-    const existing = await points.findOne({
-      where: { patientId: patient.id, date },
-    });
-    if (existing) {
-      existing.score = recoveryScore;
-      await points.save(existing);
-    } else {
-      await points.save(
-        points.create({
-          patientId: patient.id,
-          hospitalId: patient.hospitalId,
-          date,
-          score: recoveryScore,
-        }),
-      );
-    }
+    await q(
+      `INSERT INTO recovery_points (id,"patientId","hospitalId",date,score)
+       VALUES ($1,$2,$3,$4,$5)
+       ON CONFLICT ("patientId",date) DO UPDATE SET score=EXCLUDED.score`,
+      [uuid(), inputData.patientId, patient.hospitalId, date, recoveryScore],
+    );
 
     let alertCreated = false;
     if (risk.riskLevel === 'HIGH' || risk.riskLevel === 'MEDIUM') {
@@ -144,20 +138,22 @@ const persistStep = createStep({
         : risk.riskLevel === 'HIGH'
           ? 'High-Risk Check-in'
           : 'Symptom Watch';
-      await alerts.save(
-        alerts.create({
-          patientId: patient.id,
-          doctorId: patient.doctorId,
-          hospitalId: patient.hospitalId,
-          type: 'RISK',
+      await q(
+        `INSERT INTO alerts
+           (id,"patientId","doctorId","hospitalId",type,severity,title,message,"actionLabel",status)
+         VALUES ($1,$2,$3,$4,'RISK',$5,$6,$7,$8,'UNREAD')`,
+        [
+          uuid(),
+          inputData.patientId,
+          patient.doctorId,
+          patient.hospitalId,
           severity,
           title,
-          message: isFever
+          isFever
             ? `Reported temperature ${temp}°C — possible infection risk. ${risk.advice}`
             : risk.advice,
-          actionLabel: risk.riskLevel === 'HIGH' ? 'Emergency Response' : 'View',
-          status: 'UNREAD',
-        }),
+          risk.riskLevel === 'HIGH' ? 'Emergency Response' : 'View',
+        ],
       );
       alertCreated = true;
     }

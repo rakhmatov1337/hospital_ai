@@ -1,10 +1,6 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
-import { getAiDataSource } from '../db';
-import { Patient } from '../../../entities/patient.entity';
-import { CarePlan } from '../../../entities/care-plan.entity';
-import { CarePlanItem } from '../../../entities/care-plan-item.entity';
-import { CheckIn } from '../../../entities/check-in.entity';
+import { q, one, parseArray } from '../db';
 
 /** RequestContext key the chat service sets so tools read the right patient. */
 export const PATIENT_CTX_KEY = 'patientId';
@@ -21,17 +17,25 @@ function resolvePatientId(inputData: any, context: any): string {
 
 function postOpDay(surgeryDate: string): number {
   const a = new Date(surgeryDate + 'T00:00:00Z').getTime();
-  const b = new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00Z').getTime();
+  const b = new Date(
+    new Date().toISOString().slice(0, 10) + 'T00:00:00Z',
+  ).getTime();
   return Math.max(0, Math.floor((b - a) / 86_400_000));
+}
+
+async function activePlanId(patientId: string): Promise<string | null> {
+  const plan = await one<{ id: string }>(
+    `SELECT id FROM care_plans WHERE "patientId"=$1 AND status='ACTIVE' ORDER BY "createdAt" DESC LIMIT 1`,
+    [patientId],
+  );
+  return plan?.id ?? null;
 }
 
 export const getPatientProfileTool = createTool({
   id: 'getPatientProfile',
   description:
     "Get the current patient's demographics, surgery type, surgery date, post-op day, and recovery status.",
-  inputSchema: z.object({
-    patientId: z.string().optional(),
-  }),
+  inputSchema: z.object({ patientId: z.string().optional() }),
   outputSchema: z.object({
     fullName: z.string().nullable(),
     surgeryType: z.string().nullable(),
@@ -42,16 +46,30 @@ export const getPatientProfileTool = createTool({
   }),
   execute: async (inputData, context) => {
     const id = resolvePatientId(inputData, context);
-    const ds = await getAiDataSource();
-    const p = await ds.getRepository(Patient).findOne({ where: { id } });
-    if (!p) throw new Error('Patient not found');
+    const row = await one<{
+      fullname: string | null;
+      surgerytype: string | null;
+      surgerydate: string;
+      status: string;
+      recoveryscore: number;
+    }>(
+      `SELECT u."fullName" AS fullname, st.name AS surgerytype,
+              to_char(p."surgeryDate",'YYYY-MM-DD') AS surgerydate,
+              p.status, p."recoveryScore" AS recoveryscore
+       FROM patients p
+       JOIN users u ON u.id = p."userId"
+       JOIN surgery_types st ON st.id = p."surgeryTypeId"
+       WHERE p.id = $1`,
+      [id],
+    );
+    if (!row) throw new Error('Patient not found');
     return {
-      fullName: p.user?.fullName ?? null,
-      surgeryType: p.surgeryType?.name ?? null,
-      surgeryDate: p.surgeryDate,
-      postOpDay: postOpDay(p.surgeryDate),
-      status: p.status,
-      recoveryScore: p.recoveryScore,
+      fullName: row.fullname,
+      surgeryType: row.surgerytype,
+      surgeryDate: row.surgerydate,
+      postOpDay: postOpDay(row.surgerydate),
+      status: row.status,
+      recoveryScore: Number(row.recoveryscore),
     };
   },
 });
@@ -75,23 +93,28 @@ export const getCarePlanTool = createTool({
   }),
   execute: async (inputData, context) => {
     const id = resolvePatientId(inputData, context);
-    const ds = await getAiDataSource();
-    const plan = await ds.getRepository(CarePlan).findOne({
-      where: { patientId: id, status: 'ACTIVE' },
-      order: { createdAt: 'DESC' },
-    });
-    if (!plan) return { items: [] };
-    const items = await ds
-      .getRepository(CarePlanItem)
-      .find({ where: { carePlanId: plan.id, active: true } });
+    const planId = await activePlanId(id);
+    if (!planId) return { items: [] };
+    const rows = await q<{
+      type: string;
+      title: string;
+      description: string;
+      dosage: string | null;
+      frequency: string | null;
+      scheduletimes: string | null;
+    }>(
+      `SELECT type, title, description, dosage, frequency, "scheduleTimes" AS scheduletimes
+       FROM care_plan_items WHERE "carePlanId"=$1 AND active=true`,
+      [planId],
+    );
     return {
-      items: items.map((i) => ({
+      items: rows.map((i) => ({
         type: i.type,
         title: i.title,
         description: i.description,
         dosage: i.dosage,
         frequency: i.frequency,
-        scheduleTimes: i.scheduleTimes,
+        scheduleTimes: parseArray(i.scheduletimes),
       })),
     };
   },
@@ -115,21 +138,25 @@ export const getMedicationScheduleTool = createTool({
   }),
   execute: async (inputData, context) => {
     const id = resolvePatientId(inputData, context);
-    const ds = await getAiDataSource();
-    const plan = await ds.getRepository(CarePlan).findOne({
-      where: { patientId: id, status: 'ACTIVE' },
-      order: { createdAt: 'DESC' },
-    });
-    if (!plan) return { medications: [] };
-    const items = await ds.getRepository(CarePlanItem).find({
-      where: { carePlanId: plan.id, type: 'MEDICATION', active: true },
-    });
+    const planId = await activePlanId(id);
+    if (!planId) return { medications: [] };
+    const rows = await q<{
+      title: string;
+      dosage: string | null;
+      frequency: string | null;
+      scheduletimes: string | null;
+      description: string;
+    }>(
+      `SELECT title, dosage, frequency, "scheduleTimes" AS scheduletimes, description
+       FROM care_plan_items WHERE "carePlanId"=$1 AND type='MEDICATION' AND active=true`,
+      [planId],
+    );
     return {
-      medications: items.map((i) => ({
+      medications: rows.map((i) => ({
         title: i.title,
         dosage: i.dosage,
         frequency: i.frequency,
-        scheduleTimes: i.scheduleTimes,
+        scheduleTimes: parseArray(i.scheduletimes),
         description: i.description,
       })),
     };
@@ -157,19 +184,25 @@ export const getRecentCheckInsTool = createTool({
   }),
   execute: async (inputData, context) => {
     const id = resolvePatientId(inputData, context);
-    const ds = await getAiDataSource();
-    const rows = await ds.getRepository(CheckIn).find({
-      where: { patientId: id },
-      order: { createdAt: 'DESC' },
-      take: inputData?.limit ?? 5,
-    });
+    const rows = await q<{
+      date: string;
+      painlevel: number;
+      temperature: number | null;
+      symptoms: string | null;
+      risklevel: string | null;
+    }>(
+      `SELECT to_char(date,'YYYY-MM-DD') AS date, "painLevel" AS painlevel,
+              temperature, symptoms, "riskLevel" AS risklevel
+       FROM check_ins WHERE "patientId"=$1 ORDER BY "createdAt" DESC LIMIT $2`,
+      [id, inputData?.limit ?? 5],
+    );
     return {
       checkIns: rows.map((c) => ({
         date: c.date,
-        painLevel: c.painLevel,
-        temperature: c.temperature,
-        symptoms: c.symptoms,
-        riskLevel: c.riskLevel,
+        painLevel: Number(c.painlevel),
+        temperature: c.temperature != null ? Number(c.temperature) : null,
+        symptoms: parseArray(c.symptoms),
+        riskLevel: c.risklevel,
       })),
     };
   },

@@ -2,9 +2,7 @@ import { createWorkflow, createStep } from '@mastra/core/workflows';
 import { z } from 'zod';
 import { generateCarePlan } from '../../care-plan/care-plan.service';
 import { carePlanItemSchema } from '../../care-plan/care-plan.types';
-import { getAiDataSource } from '../db';
-import { CarePlan } from '../../../entities/care-plan.entity';
-import { CarePlanItem } from '../../../entities/care-plan-item.entity';
+import { q, uuid } from '../db';
 
 /**
  * Patient onboarding: when a doctor registers a patient we generate an
@@ -55,41 +53,45 @@ const persistStep = createStep({
   }),
   execute: async ({ inputData }) => {
     const { plan } = inputData;
-    const ds = await getAiDataSource();
-    const planRepo = ds.getRepository(CarePlan);
-    const itemRepo = ds.getRepository(CarePlanItem);
+    const carePlanId = uuid();
 
-    const carePlan = await planRepo.save(
-      planRepo.create({
-        patientId: inputData.patientId,
-        surgeryTypeId: inputData.surgeryTypeId,
-        source: 'AI',
-        confidence: plan.confidence,
-        aiReasoning: plan.reasoning,
-        modelUsed: plan.modelUsed,
-        status: 'DRAFT',
-      }),
+    await q(
+      `INSERT INTO care_plans
+         (id,"patientId","surgeryTypeId",source,confidence,"aiReasoning","modelUsed",status)
+       VALUES ($1,$2,$3,'AI',$4,$5,$6,'DRAFT')`,
+      [
+        carePlanId,
+        inputData.patientId,
+        inputData.surgeryTypeId,
+        plan.confidence,
+        plan.reasoning,
+        plan.modelUsed,
+      ],
     );
 
-    await itemRepo.save(
-      plan.items.map((i) =>
-        itemRepo.create({
-          carePlanId: carePlan.id,
-          patientId: inputData.patientId,
-          type: i.type,
-          title: i.title,
-          description: i.description,
-          scheduleTimes: i.scheduleTimes,
-          dosage: i.dosage ?? null,
-          frequency: i.frequency ?? null,
-          startDay: i.startDay,
-          durationDays: i.durationDays ?? null,
-        }),
-      ),
-    );
+    for (const i of plan.items) {
+      await q(
+        `INSERT INTO care_plan_items
+           (id,"carePlanId","patientId",type,title,description,"scheduleTimes",dosage,frequency,"startDay","durationDays",active)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,true)`,
+        [
+          uuid(),
+          carePlanId,
+          inputData.patientId,
+          i.type,
+          i.title,
+          i.description,
+          i.scheduleTimes?.join(',') ?? null,
+          i.dosage ?? null,
+          i.frequency ?? null,
+          i.startDay,
+          i.durationDays ?? null,
+        ],
+      );
+    }
 
     return {
-      carePlanId: carePlan.id,
+      carePlanId,
       itemCount: plan.items.length,
       confidence: plan.confidence,
       modelUsed: plan.modelUsed,

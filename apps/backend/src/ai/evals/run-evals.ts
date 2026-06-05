@@ -9,8 +9,7 @@ import {
   toxicityScorer,
 } from './scorers';
 import { appendectomyEvalSet } from './dataset';
-import { getAiDataSource } from '../mastra/db';
-import { ScoreLog } from '../../entities/score-log.entity';
+import { q, uuid } from '../mastra/db';
 
 /**
  * CI / batch evaluation of the nurse chat agent over the golden appendectomy
@@ -27,9 +26,6 @@ async function main() {
     toxicityScorer(),
     medicalSafetyScorer,
   ];
-  const ds = await getAiDataSource();
-  const logRepo = ds.getRepository(ScoreLog);
-
   console.log(`Running evals over ${appendectomyEvalSet.length} questions...`);
   const result = await runEvals({
     data: appendectomyEvalSet,
@@ -41,13 +37,10 @@ async function main() {
         const score = typeof r?.score === 'number' ? r.score : null;
         if (score == null) continue;
         try {
-          await logRepo.save(
-            logRepo.create({
-              agent: 'chat',
-              scorer,
-              score,
-              reason: r?.reason ?? null,
-            }),
+          await q(
+            `INSERT INTO score_logs (id,agent,scorer,score,reason)
+             VALUES ($1,'chat',$2,$3,$4)`,
+            [uuid(), scorer, score, r?.reason ?? null],
           );
         } catch {
           /* score_logs table may not exist before first app boot/seed */

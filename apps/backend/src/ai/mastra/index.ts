@@ -22,6 +22,8 @@ import {
  * LibSQL storage makes workflow runs durable + inspectable.
  */
 export const mastra = new Mastra({
+  // Studio (`mastra dev`) serves here — off the API's port 3000 so both run.
+  server: { port: 4111 },
   agents: { carePlanAgent, riskAgent, nurseChatAgent, clinicalAdvisorAgent },
   workflows: {
     kbIngestionWorkflow,

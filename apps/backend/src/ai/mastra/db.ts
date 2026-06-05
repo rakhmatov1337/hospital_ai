@@ -1,58 +1,49 @@
-import 'reflect-metadata';
-import { DataSource } from 'typeorm';
+import { Pool } from 'pg';
+import { randomUUID } from 'node:crypto';
 import { env } from '../../config/env';
-import { User } from '../../entities/user.entity';
-import { Hospital } from '../../entities/hospital.entity';
-import { SurgeryType } from '../../entities/surgery-type.entity';
-import { Patient } from '../../entities/patient.entity';
-import { CarePlan } from '../../entities/care-plan.entity';
-import { CarePlanItem } from '../../entities/care-plan-item.entity';
-import { ItemCompletion } from '../../entities/item-completion.entity';
-import { CheckIn } from '../../entities/check-in.entity';
-import { RiskAssessment } from '../../entities/risk-assessment.entity';
-import { Alert } from '../../entities/alert.entity';
-import { RecoveryPoint } from '../../entities/recovery-point.entity';
-import { KbDocument } from '../../entities/kb-document.entity';
-import { AiInteraction } from '../../entities/ai-interaction.entity';
-import { ScoreLog } from '../../entities/score-log.entity';
-
-const ENTITIES = [
-  User,
-  Hospital,
-  SurgeryType,
-  Patient,
-  CarePlan,
-  CarePlanItem,
-  ItemCompletion,
-  CheckIn,
-  RiskAssessment,
-  Alert,
-  RecoveryPoint,
-  KbDocument,
-  AiInteraction,
-  ScoreLog,
-];
-
-let ds: DataSource | null = null;
 
 /**
- * Standalone read DataSource for Mastra tools/workflows. Independent of Nest DI
- * so the same agents run unchanged in Mastra Studio (`mastra dev`). Never
- * synchronizes — the Nest app owns the schema.
+ * Raw pg access for Mastra tools/workflows. Deliberately TypeORM-free: the
+ * Mastra bundler (Studio / `mastra build`) uses esbuild, which does NOT emit
+ * decorator metadata, so importing TypeORM entity classes here would crash the
+ * bundle. Column identifiers are camelCase (created by TypeORM) so they must be
+ * double-quoted in SQL.
  */
-export async function getAiDataSource(): Promise<DataSource> {
-  if (ds?.isInitialized) return ds;
+let pool: Pool | null = null;
+
+export function getPool(): Pool {
+  if (pool) return pool;
   const url = env.databaseUrl();
   const isLocal = ['localhost', '127.0.0.1', '::1'].includes(
     new URL(url).hostname,
   );
-  ds = new DataSource({
-    type: 'postgres',
-    url,
+  pool = new Pool({
+    connectionString: url,
     ssl: isLocal ? false : { rejectUnauthorized: false },
-    synchronize: false,
-    entities: ENTITIES,
   });
-  await ds.initialize();
-  return ds;
+  return pool;
+}
+
+export async function q<T = Record<string, unknown>>(
+  text: string,
+  params: unknown[] = [],
+): Promise<T[]> {
+  const res = await getPool().query(text, params);
+  return res.rows as T[];
+}
+
+export async function one<T = Record<string, unknown>>(
+  text: string,
+  params: unknown[] = [],
+): Promise<T | null> {
+  const rows = await q<T>(text, params);
+  return rows[0] ?? null;
+}
+
+export const uuid = () => randomUUID();
+
+/** simple-array columns are stored comma-joined; parse back to string[]. */
+export function parseArray(v: unknown): string[] | undefined {
+  if (v == null || v === '') return undefined;
+  return String(v).split(',');
 }
