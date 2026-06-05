@@ -2,11 +2,13 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsBoolean,
+  IsIn,
   IsInt,
   IsNumber,
   IsOptional,
   IsString,
   Max,
+  MaxLength,
   Min,
 } from 'class-validator';
 
@@ -42,6 +44,28 @@ export class CheckInDto {
   @IsOptional()
   @IsInt()
   spo2?: number;
+}
+
+export class ComplaintDto {
+  @ApiProperty({
+    enum: ['DOCTOR', 'NURSE', 'SERVICE', 'FACILITY', 'MEDICATION', 'OTHER'],
+    description:
+      'Shifokor=DOCTOR, Hamshira=NURSE, Xizmat=SERVICE, Muassasa=FACILITY, Dori=MEDICATION, Boshqa=OTHER',
+  })
+  @IsIn(['DOCTOR', 'NURSE', 'SERVICE', 'FACILITY', 'MEDICATION', 'OTHER'])
+  category!: 'DOCTOR' | 'NURSE' | 'SERVICE' | 'FACILITY' | 'MEDICATION' | 'OTHER';
+
+  @ApiProperty({ maxLength: 500, example: 'Nima boʻlganini tasvirlab bering...' })
+  @IsString()
+  @MaxLength(500)
+  description!: string;
+
+  @ApiProperty({
+    enum: ['LOW', 'MEDIUM', 'HIGH'],
+    description: "Past=LOW, O'rta=MEDIUM, Yuqori=HIGH",
+  })
+  @IsIn(['LOW', 'MEDIUM', 'HIGH'])
+  urgency!: 'LOW' | 'MEDIUM' | 'HIGH';
 }
 
 export class CompleteItemDto {

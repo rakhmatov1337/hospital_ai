@@ -13,7 +13,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { MeService } from './me.service';
-import { CompleteItemDto, CheckInDto } from './me.dto';
+import { CompleteItemDto, CheckInDto, ComplaintDto } from './me.dto';
 import { ChatDto } from '../ai/chat/chat.dto';
 import {
   createChatStream,
@@ -83,6 +83,17 @@ export class MeController {
   @Post('check-in')
   checkIn(@CurrentUser() user: JwtPayload, @Body() dto: CheckInDto) {
     return this.me.createCheckIn(this.pid(user), dto);
+  }
+
+  // Anonymous complaint ("Anonim shikoyat")
+  @Post('complaints')
+  submitComplaint(@CurrentUser() user: JwtPayload, @Body() dto: ComplaintDto) {
+    return this.me.createComplaint(this.pid(user), dto);
+  }
+
+  @Get('complaints')
+  myComplaints(@CurrentUser() user: JwtPayload) {
+    return this.me.listComplaints(this.pid(user));
   }
 
   @Get('chat/history')

@@ -7,16 +7,18 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiProperty, ApiTags } from '@nestjs/swagger';
-import { IsOptional, IsString, MinLength } from 'class-validator';
+import { IsIn, IsOptional, IsString, MinLength } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { User } from '../entities/user.entity';
 import { Patient } from '../entities/patient.entity';
 import { Alert } from '../entities/alert.entity';
+import { Complaint } from '../entities/complaint.entity';
 import { JwtAuthGuard, RolesGuard, TenantGuard } from '../auth/guards';
 import { CurrentUser, Roles } from '../auth/auth.decorators';
 import type { JwtPayload } from '../auth/auth.types';
@@ -53,6 +55,12 @@ class UpdateDoctorDto {
   title?: string;
 }
 
+class UpdateComplaintStatusDto {
+  @ApiProperty({ enum: ['NEW', 'REVIEWED', 'RESOLVED'] })
+  @IsIn(['NEW', 'REVIEWED', 'RESOLVED'])
+  status!: 'NEW' | 'REVIEWED' | 'RESOLVED';
+}
+
 @ApiTags('hospital-admin')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard, TenantGuard)
@@ -63,6 +71,8 @@ class HospitalController {
     @InjectRepository(User) private readonly users: Repository<User>,
     @InjectRepository(Patient) private readonly patients: Repository<Patient>,
     @InjectRepository(Alert) private readonly alerts: Repository<Alert>,
+    @InjectRepository(Complaint)
+    private readonly complaints: Repository<Complaint>,
   ) {}
 
   private hid(u: JwtPayload): string {
@@ -172,10 +182,49 @@ class HospitalController {
       doctorId: p.doctorId,
     }));
   }
+
+  // Anonymous complaints — patient identity is intentionally NOT returned.
+  @Get('complaints')
+  async complaintsList(
+    @CurrentUser() u: JwtPayload,
+    @Query('status') status?: string,
+    @Query('urgency') urgency?: string,
+  ) {
+    const where: Record<string, unknown> = { hospitalId: this.hid(u) };
+    if (status) where.status = status;
+    if (urgency) where.urgency = urgency;
+    const rows = await this.complaints.find({
+      where,
+      order: { createdAt: 'DESC' },
+    });
+    return rows.map((c) => ({
+      id: c.id,
+      category: c.category,
+      description: c.description,
+      urgency: c.urgency,
+      status: c.status,
+      createdAt: c.createdAt,
+    }));
+  }
+
+  @Patch('complaints/:id')
+  async updateComplaint(
+    @CurrentUser() u: JwtPayload,
+    @Param('id') id: string,
+    @Body() dto: UpdateComplaintStatusDto,
+  ) {
+    const c = await this.complaints.findOne({
+      where: { id, hospitalId: this.hid(u) },
+    });
+    if (!c) return null;
+    c.status = dto.status;
+    await this.complaints.save(c);
+    return { id: c.id, status: c.status };
+  }
 }
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Patient, Alert])],
+  imports: [TypeOrmModule.forFeature([User, Patient, Alert, Complaint])],
   controllers: [HospitalController],
 })
 export class HospitalModule {}

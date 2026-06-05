@@ -6,7 +6,8 @@ import { CarePlan } from '../entities/care-plan.entity';
 import { CarePlanItem } from '../entities/care-plan-item.entity';
 import { ItemCompletion } from '../entities/item-completion.entity';
 import { CheckIn } from '../entities/check-in.entity';
-import { CompleteItemDto, CheckInDto } from './me.dto';
+import { Complaint } from '../entities/complaint.entity';
+import { CompleteItemDto, CheckInDto, ComplaintDto } from './me.dto';
 import { mastra } from '../ai/mastra';
 import { dailyCheckInWorkflow } from '../ai/mastra/workflows/daily-checkin.workflow';
 
@@ -64,6 +65,8 @@ export class MeService {
     @InjectRepository(ItemCompletion)
     private readonly completions: Repository<ItemCompletion>,
     @InjectRepository(CheckIn) private readonly checkIns: Repository<CheckIn>,
+    @InjectRepository(Complaint)
+    private readonly complaints: Repository<Complaint>,
   ) {}
 
   private async getPatient(patientId: string): Promise<Patient> {
@@ -243,6 +246,44 @@ export class MeService {
       checkIn: { id: checkIn.id, date, painLevel: dto.painLevel },
       risk: result.status === 'success' ? result.result : null,
     };
+  }
+
+  /** Submit an anonymous complaint ("Anonim shikoyat"). */
+  async createComplaint(patientId: string, dto: ComplaintDto) {
+    const p = await this.getPatient(patientId);
+    const row = await this.complaints.save(
+      this.complaints.create({
+        hospitalId: p.hospitalId,
+        patientId, // internal only — never returned to staff
+        category: dto.category,
+        description: dto.description,
+        urgency: dto.urgency,
+        status: 'NEW',
+      }),
+    );
+    return {
+      id: row.id,
+      category: row.category,
+      urgency: row.urgency,
+      status: row.status,
+      createdAt: row.createdAt,
+    };
+  }
+
+  /** The patient's own submitted complaints. */
+  async listComplaints(patientId: string) {
+    const rows = await this.complaints.find({
+      where: { patientId },
+      order: { createdAt: 'DESC' },
+    });
+    return rows.map((r) => ({
+      id: r.id,
+      category: r.category,
+      description: r.description,
+      urgency: r.urgency,
+      status: r.status,
+      createdAt: r.createdAt,
+    }));
   }
 
   async profile(patientId: string) {

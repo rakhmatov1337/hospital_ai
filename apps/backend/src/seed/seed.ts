@@ -17,6 +17,7 @@ import { RecoveryPoint } from '../entities/recovery-point.entity';
 import { KbDocument } from '../entities/kb-document.entity';
 import { AiInteraction } from '../entities/ai-interaction.entity';
 import { ScoreLog } from '../entities/score-log.entity';
+import { Complaint } from '../entities/complaint.entity';
 
 function isLocal(url: string) {
   return ['localhost', '127.0.0.1', '::1'].includes(new URL(url).hostname);
@@ -48,6 +49,7 @@ async function main() {
       KbDocument,
       AiInteraction,
       ScoreLog,
+      Complaint,
     ],
   });
   await ds.initialize();
