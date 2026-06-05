@@ -19,9 +19,15 @@ import { User } from '../entities/user.entity';
 import { Patient } from '../entities/patient.entity';
 import { Alert } from '../entities/alert.entity';
 import { Complaint } from '../entities/complaint.entity';
+import { CheckIn } from '../entities/check-in.entity';
+import { RiskAssessment } from '../entities/risk-assessment.entity';
+import { RecoveryPoint } from '../entities/recovery-point.entity';
+import { CarePlan } from '../entities/care-plan.entity';
+import { CarePlanItem } from '../entities/care-plan-item.entity';
 import { JwtAuthGuard, RolesGuard, TenantGuard } from '../auth/guards';
 import { CurrentUser, Roles } from '../auth/auth.decorators';
 import type { JwtPayload } from '../auth/auth.types';
+import { postOpDay } from '../common/dates';
 
 class CreateDoctorDto {
   @ApiProperty({ example: 'Dr. Amir Karimov' })
@@ -73,6 +79,14 @@ class HospitalController {
     @InjectRepository(Alert) private readonly alerts: Repository<Alert>,
     @InjectRepository(Complaint)
     private readonly complaints: Repository<Complaint>,
+    @InjectRepository(CheckIn) private readonly checkIns: Repository<CheckIn>,
+    @InjectRepository(RiskAssessment)
+    private readonly risks: Repository<RiskAssessment>,
+    @InjectRepository(RecoveryPoint)
+    private readonly points: Repository<RecoveryPoint>,
+    @InjectRepository(CarePlan) private readonly plans: Repository<CarePlan>,
+    @InjectRepository(CarePlanItem)
+    private readonly planItems: Repository<CarePlanItem>,
   ) {}
 
   private hid(u: JwtPayload): string {
@@ -183,6 +197,100 @@ class HospitalController {
     }));
   }
 
+  // Read-only patient detail for hospital admin — scoped to the hospital,
+  // not to a single doctor (admins see every patient in their hospital).
+  @Get('hospital/patients/:id')
+  async patientDetail(@CurrentUser() u: JwtPayload, @Param('id') id: string) {
+    const hospitalId = this.hid(u);
+    const p = await this.patients.findOne({ where: { id, hospitalId } });
+    if (!p) return null;
+
+    const [doctor, plan, latestRisk, recentCheckIns, trend, openAlerts] =
+      await Promise.all([
+        this.users.findOne({
+          where: { id: p.doctorId, hospitalId, role: 'DOCTOR' },
+        }),
+        this.plans.findOne({
+          where: { patientId: id },
+          order: { createdAt: 'DESC' },
+        }),
+        this.risks.findOne({
+          where: { patientId: id },
+          order: { createdAt: 'DESC' },
+        }),
+        this.checkIns.find({
+          where: { patientId: id },
+          order: { createdAt: 'DESC' },
+          take: 10,
+        }),
+        this.points.find({
+          where: { patientId: id },
+          order: { date: 'ASC' },
+        }),
+        this.alerts.find({
+          where: { patientId: id, hospitalId, status: 'UNREAD' },
+          order: { createdAt: 'DESC' },
+        }),
+      ]);
+
+    const itemCount = plan
+      ? await this.planItems.count({ where: { carePlanId: plan.id } })
+      : 0;
+
+    return {
+      id: p.id,
+      publicId: p.publicId,
+      fullName: p.user?.fullName,
+      age: p.age,
+      status: p.status,
+      recoveryScore: p.recoveryScore,
+      surgeryType: p.surgeryType?.name,
+      surgeryDate: p.surgeryDate,
+      postOpDay: postOpDay(p.surgeryDate),
+      doctor: doctor
+        ? { id: doctor.id, fullName: doctor.fullName, title: doctor.title }
+        : null,
+      carePlan: plan
+        ? {
+            id: plan.id,
+            status: plan.status,
+            source: plan.source,
+            confidence: plan.confidence,
+            itemCount,
+          }
+        : null,
+      latestRisk: latestRisk
+        ? {
+            riskLevel: latestRisk.riskLevel,
+            advice: latestRisk.advice,
+            confidence: latestRisk.confidence,
+            createdAt: latestRisk.createdAt,
+          }
+        : null,
+      recentCheckIns: recentCheckIns.map((c) => ({
+        id: c.id,
+        date: c.date,
+        painLevel: c.painLevel,
+        temperature: c.temperature,
+        bpm: c.bpm,
+        spo2: c.spo2,
+        mood: c.mood,
+        symptoms: c.symptoms ?? [],
+        riskLevel: c.riskLevel,
+        source: c.source,
+        createdAt: c.createdAt,
+      })),
+      recoveryTrend: trend.map((t) => ({ date: t.date, score: t.score })),
+      openAlerts: openAlerts.map((a) => ({
+        id: a.id,
+        severity: a.severity,
+        title: a.title,
+        message: a.message,
+        createdAt: a.createdAt,
+      })),
+    };
+  }
+
   // Anonymous complaints — patient identity is intentionally NOT returned.
   @Get('complaints')
   async complaintsList(
@@ -224,7 +332,19 @@ class HospitalController {
 }
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Patient, Alert, Complaint])],
+  imports: [
+    TypeOrmModule.forFeature([
+      User,
+      Patient,
+      Alert,
+      Complaint,
+      CheckIn,
+      RiskAssessment,
+      RecoveryPoint,
+      CarePlan,
+      CarePlanItem,
+    ]),
+  ],
   controllers: [HospitalController],
 })
 export class HospitalModule {}
