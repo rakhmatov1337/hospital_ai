@@ -67,6 +67,12 @@ class UpdateComplaintStatusDto {
   status!: 'NEW' | 'REVIEWED' | 'RESOLVED';
 }
 
+class UpdateAlertStatusDto {
+  @ApiProperty({ enum: ['UNREAD', 'READ', 'DISMISSED'] })
+  @IsIn(['UNREAD', 'READ', 'DISMISSED'])
+  status!: 'UNREAD' | 'READ' | 'DISMISSED';
+}
+
 @ApiTags('hospital-admin')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard, TenantGuard)
@@ -331,6 +337,57 @@ class HospitalController {
     c.status = dto.status;
     await this.complaints.save(c);
     return { id: c.id, status: c.status };
+  }
+
+  // Clinical alerts across the whole hospital (risk check-ins + AI chat
+  // escalations). Unlike complaints, alerts carry patient identity so staff
+  // can act on them.
+  @Get('hospital/alerts')
+  async alertsList(
+    @CurrentUser() u: JwtPayload,
+    @Query('status') status?: string,
+    @Query('severity') severity?: string,
+  ) {
+    const where: Record<string, unknown> = { hospitalId: this.hid(u) };
+    if (status) where.status = status;
+    if (severity) where.severity = severity;
+    const rows = await this.alerts.find({
+      where,
+      order: { createdAt: 'DESC' },
+    });
+    return rows.map((a) => ({
+      id: a.id,
+      type: a.type,
+      severity: a.severity,
+      title: a.title,
+      message: a.message,
+      actionLabel: a.actionLabel,
+      status: a.status,
+      createdAt: a.createdAt,
+      doctorId: a.doctorId,
+      patient: a.patient
+        ? {
+            id: a.patient.id,
+            publicId: a.patient.publicId,
+            fullName: a.patient.user?.fullName,
+          }
+        : null,
+    }));
+  }
+
+  @Patch('hospital/alerts/:id')
+  async updateAlert(
+    @CurrentUser() u: JwtPayload,
+    @Param('id') id: string,
+    @Body() dto: UpdateAlertStatusDto,
+  ) {
+    const a = await this.alerts.findOne({
+      where: { id, hospitalId: this.hid(u) },
+    });
+    if (!a) return null;
+    a.status = dto.status;
+    await this.alerts.save(a);
+    return { id: a.id, status: a.status };
   }
 }
 
