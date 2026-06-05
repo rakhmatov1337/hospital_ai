@@ -1,16 +1,20 @@
 import { Memory } from '@mastra/memory';
-import { LibSQLStore, LibSQLVector } from '@mastra/libsql';
+import { PostgresStore, PgVector } from '@mastra/pg';
+import { pgConnectionString } from './vectors';
 import { EMBEDDER } from './providers';
 
 /**
- * AI-05: Mastra Memory for the nurse chat agent. Uses a local LibSQL file store so
- * memory works offline and the demo can't break if Neon hiccups (RAG stays on
- * pgvector/Neon). Working memory + semantic recall are scoped by `resource`
- * (the patient), so context persists across the patient's chat sessions.
+ * AI-05: Mastra Memory for the nurse chat agent. Stored in Postgres (same DB as
+ * RAG/pgvector) so the api + studio processes can share it without SQLITE_BUSY
+ * locks. Working memory + semantic recall are scoped by `resource` (the
+ * patient), so context persists across the patient's chat sessions.
  */
 export const memory = new Memory({
-  storage: new LibSQLStore({ id: 'mem-store', url: 'file:./hospital-memory.db' }),
-  vector: new LibSQLVector({ id: 'mem-vector', url: 'file:./hospital-memory.db' }),
+  storage: new PostgresStore({
+    id: 'mem-store',
+    connectionString: pgConnectionString(),
+  }),
+  vector: new PgVector({ id: 'mem-vector', connectionString: pgConnectionString() }),
   embedder: EMBEDDER(),
   options: {
     lastMessages: 15,

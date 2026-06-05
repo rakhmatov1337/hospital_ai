@@ -15,7 +15,7 @@ export function kbIndexFor(name?: string | null): string {
 }
 
 /** Disable SSL for local Postgres, require it for cloud — deterministic either way. */
-function pgConnectionString(): string {
+export function pgConnectionString(): string {
   const u = new URL(env.databaseUrl());
   const isLocal = ['localhost', '127.0.0.1', '::1'].includes(u.hostname);
   if (isLocal) u.searchParams.set('sslmode', 'disable');
