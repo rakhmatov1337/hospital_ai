@@ -119,6 +119,9 @@ class HospitalController {
       unreadAlerts: await this.alerts.count({
         where: { hospitalId, status: 'UNREAD' },
       }),
+      newComplaints: await this.complaints.count({
+        where: { hospitalId, status: 'NEW' },
+      }),
     };
   }
 
