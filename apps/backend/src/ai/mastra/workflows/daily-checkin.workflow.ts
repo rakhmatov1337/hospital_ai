@@ -134,10 +134,10 @@ const persistStep = createStep({
       const isFever = temp != null && temp >= 38;
       const severity = risk.riskLevel === 'HIGH' ? 'CRITICAL' : 'WARNING';
       const title = isFever
-        ? 'Elevated Temperature Alert'
+        ? 'Yuqori harorat haqida ogohlantirish'
         : risk.riskLevel === 'HIGH'
-          ? 'High-Risk Check-in'
-          : 'Symptom Watch';
+          ? 'Yuqori xavfli check-in'
+          : 'Belgilarni kuzatish';
       await q(
         `INSERT INTO alerts
            (id,"patientId","doctorId","hospitalId",type,severity,title,message,"actionLabel",status)
@@ -150,9 +150,9 @@ const persistStep = createStep({
           severity,
           title,
           isFever
-            ? `Reported temperature ${temp}°C — possible infection risk. ${risk.advice}`
+            ? `Bemor harorati ${temp}°C deb bildirdi — infeksiya xavfi bo'lishi mumkin. ${risk.advice}`
             : risk.advice,
-          risk.riskLevel === 'HIGH' ? 'Emergency Response' : 'View',
+          risk.riskLevel === 'HIGH' ? 'Shoshilinch javob' : "Ko'rish",
         ],
       );
       alertCreated = true;

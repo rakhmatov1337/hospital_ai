@@ -1,6 +1,6 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
-import { q, one, parseArray } from '../db';
+import { q, one, parseArray, uuid } from '../db';
 
 /** RequestContext key the chat service sets so tools read the right patient. */
 export const PATIENT_CTX_KEY = 'patientId';
@@ -208,9 +208,92 @@ export const getRecentCheckInsTool = createTool({
   },
 });
 
+export const escalateToDoctorTool = createTool({
+  id: 'escalateToDoctor',
+  description:
+    "Notify the patient's REAL doctor and hospital when the patient reports red-flag symptoms (fever >= 38C, chills/shivering, severe or worsening pain, wound pus/redness/swelling/bleeding, persistent vomiting, breathing or chest problems, calf pain/swelling). This creates an alert in the doctor and hospital dashboards so a human can act. Call this BEFORE telling the patient their care team has been notified. Do NOT call it for mild or normal recovery questions.",
+  inputSchema: z.object({
+    patientId: z.string().optional(),
+    reason: z
+      .string()
+      .describe(
+        "Short summary of the red-flag symptoms in the patient's own language, e.g. '38.5C isitma, yara qizarishi, titroq'.",
+      ),
+    severity: z
+      .enum(['HIGH', 'MEDIUM'])
+      .optional()
+      .describe(
+        'HIGH = urgent/emergency signs; MEDIUM = concerning, needs review soon. Default HIGH.',
+      ),
+  }),
+  outputSchema: z.object({
+    created: z.boolean(),
+    alreadyNotified: z.boolean(),
+    severity: z.string(),
+  }),
+  execute: async (inputData, context) => {
+    const id = resolvePatientId(inputData, context);
+    const reason = String(inputData?.reason ?? '').slice(0, 500);
+    const severityIn = inputData?.severity === 'MEDIUM' ? 'MEDIUM' : 'HIGH';
+
+    const patient = await one<{ doctorId: string; hospitalId: string }>(
+      `SELECT "doctorId","hospitalId" FROM patients WHERE id=$1`,
+      [id],
+    );
+    if (!patient) throw new Error('Patient not found');
+
+    // Dedup: at most one open AI escalation per patient per 2 hours, so a long
+    // conversation about the same symptoms doesn't flood the doctor's inbox.
+    const recent = await one<{ id: string }>(
+      `SELECT id FROM alerts
+       WHERE "patientId"=$1 AND type='AI_ESCALATION' AND status='UNREAD'
+         AND "createdAt" > now() - interval '2 hours'
+       LIMIT 1`,
+      [id],
+    );
+    if (recent)
+      return { created: false, alreadyNotified: true, severity: severityIn };
+
+    const severity = severityIn === 'HIGH' ? 'CRITICAL' : 'WARNING';
+    const title =
+      severityIn === 'HIGH'
+        ? 'Shoshilinch: AI suhbatda xavfli belgilar'
+        : 'Diqqat: AI suhbatda belgilarni kuzatish';
+    const message = `Bemor AI hamshira bilan suhbatda xavfli belgilarni bildirdi: ${reason}. Iltimos, bemor bilan tezroq bog'laning.`;
+    const actionLabel = severityIn === 'HIGH' ? 'Shoshilinch javob' : "Ko'rish";
+
+    await q(
+      `INSERT INTO alerts
+         (id,"patientId","doctorId","hospitalId",type,severity,title,message,"actionLabel",status)
+       VALUES ($1,$2,$3,$4,'AI_ESCALATION',$5,$6,$7,$8,'UNREAD')`,
+      [
+        uuid(),
+        id,
+        patient.doctorId,
+        patient.hospitalId,
+        severity,
+        title,
+        message,
+        actionLabel,
+      ],
+    );
+
+    // Urgent chat escalation flags the patient as at-risk on the dashboards.
+    if (severityIn === 'HIGH') {
+      await q(
+        `UPDATE patients SET status='AT_RISK', "updatedAt"=now() WHERE id=$1`,
+        [id],
+      );
+    }
+
+    return { created: true, alreadyNotified: false, severity: severityIn };
+  },
+});
+
 export const patientTools = {
   getPatientProfileTool,
   getCarePlanTool,
   getMedicationScheduleTool,
   getRecentCheckInsTool,
+  escalateToDoctorTool,
 };
