@@ -1,0 +1,407 @@
+// Hospital AI — domain data model (SP1 foundation).
+// 16 entities, every one carries clinic_id (directly or via parent). UUID v7 ids,
+// snake_case columns (@map), Postgres enums. Prisma owns migrations (never synchronize).
+//
+// APPEND-ONLY MODELS (immutability.extension guards these — no update/delete/upsert):
+//   - Consent
+//   - Escalation                 (status forward-only, validated in service)
+//   - EscalationNotification     (incl. failed attempts)
+//   - Event                      (never backfilled)
+//   - ContentTranslation         (only rows whose status = approved are frozen)
+//
+// CLINIC-SCOPED MODELS (tenancy.extension injects where:{ clinic_id } from context):
+//   - Staff, Patient, RecoveryPlan, EscalationRule, ContentItem, Event
+//   (Task/CheckIn/etc. are scoped transitively via their parent's clinic.)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums (mirror packages/shared-types)
+// ---------------------------------------------------------------------------
+
+enum Language {
+  UZ
+  RU
+  EN
+}
+
+enum StaffRole {
+  staff
+  clinical_lead
+}
+
+enum PatientStatus {
+  enrolled
+  active
+  completed
+  withdrawn
+}
+
+enum TaskType {
+  medication
+  activity
+  wound_care
+  education
+  checkin
+}
+
+enum TaskStatus {
+  pending
+  completed
+  missed
+}
+
+enum Tier {
+  emergency
+  urgent
+  routine
+}
+
+enum EscalationStatus {
+  new
+  acknowledged
+  contacted
+  breached
+}
+
+enum ContentStatus {
+  draft
+  approved
+}
+
+// ---------------------------------------------------------------------------
+// Tenancy / identity
+// ---------------------------------------------------------------------------
+
+model Clinic {
+  id              String   @id @default(uuid(7))
+  name            String
+  phone           String
+  emergencyNumber String   @map("emergency_number")
+  workingHours    String   @map("working_hours")
+  workingDays     String   @map("working_days")
+  timezone        String
+  onDutyContact   String?  @map("on_duty_contact")
+  backupContact   String?  @map("backup_contact")
+  headContact     String?  @map("head_contact")
+  notifyMinutes   Int      @map("notify_minutes")
+  ackMinutes      Int      @map("ack_minutes")
+  breachMinutes   Int      @map("breach_minutes")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  staff           Staff[]
+  patients        Patient[]
+  recoveryPlans   RecoveryPlan[]
+  escalationRules EscalationRule[]
+  contentItems    ContentItem[]
+  events          Event[]
+
+  @@map("clinic")
+}
+
+model Staff {
+  id           String    @id @default(uuid(7))
+  clinicId     String    @map("clinic_id")
+  name         String
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  role         StaffRole @default(staff)
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  clinic Clinic @relation(fields: [clinicId], references: [id])
+
+  @@index([clinicId])
+  @@map("staff")
+}
+
+model Patient {
+  id             String        @id @default(uuid(7))
+  clinicId       String        @map("clinic_id")
+  patientRef     String        @map("patient_ref")
+  name           String
+  phone          String
+  ageBand        String        @map("age_band")
+  procedureType  String        @map("procedure_type")
+  dischargeDate  DateTime      @map("discharge_date")
+  language       Language
+  planId         String?       @map("plan_id")
+  status         PatientStatus @default(enrolled)
+  enrolmentCode  String        @unique @map("enrolment_code")
+  codeExpiresAt  DateTime?     @map("code_expires_at")
+  consentVersion String?       @map("consent_version")
+  consentedAt    DateTime?     @map("consented_at")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  clinic          Clinic           @relation(fields: [clinicId], references: [id])
+  plan            RecoveryPlan?    @relation(fields: [planId], references: [id])
+  consents        Consent[]
+  tasks           Task[]
+  checkIns        CheckIn[]
+  escalations     Escalation[]
+  surveyResponses SurveyResponse[]
+
+  @@unique([clinicId, patientRef])
+  @@index([clinicId])
+  @@map("patient")
+}
+
+model Consent {
+  id           String   @id @default(uuid(7))
+  patientId    String   @map("patient_id")
+  version      String
+  acceptedAt   DateTime @map("accepted_at")
+  textSnapshot String   @map("text_snapshot")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([patientId])
+  @@map("consent")
+}
+
+// ---------------------------------------------------------------------------
+// Programme
+// ---------------------------------------------------------------------------
+
+model RecoveryPlan {
+  id            String   @id @default(uuid(7))
+  clinicId      String   @map("clinic_id")
+  procedureType String   @map("procedure_type")
+  name          String
+  durationDays  Int      @default(30) @map("duration_days")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  clinic    Clinic     @relation(fields: [clinicId], references: [id])
+  planItems PlanItem[]
+  patients  Patient[]
+
+  @@index([clinicId])
+  @@map("recovery_plan")
+}
+
+model PlanItem {
+  id            String   @id @default(uuid(7))
+  planId        String   @map("plan_id")
+  recoveryDay   Int      @map("recovery_day")
+  taskType      TaskType @map("task_type")
+  contentRef    String   @map("content_ref")
+  scheduledTime String   @map("scheduled_time")
+  windowMinutes Int      @map("window_minutes")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  plan  RecoveryPlan @relation(fields: [planId], references: [id])
+  tasks Task[]
+
+  @@index([planId])
+  @@map("plan_item")
+}
+
+model Task {
+  id             String     @id @default(uuid(7))
+  patientId      String     @map("patient_id")
+  planItemId     String?    @map("plan_item_id")
+  taskType       TaskType   @map("task_type")
+  scheduledFor   DateTime   @map("scheduled_for")
+  windowClosesAt DateTime   @map("window_closes_at")
+  recoveryDay    Int        @map("recovery_day")
+  status         TaskStatus @default(pending)
+  completedAt    DateTime?  @map("completed_at")
+  onTime         Boolean?   @map("on_time")
+  completionKey  String?    @unique @map("completion_key")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+
+  patient  Patient   @relation(fields: [patientId], references: [id])
+  planItem PlanItem? @relation(fields: [planItemId], references: [id])
+
+  @@index([patientId])
+  @@index([status])
+  @@map("task")
+}
+
+// ---------------------------------------------------------------------------
+// Check-in / safety
+// ---------------------------------------------------------------------------
+
+model CheckIn {
+  id                 String   @id @default(uuid(7))
+  patientId          String   @map("patient_id")
+  submittedAt        DateTime @map("submitted_at")
+  recoveryDay        Int      @map("recovery_day")
+  questionSetVersion String   @map("question_set_version")
+  ruleVersion        String   @map("rule_version")
+  tierAssigned       Tier?    @map("tier_assigned")
+  withinClinicHours  Boolean  @map("within_clinic_hours")
+  submissionKey      String?  @unique @map("submission_key")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  patient    Patient         @relation(fields: [patientId], references: [id])
+  answers    CheckInAnswer[]
+  escalation Escalation?
+
+  @@index([patientId])
+  @@map("check_in")
+}
+
+model CheckInAnswer {
+  id          String   @id @default(uuid(7))
+  checkinId   String   @map("checkin_id")
+  questionRef String   @map("question_ref")
+  // Categorical or numeric ONLY — never free text (analytics-safe by schema).
+  answerValue String   @map("answer_value")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  checkIn CheckIn @relation(fields: [checkinId], references: [id])
+
+  @@index([checkinId])
+  @@map("check_in_answer")
+}
+
+model EscalationRule {
+  id         String   @id @default(uuid(7))
+  clinicId   String   @map("clinic_id")
+  version    String
+  tier       Tier
+  conditions Json
+  approvedBy String?  @map("approved_by")
+  approvedAt DateTime? @map("approved_at")
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  clinic Clinic @relation(fields: [clinicId], references: [id])
+
+  @@index([clinicId])
+  @@map("escalation_rule")
+}
+
+model Escalation {
+  id           String           @id @default(uuid(7))
+  checkinId    String           @unique @map("checkin_id")
+  patientId    String           @map("patient_id")
+  tier         Tier
+  status       EscalationStatus @default(new)
+  outcomeCode  String?          @map("outcome_code")
+  // Staff-only clinical note (never surfaced to a patient client).
+  clinicalNote String?          @map("clinical_note")
+  createdAt    DateTime         @default(now()) @map("created_at")
+
+  checkIn       CheckIn                  @relation(fields: [checkinId], references: [id])
+  patient       Patient                  @relation(fields: [patientId], references: [id])
+  notifications EscalationNotification[]
+
+  @@index([patientId])
+  @@index([status])
+  @@map("escalation")
+}
+
+model EscalationNotification {
+  id            String   @id @default(uuid(7))
+  escalationId  String   @map("escalation_id")
+  attemptNumber Int      @map("attempt_number")
+  channel       String
+  recipientRole String   @map("recipient_role")
+  sentAt        DateTime @map("sent_at")
+  delivered     Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  escalation Escalation @relation(fields: [escalationId], references: [id])
+
+  @@index([escalationId])
+  @@map("escalation_notification")
+}
+
+// ---------------------------------------------------------------------------
+// Content
+// ---------------------------------------------------------------------------
+
+model ContentItem {
+  id         String        @id @default(uuid(7))
+  // Nullable clinic_id => a global (shared) content item.
+  clinicId   String?       @map("clinic_id")
+  category   String
+  contentKey String        @map("content_key")
+  status     ContentStatus @default(draft)
+  createdAt  DateTime      @default(now()) @map("created_at")
+  updatedAt  DateTime      @updatedAt @map("updated_at")
+
+  clinic       Clinic?              @relation(fields: [clinicId], references: [id])
+  translations ContentTranslation[]
+
+  @@unique([clinicId, contentKey])
+  @@index([contentKey])
+  @@map("content_item")
+}
+
+model ContentTranslation {
+  id            String        @id @default(uuid(7))
+  contentItemId String        @map("content_item_id")
+  language      Language
+  text          String
+  version       Int           @default(1)
+  approvedBy    String?       @map("approved_by")
+  approvedAt    DateTime?     @map("approved_at")
+  status        ContentStatus @default(draft)
+  isPlaceholder Boolean       @default(false) @map("is_placeholder")
+  createdAt     DateTime      @default(now()) @map("created_at")
+
+  contentItem ContentItem @relation(fields: [contentItemId], references: [id])
+
+  @@unique([contentItemId, language, version])
+  @@index([contentItemId, language])
+  @@map("content_translation")
+}
+
+// ---------------------------------------------------------------------------
+// Analytics
+// ---------------------------------------------------------------------------
+
+model Event {
+  id            String   @id @default(uuid(7))
+  clinicId      String   @map("clinic_id")
+  // Anonymised patient reference ONLY (never patient_id) in telemetry.
+  patientRef    String?  @map("patient_ref")
+  eventName     String   @map("event_name")
+  occurredAt    DateTime @map("occurred_at")
+  localOffset   String   @map("local_offset")
+  recoveryDay   Int?     @map("recovery_day")
+  schemaVersion Int      @map("schema_version")
+  // Categorical-only payload by convention (no clinical free text).
+  payload       Json
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  clinic Clinic @relation(fields: [clinicId], references: [id])
+
+  @@index([clinicId])
+  @@index([eventName])
+  @@map("event")
+}
+
+model SurveyResponse {
+  id                  String   @id @default(uuid(7))
+  patientId           String   @map("patient_id")
+  completedAt         DateTime @map("completed_at")
+  q1Helpful           Int?     @map("q1_helpful")
+  q2Easy              Int?     @map("q2_easy")
+  q3AdherenceSupport  Int?     @map("q3_adherence_support")
+  q4Recommend         Int?     @map("q4_recommend")
+  // Free text lives HERE and is excluded from analytics.
+  freeText            String?  @map("free_text")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([patientId])
+  @@map("survey_response")
+}

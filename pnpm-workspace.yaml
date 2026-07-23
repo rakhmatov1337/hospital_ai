@@ -1,0 +1,5 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  # Legacy NestJS+TypeORM backend is reference-only (SP3 porting source); exclude from the workspace.
+  - "!apps/backend"

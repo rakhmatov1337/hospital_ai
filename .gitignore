@@ -10,6 +10,13 @@ build/
 .mastra/
 .output/
 out/
+*.tsbuildinfo
+
+# Turbo
+.turbo/
+
+# Prisma generated client (regenerated on install/build)
+**/node_modules/.prisma/
 
 # Env & secrets
 .env

@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    name: api (lint · typecheck · test)
+    runs-on: ubuntu-latest
+
+    # Postgres 16 + pgvector to match the stack (the domain schema itself needs
+    # only stock Postgres; the image is a superset so future pgvector migrations
+    # apply unchanged).
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: hospital_ai
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # Domain DB for Prisma migrate + the e2e suite (matches POSTGRES_* above).
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/hospital_ai
+      # Production-gate flags: dev/CI values (never production).
+      NODE_ENV: test
+      ALLOW_PLACEHOLDER_CONTENT: 'true'
+      PATIENT_ENROLMENT_ENABLED: 'false'
+      DATA_REGION: eu-central
+      API_BASE_URL: http://localhost:3012
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared-types
+        run: pnpm --filter @hospital-ai/shared-types build
+
+      - name: Generate Prisma client
+        run: pnpm --filter api exec prisma generate
+
+      - name: Apply database migrations
+        run: pnpm --filter api exec prisma migrate deploy
+
+      - name: Lint
+        run: pnpm --filter api lint
+
+      - name: Typecheck
+        run: pnpm --filter api typecheck
+
+      - name: Test (unit + mandatory negative e2e)
+        run: pnpm --filter api test

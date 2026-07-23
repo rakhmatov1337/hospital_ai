@@ -1,0 +1,27 @@
+{
+  "name": "hospital-ai",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.30.1",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "prisma",
+      "@scarf/scarf",
+      "esbuild"
+    ]
+  }
+}
