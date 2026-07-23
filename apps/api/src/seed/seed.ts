@@ -185,17 +185,50 @@ async function seedContent(prisma: PrismaClient, now: Date): Promise<number> {
   return pack.length;
 }
 
+/**
+ * Placeholder-v1 tier rules — VERBATIM from the Notion Content Pack, encoded as an
+ * evaluable DSL over the check-in answer codes in CHECKIN_QUESTIONS. Leaf shape:
+ * { q, op, value|values }; combinators: { anyOf } / { allOf }; ROUTINE = default.
+ * The deterministic engine that evaluates these (emergency > urgent > routine) is
+ * SP2. Thresholds are literature-derived placeholders — a clinician replaces them
+ * before any real patient (rule_version stays "placeholder-v1").
+ */
 async function seedEscalationRules(prisma: PrismaClient, clinicId: string, now: Date) {
   const tiers: Array<{ tier: Tier; conditions: unknown }> = [
-    { tier: Tier.emergency, conditions: { anyOf: ['q2:yes_high_fever', 'q4:heavy_bleeding'] } },
-    { tier: Tier.urgent, conditions: { anyOf: ['q3:very_red', 'q1:>=7', 'q5:yes'] } },
+    {
+      tier: Tier.emergency,
+      conditions: {
+        anyOf: [
+          {
+            q: 'q5_redflags',
+            op: 'includesAny',
+            values: ['difficulty_breathing', 'chest_pain', 'confusion', 'very_hard_to_stay_awake', 'heavy_bleeding'],
+          },
+          { q: 'q4_wound', op: 'eq', value: 'opening' },
+        ],
+      },
+    },
+    {
+      tier: Tier.urgent,
+      conditions: {
+        anyOf: [
+          { q: 'q1_temp', op: 'eq', value: '38_5_or_above' },
+          { q: 'q5_redflags', op: 'includesAny', values: ['chills', 'new_calf_pain'] },
+          { q: 'q4_wound', op: 'in', values: ['very_red_or_spreading', 'leaking'] },
+          { q: 'q2_pain', op: 'gte', value: 8 },
+          { allOf: [{ q: 'q3_pain_change', op: 'eq', value: 'worse' }, { q: 'q2_pain', op: 'gte', value: 6 }] },
+          { q: 'q6_intake', op: 'eq', value: 'no' },
+          { q: 'q7_urine', op: 'eq', value: 'no' },
+        ],
+      },
+    },
     { tier: Tier.routine, conditions: { default: true } },
   ];
   for (const t of tiers) {
     await prisma.escalationRule.create({
       data: {
         clinicId,
-        version: 'v1',
+        version: 'placeholder-v1',
         tier: t.tier,
         conditions: t.conditions as object,
         // Placeholder sign-off — the deterministic tiering engine is SP2.

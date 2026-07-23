@@ -88,56 +88,156 @@ const appStrings: ContentPackEntry[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// The SIX exact safety-critical strings.
-// Phrased "Your clinic's instruction: …" + {CLINIC_NAME}/{CLINIC_PHONE}/
-// {CLINIC_EMERGENCY} (stop-condition 9). These are the strings a patient may see
-// when a check-in flags a concern; the tiering/resolution that shows them is SP2.
+// The SIX exact safety-critical strings — VERBATIM from the Notion Content Pack
+// ("EXACT — do not paraphrase"). Attributed to the clinic, never the app
+// (stop-condition 9). Tokens {CLINIC_NAME}/{CLINIC_PHONE}/{OPENING_TIME} and the
+// literal emergency number 103 are interpolated at resolution time (SP2). These
+// are the strings a patient may see when a check-in flags a concern.
 // ---------------------------------------------------------------------------
 const safety: ContentPackEntry[] = [
+  entry('safety', 'emergency.headline', "Your clinic's instruction: call 103 now."),
   entry(
     'safety',
-    'safety.emergency_instruction',
-    "Your clinic's instruction: This may be an emergency. Call {CLINIC_EMERGENCY} now, or go to the nearest emergency department immediately. Then let {CLINIC_NAME} know on {CLINIC_PHONE}.",
+    'emergency.body',
+    '{CLINIC_NAME} advises that anyone with these symptoms after surgery should call emergency services immediately. Do not wait for a reply from this app.',
   ),
   entry(
     'safety',
-    'safety.urgent_instruction',
-    "Your clinic's instruction: Please contact {CLINIC_NAME} now on {CLINIC_PHONE}. Your answers today need to be reviewed by a nurse without delay.",
+    'emergency.banner',
+    "Your clinic's instruction: in an emergency, call 103. Do not use this app to report urgent symptoms.",
   ),
   entry(
     'safety',
-    'safety.after_hours_urgent',
-    "Your clinic's instruction: {CLINIC_NAME} is closed right now. If this cannot wait until opening hours, call {CLINIC_EMERGENCY}. Otherwise call {CLINIC_PHONE} as soon as the clinic opens.",
+    'checkin.submitted.urgent',
+    "Thank you. Your answers have been sent to the {CLINIC_NAME} care team. This app cannot assess your symptoms — a staff member will review them. {CLINIC_NAME}'s instruction: if your symptoms get worse while you are waiting, call 103 or {CLINIC_PHONE} straight away.",
   ),
   entry(
     'safety',
-    'safety.wound_warning_signs',
-    "Your clinic's instruction: Watch your wound for spreading redness, increasing swelling, pus, a bad smell, or the wound opening. If you see any of these, contact {CLINIC_NAME} on {CLINIC_PHONE}.",
+    'checkin.submitted.out_of_hours',
+    "{CLINIC_NAME} is closed. Your answers will be reviewed at {OPENING_TIME}. {CLINIC_NAME}'s instruction: if you are worried now, call 103 or {CLINIC_PHONE}.",
   ),
   entry(
     'safety',
-    'safety.medication_warning',
-    "Your clinic's instruction: If you have a rash, swelling of the face or throat, or trouble breathing after a medicine, this may be a serious reaction — call {CLINIC_EMERGENCY} now and tell {CLINIC_NAME} on {CLINIC_PHONE}.",
-  ),
-  entry(
-    'safety',
-    'safety.when_to_seek_help',
-    "Your clinic's instruction: Contact {CLINIC_NAME} on {CLINIC_PHONE} if you have a fever above 38°C, heavy bleeding, severe or worsening pain, repeated vomiting, or you feel very unwell.",
+    'content.disclaimer',
+    'This information was approved by your clinic. It is general guidance, not advice about your specific case. For questions about your own recovery, contact {CLINIC_NAME}.',
   ),
 ];
 
 // ---------------------------------------------------------------------------
-// The SEVEN daily check-in questions (categorical/numeric answers only —
-// stored in CheckInAnswer.answer_value, never free text).
+// The SEVEN daily check-in questions — VERBATIM from the Notion Content Pack
+// (rule_version: placeholder-v1). Answers are categorical/numeric only, stored in
+// CheckInAnswer.answer_value (never free text). The question TEXT is patient-visible
+// content (below); the ANSWER OPTIONS + codes are the structured contract the SP2
+// deterministic tier engine and the EscalationRule DSL evaluate against
+// (see CHECKIN_QUESTIONS).
 // ---------------------------------------------------------------------------
 const checkinQuestions: ContentPackEntry[] = [
-  entry('checkin', 'checkin.q1', 'On a scale of 0 to 10, how bad is your pain right now?'),
-  entry('checkin', 'checkin.q2', 'Have you measured a temperature of 38°C or higher today?'),
-  entry('checkin', 'checkin.q3', 'How does your wound look today: normal, a little red, or very red / leaking?'),
-  entry('checkin', 'checkin.q4', 'Is there any new bleeding from your wound?'),
-  entry('checkin', 'checkin.q5', 'Have you been vomiting or unable to keep fluids down?'),
-  entry('checkin', 'checkin.q6', 'Are you able to get up and walk a little today?'),
-  entry('checkin', 'checkin.q7', 'Did you take all of your prescribed medicines today?'),
+  entry('checkin', 'checkin.q1_temp', 'Have you measured your temperature today?'),
+  entry('checkin', 'checkin.q2_pain', 'How is your pain right now?'),
+  entry('checkin', 'checkin.q3_pain_change', 'Compared with yesterday, your pain is…'),
+  entry('checkin', 'checkin.q4_wound', 'How does your wound look today?'),
+  entry('checkin', 'checkin.q5_redflags', 'Do you have any of these today?'),
+  entry('checkin', 'checkin.q6_intake', 'Are you eating and drinking normally?'),
+  entry('checkin', 'checkin.q7_urine', 'Have you passed urine today?'),
+];
+
+/** How a check-in question is answered. */
+export type CheckinAnswerType = 'single' | 'multi' | 'scale';
+
+export interface CheckinAnswerOption {
+  /** Stable code stored in CheckInAnswer.answer_value + referenced by tier rules. */
+  code: string;
+  /** Patient-visible English label (verbatim from the Content Pack). */
+  label: string;
+}
+
+export interface CheckinQuestionDef {
+  /** Short reference used by tier rules (e.g. "q4_wound"). */
+  ref: string;
+  /** Content key for the patient-visible question text. */
+  contentKey: string;
+  type: CheckinAnswerType;
+  /** For scale questions: inclusive numeric range. */
+  scale?: { min: number; max: number };
+  /** For single/multi questions: the exact answer options. */
+  options?: CheckinAnswerOption[];
+}
+
+/**
+ * The structured check-in question set (placeholder-v1) — the exact answer options
+ * from the Content Pack, with stable codes. This is the SP2 contract: the tier
+ * engine reads CheckInAnswer.answer_value against these codes, and the placeholder
+ * EscalationRule.conditions (SP2) reference them, e.g. `q4_wound = "opening"`.
+ */
+export const CHECKIN_QUESTIONS: CheckinQuestionDef[] = [
+  {
+    ref: 'q1_temp',
+    contentKey: 'checkin.q1_temp',
+    type: 'single',
+    options: [
+      { code: 'under_37_5', label: 'Under 37.5' },
+      { code: '37_5_to_38_4', label: '37.5–38.4' },
+      { code: '38_5_or_above', label: '38.5 or above' },
+      { code: 'not_measured', label: "Haven't measured" },
+    ],
+  },
+  { ref: 'q2_pain', contentKey: 'checkin.q2_pain', type: 'scale', scale: { min: 0, max: 10 } },
+  {
+    ref: 'q3_pain_change',
+    contentKey: 'checkin.q3_pain_change',
+    type: 'single',
+    options: [
+      { code: 'better', label: 'Better' },
+      { code: 'same', label: 'Same' },
+      { code: 'worse', label: 'Worse' },
+    ],
+  },
+  {
+    ref: 'q4_wound',
+    contentKey: 'checkin.q4_wound',
+    type: 'single',
+    options: [
+      { code: 'normal', label: 'Normal' },
+      { code: 'a_little_red', label: 'A little red' },
+      { code: 'very_red_or_spreading', label: 'Very red or spreading' },
+      { code: 'leaking', label: 'Leaking fluid or pus' },
+      { code: 'opening', label: 'Opening' },
+    ],
+  },
+  {
+    ref: 'q5_redflags',
+    contentKey: 'checkin.q5_redflags',
+    type: 'multi',
+    options: [
+      { code: 'chills', label: 'Chills or shivering' },
+      { code: 'difficulty_breathing', label: 'Difficulty breathing' },
+      { code: 'chest_pain', label: 'Chest pain' },
+      { code: 'confusion', label: 'Confusion' },
+      { code: 'very_hard_to_stay_awake', label: 'Very hard to stay awake' },
+      { code: 'heavy_bleeding', label: 'Heavy bleeding' },
+      { code: 'new_calf_pain', label: 'New calf pain or swelling' },
+      { code: 'none', label: 'None of these' },
+    ],
+  },
+  {
+    ref: 'q6_intake',
+    contentKey: 'checkin.q6_intake',
+    type: 'single',
+    options: [
+      { code: 'yes', label: 'Yes' },
+      { code: 'some_difficulty', label: 'Some difficulty' },
+      { code: 'no', label: 'No' },
+    ],
+  },
+  {
+    ref: 'q7_urine',
+    contentKey: 'checkin.q7_urine',
+    type: 'single',
+    options: [
+      { code: 'yes', label: 'Yes' },
+      { code: 'no', label: 'No' },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
