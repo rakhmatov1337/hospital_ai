@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ClsModule } from 'nestjs-cls';
 
 import { PrismaModule } from './prisma/prisma.module';
@@ -21,6 +22,8 @@ import { TelemetryModule } from './telemetry/telemetry.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env'] }),
     ClsModule.forRoot({ global: true, middleware: { mount: true } }),
+    // Deterministic scheduled jobs (escalation ladder, task_missed) — SP2.
+    ScheduleModule.forRoot(),
     PrismaModule,
     CommonModule,
     // Feature modules (schema-backed skeletons in SP1 T1; behaviour in T2-T7).

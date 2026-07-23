@@ -3,6 +3,7 @@ import { ContentStatus, Language, ERROR_CODES } from '@hospital-ai/shared-types'
 import { AppError } from '../common/errors';
 import { RequestContext } from '../common/request-context';
 import { PrismaService } from '../prisma/prisma.service';
+import { ClinicTokenSource, interpolateClinicTokens } from './interpolation';
 
 /** Result of a successful content resolution — carries no fallback text. */
 export interface ResolvedContent {
@@ -78,5 +79,24 @@ export class ContentService {
       'Requested content is not approved for the requested language.',
       { contentKey, language },
     );
+  }
+
+  /**
+   * Resolve an APPROVED translation and interpolate the clinic tokens into it
+   * (spec §8). The single helper the check-in flow and the staff queue/detail
+   * both use so patient-visible bodies are interpolated in exactly one place.
+   *
+   * Fail-closed is preserved end-to-end: {@link resolve} still throws
+   * CONTENT_NOT_APPROVED for a missing/unapproved key, so an unapproved string can
+   * never be interpolated and leaked. Interpolation runs only on an already-approved
+   * string and the interpolated form is never persisted.
+   */
+  async resolveInterpolated(
+    contentKey: string,
+    language: Language,
+    clinic: ClinicTokenSource,
+  ): Promise<ResolvedContent> {
+    const resolved = await this.resolve(contentKey, language);
+    return { ...resolved, text: interpolateClinicTokens(resolved.text, clinic) };
   }
 }

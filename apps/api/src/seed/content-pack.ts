@@ -124,6 +124,35 @@ const safety: ContentPackEntry[] = [
 ];
 
 // ---------------------------------------------------------------------------
+// Patient-initiated "Contact clinic" action (SP2 spec §8). This resolves like any
+// other content and interpolates {CLINIC_NAME}/{CLINIC_PHONE}; tapping it opens the
+// clinic number. It deliberately creates NO escalation (MVP scope) — it is a plain
+// affordance to reach the clinic, not a triage signal.
+// ---------------------------------------------------------------------------
+const contact: ContentPackEntry[] = [
+  entry('contact', 'contact.button', 'Contact clinic'),
+  entry(
+    'contact',
+    'contact.body',
+    'Call {CLINIC_NAME} on {CLINIC_PHONE}. In an emergency, call 103 — do not wait for a reply from this app.',
+  ),
+];
+
+// ---------------------------------------------------------------------------
+// Check-in confirmation for the ROUTINE tier (in-hours). Kept OUT of the `safety`
+// array on purpose so SAFETY_KEYS stays exactly the six safety-critical strings;
+// the urgent / out-of-hours confirmations already live in `safety`. Attributed to
+// the clinic and token-interpolated like the rest (spec §4 tier→content-key map).
+// ---------------------------------------------------------------------------
+const confirmations: ContentPackEntry[] = [
+  entry(
+    'safety',
+    'checkin.submitted.routine',
+    "Thank you. Your check-in has been recorded and the {CLINIC_NAME} care team will review it on the next working day. {CLINIC_NAME}'s instruction: if your symptoms get worse, call 103 or {CLINIC_PHONE}.",
+  ),
+];
+
+// ---------------------------------------------------------------------------
 // The SEVEN daily check-in questions — VERBATIM from the Notion Content Pack
 // (rule_version: placeholder-v1). Answers are categorical/numeric only, stored in
 // CheckInAnswer.answer_value (never free text). The question TEXT is patient-visible
@@ -315,6 +344,8 @@ export function buildContentPack(procedureTypes: string[]): ContentPackEntry[] {
     ...onboarding,
     ...appStrings,
     ...safety,
+    ...confirmations,
+    ...contact,
     ...checkinQuestions,
     ...taskContent,
     ...clinical,

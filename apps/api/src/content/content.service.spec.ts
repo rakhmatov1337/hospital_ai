@@ -143,4 +143,50 @@ describe('ContentService.resolve', () => {
     const arg = findMany.mock.calls[0][0];
     expect(arg.where.OR).toEqual([{ clinicId: 'clinic-a' }, { clinicId: null }]);
   });
+
+  // -------------------------------------------------------------------------
+  // resolveInterpolated (SP2 spec §8): resolve → clinic-token interpolation,
+  // with the SP1 fail-closed behaviour preserved end-to-end.
+  // -------------------------------------------------------------------------
+  describe('resolveInterpolated', () => {
+    const clinic = {
+      name: 'Tashkent Surgical Clinic',
+      phone: '+998 71 200 00 00',
+      emergencyNumber: '103',
+      workingHours: '09:00-18:00',
+    };
+
+    it('interpolates clinic tokens into an approved translation', async () => {
+      process.env.ALLOW_PLACEHOLDER_CONTENT = 'false';
+      findMany.mockResolvedValue([
+        buildItem({
+          translations: [
+            buildTranslation({
+              text: '{CLINIC_NAME} is closed. Reviewed at {OPENING_TIME}. Call {CLINIC_PHONE}.',
+            }),
+          ],
+        }),
+      ]);
+
+      const result = await service.resolveInterpolated(
+        'checkin.submitted.out_of_hours',
+        Language.EN,
+        clinic,
+      );
+
+      expect(result.text).toBe(
+        'Tashkent Surgical Clinic is closed. Reviewed at 09:00. Call +998 71 200 00 00.',
+      );
+    });
+
+    it('fails closed (throws) when the key is not approved — never interpolates unapproved text', async () => {
+      process.env.ALLOW_PLACEHOLDER_CONTENT = 'false';
+      // status=approved query yields no translations for an unapproved key.
+      findMany.mockResolvedValue([buildItem({ translations: [] })]);
+
+      await expect(
+        service.resolveInterpolated('checkin.submitted.urgent', Language.EN, clinic),
+      ).rejects.toMatchObject({ code: ERROR_CODES.CONTENT_NOT_APPROVED });
+    });
+  });
 });
