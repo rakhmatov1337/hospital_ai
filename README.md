@@ -1,58 +1,82 @@
 # Hospital AI
 
-AI-powered pre- and post-surgical recovery platform — automates patient rehabilitation, reduces readmissions, and lets clinics monitor every patient from one dashboard.
+A **30-day post-operative recovery programme**: patients follow a clinician-approved recovery plan at home, and clinic staff work a live check-in queue and handle escalations from a web dashboard. Multi-tenant (`clinic_id` everywhere), UZ / RU / EN.
 
-**4-tier multi-tenant platform:** **Superadmin** (creates hospitals, uploads AI training docs, tracks AI quality) → **Hospital Admin** (creates doctors, tracks the hospital) → **Doctor** (creates patients, sets care plans, handles alerts) → **Patient** (checklist, medications, diet, daily check-in, AI nurse chat).
+## The safety line (read this first)
 
-## Stack
+> **No AI-generated text ever reaches a patient's screen.** Not disabled — *architecturally absent*.
 
-- **Backend:** NestJS · TypeORM · PostgreSQL + pgvector
-- **Frontend:** React · Vite · TypeScript (deployed on Vercel)
-- **AI:** **Mastra v1** — agents (care plan, risk, **streaming** nurse chat, clinical advisor), **tool calling** (patient profile/care-plan/meds/check-ins + RAG), **memory** (per-patient), **workflows** (onboarding, daily check-in, KB ingestion), **scorers/evals** (faithfulness-style + custom medical-safety, confidence scoring), and **Studio**. Runs on a **3-provider fallback** — OpenAI `gpt-5.4-mini` → Anthropic `claude-sonnet-4-6` → Google `gemini-2.5-flash` — with a non-AI fallback under that. Single surgery KB focus: **Appendectomy**.
+Everything follows from that rule:
+
+- Patients only ever see **clinician-approved content from a versioned content library**. Unapproved content **fails closed** — it renders nothing and raises an error.
+- Check-in **tiering is deterministic clinic rules** (`emergency · urgent · routine`), assigned **server-side**, never by a model and never client-side.
+- **Escalations are append-only** — no code path may edit, delete, hide, delay or dedupe one.
+- The app **routes to humans**; it never judges, reassures, or diagnoses.
+
+The AI's job is to **select, schedule, translate and route approved content** — never to compose it.
 
 ## Structure
 
 ```
 hospital-ai/
 ├─ apps/
-│  ├─ backend/      # NestJS — /api/v1, Swagger /api/docs, Mastra in src/ai/mastra
-│  └─ frontend/     # React + Vite + TS
-└─ docs/            # BACKEND_V2_PLAN.md, openapi.json
+│  ├─ api/            NestJS 11 + Prisma 6 + PostgreSQL 16  (/v1, Swagger at /v1/docs)
+│  └─ dashboard/      React 18 + Vite + TS + Tailwind + TanStack Query (8 screens, D1–D8)
+├─ packages/
+│  └─ shared-types/   enums, DTO/response types, ERROR_CODES shared by api + dashboard
+└─ docs/superpowers/  design specs + implementation plans (specs/ and plans/)
 ```
 
-## Run (backend)
+## Run locally
 
-Set `DATABASE_URL` (local Postgres) + `OPENAI_API_KEY` in `apps/backend/.env` (see `.env.example`). Enable pgvector once: `CREATE EXTENSION IF NOT EXISTS vector;`
+Requires Node 22+, pnpm, and a local PostgreSQL 16.
 
 ```bash
-cd apps/backend
-npm install
-npm run build         # compile (tsc emits decorator metadata)
-npm run seed          # superadmin/hospital/doctor + 4 demo patients (creates all tables)
-npm run ingest        # load the appendectomy KB into pgvector (RAG)
-npm run start:dev     # API + Swagger: http://localhost:3000/api/docs
-npm run studio        # Mastra Studio: http://localhost:4111 (agents/workflows/scorers)
-npm run eval          # run the appendectomy eval suite -> ScoreLog (needs build)
+pnpm install
+
+# apps/api/.env  — DATABASE_URL, JWT_PRIVATE_KEY_PATH/JWT_PUBLIC_KEY_PATH (RS256), etc.
+pnpm --filter api exec prisma migrate deploy
+pnpm --filter api build
+pnpm --filter api seed        # Sehat Clinic (DEMO): 3 staff, 6 patients, 642 tasks, tri-lingual placeholder content
+pnpm --filter api start       # http://localhost:3000/v1  (docs: /v1/docs)
+
+# apps/dashboard/.env — VITE_API_BASE_URL=http://localhost:3000/v1  (must be absolute)
+pnpm --filter dashboard dev   # http://localhost:5173
 ```
 
-## Demo logins
+**Demo staff login:** `lead@sehat.demo` / `demo1234` (clinical lead) · `nurse@sehat.demo` / `demo1234`
 
-| Role | Login |
-|------|-------|
-| Superadmin | `super@hospital.ai` / `super123` |
-| Hospital admin | `hospital@hospital.ai` / `hospital123` |
-| Doctor | `demo@hospital.ai` / `demo123` |
-| Patient | access code `HOSP-1235` (Bobur — appendectomy, at-risk) · `HOSP-1234` (Nodira) |
+> `NODE_ENV=production` together with `ALLOW_PLACEHOLDER_CONTENT=true` **throws at boot**, and the demo seed refuses to run in production — both deliberate. Demo/pilot environments run as `staging`.
 
-## API testing
+## The adversarial QA gate — a release blocker
 
-- **Swagger UI:** http://localhost:3000/api/docs · spec at `docs/openapi.json` (39 endpoints)
-- **Postman:** import `postman/HospitalAI.postman_collection.json` — run top-to-bottom for the full 4-role golden flow (superadmin → hospital → doctor → patient, AI care plan, AI risk, streaming chat, eval metrics). Tokens auto-captured.
+```bash
+pnpm --filter api qa:gate     # exits non-zero on ANY failure; writes a run-log to qa-runs/
+```
 
-## Golden flow (verified end-to-end)
+Three layers, **one failure = no release**:
 
-doctor login → create patient → **AI care plan** (RAG-grounded, confidence ~0.9) → approve → patient login → daily check-in → **AI risk HIGH (conf 0.98) → auto CRITICAL alert → patient AT_RISK** → doctor sees alert → patient opens **streaming nurse chat** (personalized via tools, trilingual, KB-grounded) → superadmin reviews **AI metrics** (eval scores + confidence).
+- **Layer 1 — architectural:** no free-text reaches a model · no model output in patient UI · patient strings resolve only from the signed library · unapproved content fails closed · survey free-text is write-only.
+- **Layer 2 — adversarial:** 15 attack classes ("Can I eat plov?", threshold probing, roleplay, prompt injection, negation traps) run in **EN / UZ / RU**.
+- **Layer 3 — escalation integrity:** emergencies always surface · nothing downranked out of sight · ambiguity escalates · append-only log · out-of-hours behaviour.
+
+## AI
+
+One agent, **clinician-side only**: `care-plan-selector` (Mastra). Given a procedure it assembles a **draft** recovery plan by choosing *which approved content keys* land on *which recovery day and time*. It emits **keys, days and times — never prose**, and every key it returns is re-validated server-side against the approved library, so a hallucinated key rejects the whole draft.
+
+```bash
+pnpm --filter api studio      # Mastra Studio → http://localhost:4111
+```
+
+`POST /v1/plans/ai-draft` (clinical lead only) returns a draft **for a clinician to approve** — it is never persisted as a live plan, and never reaches a patient.
+
+## Live
+
+| | |
+|---|---|
+| API | https://api.hospital-ai.uz/v1/docs |
+| Dashboard | https://dashboard.hospital-ai.uz |
 
 ## Docs
 
-- **[Backend v2 Plan](docs/BACKEND_V2_PLAN.md)** — full architecture, API design, AI layer, workflows, evals
+Design specs and implementation plans live in **`docs/superpowers/`** — `specs/` (what and why) and `plans/` (how it was built), covering the backend foundation, safety core, dashboard, AI safety/QA gate, and the patient API.
