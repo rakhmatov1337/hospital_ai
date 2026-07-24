@@ -10,6 +10,7 @@ import { AppExceptionFilter } from './common/errors';
 
 import { AuthModule } from './auth/auth.module';
 import { ClinicsModule } from './clinics/clinics.module';
+import { StaffModule } from './staff/staff.module';
 import { PatientsModule } from './patients/patients.module';
 import { PlansModule } from './plans/plans.module';
 import { TasksModule } from './tasks/tasks.module';
@@ -29,6 +30,7 @@ import { TelemetryModule } from './telemetry/telemetry.module';
     // Feature modules (schema-backed skeletons in SP1 T1; behaviour in T2-T7).
     AuthModule,
     ClinicsModule,
+    StaffModule,
     PatientsModule,
     PlansModule,
     TasksModule,

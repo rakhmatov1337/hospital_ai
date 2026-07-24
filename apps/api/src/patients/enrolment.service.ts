@@ -14,10 +14,10 @@ import { EnrolPatientDto } from './dto/enrol-patient.dto';
  * ambiguous characters O/0 and I/1 removed (spec §4 — codes are read aloud and
  * typed by patients). 32 symbols → 32^6 ≈ 1.07e9 codes.
  */
-const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-const CODE_LENGTH = 6;
+export const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+export const CODE_LENGTH = 6;
 const REF_LENGTH = 8;
-const CODE_TTL_DAYS = 14;
+export const CODE_TTL_DAYS = 14;
 const MAX_CODE_ATTEMPTS = 12;
 
 /** Result of a successful enrolment (staff-facing; the code is handed to the patient). */
@@ -39,7 +39,7 @@ export interface EnrolledPatientView {
   planId: string | null;
 }
 
-function randomFromAlphabet(length: number): string {
+export function randomFromAlphabet(length: number): string {
   let out = '';
   for (let i = 0; i < length; i++) {
     out += CODE_ALPHABET[randomInt(CODE_ALPHABET.length)];

@@ -11,6 +11,7 @@ export const APPEND_ONLY_MODELS: readonly Prisma.ModelName[] = [
   'Escalation',
   'EscalationNotification',
   'Event',
+  'AuditLog',
 ];
 
 const APPEND_ONLY = new Set<string>(APPEND_ONLY_MODELS);

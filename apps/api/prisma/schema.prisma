@@ -7,6 +7,7 @@
 //   - Escalation                 (status forward-only, validated in service)
 //   - EscalationNotification     (incl. failed attempts)
 //   - Event                      (never backfilled)
+//   - AuditLog                   (append-only clinic settings audit trail)
 //   - ContentTranslation         (only rows whose status = approved are frozen)
 //
 // CLINIC-SCOPED MODELS (tenancy.extension injects where:{ clinic_id } from context):
@@ -103,6 +104,7 @@ model Clinic {
   escalationRules EscalationRule[]
   contentItems    ContentItem[]
   events          Event[]
+  auditLogs       AuditLog[]
 
   @@map("clinic")
 }
@@ -386,6 +388,32 @@ model Event {
   @@index([clinicId])
   @@index([eventName])
   @@map("event")
+}
+
+// ---------------------------------------------------------------------------
+// Audit
+// ---------------------------------------------------------------------------
+
+// APPEND-ONLY: an audit entry is written once and never mutated (guarded by the
+// immutability extension). Captures actor + timestamp + field for the
+// sensitive clinic settings changes (name / phone / emergency number).
+model AuditLog {
+  id        String   @id @default(uuid(7))
+  clinicId  String   @map("clinic_id")
+  actorId   String?  @map("actor_id")
+  actorRole String?  @map("actor_role")
+  entity    String
+  entityId  String   @map("entity_id")
+  field     String
+  oldValue  String?  @map("old_value")
+  newValue  String?  @map("new_value")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  clinic Clinic @relation(fields: [clinicId], references: [id])
+
+  @@index([clinicId])
+  @@index([entity, entityId])
+  @@map("audit_log")
 }
 
 model SurveyResponse {

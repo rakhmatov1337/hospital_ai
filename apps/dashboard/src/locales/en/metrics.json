@@ -1,0 +1,72 @@
+{
+  "title": "Metrics",
+  "subtitle": "Live pilot analytics for this clinic. Every percentage shows the figures behind it.",
+  "export": "Export CSV",
+  "range": {
+    "label": "Date range",
+    "all": "All time",
+    "last7": "Last 7 days",
+    "last14": "Last 14 days",
+    "last30": "Last 30 days"
+  },
+  "note": {
+    "noOutcome": "Process metrics only — no readmission rate or clinical-outcome claims."
+  },
+  "error": {
+    "title": "Couldn't refresh metrics",
+    "body": "Showing the last figures we loaded. Retrying automatically."
+  },
+  "empty": {
+    "title": "No metrics yet",
+    "body": "Once patients are enrolled and start checking in, their adherence, retention and escalation figures will appear here."
+  },
+  "sections": {
+    "escalations": "Escalations",
+    "adherenceByLanguage": "Adherence by language",
+    "satisfaction": "Satisfaction"
+  },
+  "cards": {
+    "adherence": "Recovery-plan adherence",
+    "checkinCompletion": "Check-in completion",
+    "retentionD30": "Active at day 30",
+    "appOpens": "Avg app opens / week",
+    "escalationsTotal": "Escalations",
+    "breaches": "Breaches",
+    "medianAck": "Median time to acknowledge",
+    "medianContact": "Median time to contact"
+  },
+  "charts": {
+    "adherenceTrend": "Adherence by recovery day",
+    "retention": "Retention curve",
+    "escalationsByTier": "Escalations by tier",
+    "languageSplit": "Patients by language"
+  },
+  "retention": {
+    "d7": "Day 7",
+    "d14": "Day 14",
+    "d30": "Day 30"
+  },
+  "satisfaction": {
+    "q1Helpful": "Found it helpful",
+    "q2Easy": "Easy to use",
+    "q3AdherenceSupport": "Supported adherence",
+    "q4Recommend": "Would recommend"
+  },
+  "units": {
+    "tasks": "tasks",
+    "tasksOnTime": "tasks on time",
+    "checkins": "check-ins completed",
+    "reachedDay30": "reached day 30",
+    "patients": "patients",
+    "escalations": "escalations",
+    "acrossPatients_one": "across {{count}} patient",
+    "acrossPatients_other": "across {{count}} patients",
+    "ofEscalations_one": "of {{count}} escalation",
+    "ofEscalations_other": "of {{count}} escalations",
+    "fromEscalations": "from {{n}} of {{total}} escalations",
+    "responses_one": "{{count}} response",
+    "responses_other": "{{count}} responses",
+    "responseCount_one": "{{count}} response",
+    "responseCount_other": "{{count}} responses"
+  }
+}

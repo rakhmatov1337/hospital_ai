@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
-import { RequestContextData, TokenAudience } from '@hospital-ai/shared-types';
+import { ERROR_CODES, RequestContextData, StaffRole, TokenAudience } from '@hospital-ai/shared-types';
+import { AppError } from './errors';
 
 const KEY = 'requestContext';
 
@@ -36,6 +37,26 @@ export class RequestContext {
 
   get patientId(): string | undefined {
     return this.data().patientId;
+  }
+
+  get role(): StaffRole | undefined {
+    return this.data().role;
+  }
+
+  /** True when the authenticated staff member is a clinical lead. */
+  isClinicalLead(): boolean {
+    return this.data().role === StaffRole.clinical_lead;
+  }
+
+  /** Assert the caller is a clinical lead, else FORBIDDEN. */
+  requireClinicalLead(): void {
+    if (this.data().role !== StaffRole.clinical_lead) {
+      throw new AppError(
+        ERROR_CODES.FORBIDDEN,
+        'This action requires the clinical_lead role.',
+        { role: this.data().role ?? null },
+      );
+    }
   }
 
   /** Throws-free snapshot for logging/tests. */

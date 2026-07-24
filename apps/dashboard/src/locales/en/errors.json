@@ -1,0 +1,16 @@
+{
+  "default": "Something went wrong. Please try again.",
+  "UNAUTHORIZED": "Your session has expired. Please sign in again.",
+  "FORBIDDEN": "You do not have permission to do that.",
+  "VALIDATION_ERROR": "Please check the highlighted fields and try again.",
+  "NOT_FOUND": "That record could not be found.",
+  "CROSS_CLINIC_FORBIDDEN": "That record belongs to another clinic.",
+  "WRONG_TOKEN_AUDIENCE": "Please sign in with a staff account.",
+  "DUPLICATE_REQUEST": "That request was already submitted.",
+  "CONTENT_NOT_APPROVED": "This content has not been approved yet.",
+  "CLINICAL_CONTENT_NOT_APPROVED": "Enrolment is blocked: required clinical content is not clinician-approved.",
+  "APPEND_ONLY_VIOLATION": "This record is append-only and cannot be changed.",
+  "CONTENT_IMMUTABLE": "Approved content cannot be edited in place; it creates a new draft.",
+  "INVALID_STATUS_TRANSITION": "That status change is not allowed.",
+  "INTERNAL_ERROR": "Something went wrong. Please try again."
+}

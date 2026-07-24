@@ -1,0 +1,52 @@
+{
+  "title": "Пациенты",
+  "subtitle": "Все, кто участвует в программе восстановления вашей клиники.",
+  "addPatient": "Добавить пациента",
+  "count_one": "{{count}} пациент",
+  "count_few": "{{count}} пациента",
+  "count_many": "{{count}} пациентов",
+  "count_other": "{{count}} пациентов",
+  "filter": {
+    "label": "Статус",
+    "all": "Все",
+    "active": "Активные",
+    "completed": "Завершённые",
+    "withdrawn": "Выбывшие"
+  },
+  "columns": {
+    "name": "Имя",
+    "procedure": "Процедура",
+    "discharge": "Выписка",
+    "recoveryDay": "День восстановления",
+    "adherence": "Соблюдение",
+    "lastActive": "Активность",
+    "openEscalations": "Открытые эскалации",
+    "status": "Статус"
+  },
+  "cell": {
+    "recoveryDay": "День {{n}}",
+    "adherenceFraction": "{{num}} из {{den}} задач",
+    "adherenceNone": "Нет данных",
+    "lastActiveNone": "Нет активности",
+    "escalationsNone": "Нет"
+  },
+  "attention": {
+    "label": "Требует внимания",
+    "aria": "Требует внимания: низкое соблюдение или отсутствие активности"
+  },
+  "patientStatus": {
+    "enrolled": "Зачислен",
+    "active": "Активен",
+    "completed": "Завершён",
+    "withdrawn": "Выбыл"
+  },
+  "empty": {
+    "title": "Нет пациентов для отображения",
+    "description": "Нет пациентов по этому фильтру. Добавьте пациента или измените фильтр статуса.",
+    "descriptionAll": "Пока нет зачисленных пациентов. Добавьте первого пациента."
+  },
+  "error": {
+    "title": "Не удалось загрузить пациентов",
+    "retry": "Повторить"
+  }
+}

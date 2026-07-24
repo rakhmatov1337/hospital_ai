@@ -1,0 +1,14 @@
+{
+  "title": "Sign in",
+  "subtitle": "Clinician access to the recovery dashboard",
+  "emailLabel": "Email",
+  "emailPlaceholder": "you@clinic.example",
+  "passwordLabel": "Password",
+  "passwordPlaceholder": "Your password",
+  "submit": "Sign in",
+  "submitting": "Signing in…",
+  "forgotPassword": "Forgot your password?",
+  "forgotPasswordHelp": "Contact your clinic administrator to reset your password.",
+  "noRegistration": "Access is provisioned by your clinic. There is no self-registration.",
+  "invalidCredentials": "Invalid email or password."
+}

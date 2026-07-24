@@ -1,0 +1,84 @@
+{
+  "title": "Content approval",
+  "subtitle": "Review and approve patient-facing content, per item and per language.",
+  "blocker": {
+    "pending": "{{count}} of {{total}} content items still need approval",
+    "pending_one": "{{count}} of {{total}} content items still needs approval",
+    "clear": "All {{total}} content items are approved",
+    "pendingBody": "Patients only see clinician-approved content. Every item must be approved in all three languages before go-live — this is the launch blocker.",
+    "clearBody": "Every content item has a real clinician sign-off in all three languages. Nothing is blocking go-live."
+  },
+  "editWarning": {
+    "title": "Editing approved content reverts it to Draft",
+    "body": "Requesting changes to an approved translation creates a new Draft version, reverts the item to Needs review, and pulls that content from the patient app until it is approved again. Approvals are permanent, immutable records."
+  },
+  "filters": {
+    "label": "Filter content",
+    "all": "All",
+    "needsApproval": "Needs approval",
+    "missingTranslation": "Missing translation",
+    "approved": "Approved"
+  },
+  "list": {
+    "item": "Item",
+    "category": "Category",
+    "status": "Status",
+    "languages": "Languages",
+    "lastApproved": "Last approved",
+    "lastApprovedBy": "by {{who}}",
+    "never": "Not yet approved",
+    "emptyTitle": "No content items match this filter",
+    "emptyBody": "Try a different filter to see more content."
+  },
+  "itemStatus": {
+    "approved": "Approved",
+    "needs_review": "Needs review"
+  },
+  "reviewStatus": {
+    "approved": "Approved",
+    "needs_review": "Needs review",
+    "draft": "Draft",
+    "missing": "Missing"
+  },
+  "detail": {
+    "heading": "Content item",
+    "close": "Close",
+    "sideBySide": "All three languages, side by side",
+    "current": "Current version",
+    "versionHistory": "Version history",
+    "version": "v{{n}}",
+    "noHistory": "No earlier versions.",
+    "missingText": "No translation exists for this language yet.",
+    "approvedBy": "Approved by {{who}}",
+    "approvedAt": "Approved {{time}}",
+    "created": "Created {{time}}",
+    "placeholderNote": "Placeholder text — awaiting a real clinician sign-off."
+  },
+  "actions": {
+    "approve": "Approve {{lang}}",
+    "requestChanges": "Request changes",
+    "submitRequest": "Submit request",
+    "cancel": "Cancel",
+    "noteLabel": "Reviewer note (recorded in the audit log)",
+    "notePlaceholder": "Explain what needs to change…",
+    "proposedLabel": "Proposed replacement text (optional)",
+    "proposedPlaceholder": "Leave blank to keep the current wording as the new draft…",
+    "approveHint": "Approving {{lang}} does not approve the other languages.",
+    "alreadyApproved": "Already approved.",
+    "cannotApproveMissing": "Add a translation before it can be approved."
+  },
+  "permission": {
+    "leadOnly": "Only the clinical lead can approve or request changes.",
+    "leadOnlyShort": "Clinical lead only"
+  },
+  "toast": {
+    "approved": "Approved {{lang}}.",
+    "requested": "Requested changes to {{lang}} — a new draft was created.",
+    "error": "That action could not be completed. Please try again."
+  },
+  "lang": {
+    "EN": "English",
+    "UZ": "Uzbek",
+    "RU": "Russian"
+  }
+}

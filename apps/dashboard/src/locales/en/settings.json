@@ -1,0 +1,74 @@
+{
+  "title": "Clinic settings",
+  "subtitle": "Configuration for this clinic. Some fields appear in patient-facing safety messages.",
+  "sections": {
+    "details": "Clinic details",
+    "hours": "Working hours",
+    "contacts": "On-call contacts",
+    "escalation": "Escalation timings",
+    "staff": "Staff accounts"
+  },
+  "fields": {
+    "name": "Clinic name",
+    "phone": "Clinic phone",
+    "emergencyNumber": "Local emergency number",
+    "workingHours": "Working hours",
+    "workingDays": "Working days",
+    "onDutyContact": "On-duty contact",
+    "backupContact": "Backup contact",
+    "headContact": "Head of clinic contact",
+    "notifyMinutes": "Notify after (minutes)",
+    "ackMinutes": "Acknowledge within (minutes)",
+    "breachMinutes": "Breach after (minutes)"
+  },
+  "hints": {
+    "patientFacing": "Appears in patient-facing safety messages.",
+    "workingHours": "e.g. 09:00-18:00",
+    "workingDays": "e.g. Mon-Sat",
+    "escalation": "Defaults 5 / 15 / 30 minutes. Changes take effect immediately for tier routing."
+  },
+  "actions": {
+    "save": "Save changes",
+    "saving": "Saving…",
+    "addStaff": "Add staff account",
+    "edit": "Edit",
+    "deactivate": "Deactivate",
+    "activate": "Activate"
+  },
+  "confirm": {
+    "title": "Confirm patient-facing changes",
+    "body": "You are changing details that appear in patient-facing safety instructions. These changes are recorded in the audit log with your name and the time.",
+    "changes": "Changes",
+    "confirm": "Save and record",
+    "cancel": "Keep editing",
+    "arrow": "→",
+    "empty": "(empty)"
+  },
+  "saved": "Settings saved.",
+  "staff": {
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "status": "Status",
+    "actions": "Actions",
+    "active": "Active",
+    "inactive": "Inactive",
+    "leadOnly": "Only a clinical lead can add or edit staff accounts.",
+    "empty": "No staff accounts yet."
+  },
+  "roles": {
+    "staff": "Staff",
+    "clinical_lead": "Clinical lead"
+  },
+  "staffForm": {
+    "addTitle": "Add staff account",
+    "editTitle": "Edit staff account",
+    "password": "Password",
+    "passwordHint": "At least 8 characters.",
+    "passwordEditHint": "Leave blank to keep the current password.",
+    "create": "Create account",
+    "update": "Save account",
+    "saving": "Saving…"
+  },
+  "error": "Could not save. Please try again."
+}

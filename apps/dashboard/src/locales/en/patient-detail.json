@@ -1,0 +1,153 @@
+{
+  "backToList": "Back to patients",
+  "patientRef": "Reference {{ref}}",
+  "loadError": "Could not load this patient",
+  "dayValue": "Day {{n}}",
+  "codeExpires": "Expires {{date}}",
+  "patientStatus": {
+    "enrolled": "Enrolled",
+    "active": "Active",
+    "completed": "Completed",
+    "withdrawn": "Withdrawn"
+  },
+  "fields": {
+    "name": "Full name",
+    "phone": "Phone",
+    "ageBand": "Age band",
+    "language": "Language",
+    "procedureType": "Procedure",
+    "dischargeDate": "Discharge date",
+    "recoveryDay": "Recovery day",
+    "planTemplate": "Recovery-plan template"
+  },
+  "languages": {
+    "UZ": "Uzbek",
+    "RU": "Russian",
+    "EN": "English"
+  },
+  "procedures": {
+    "laparoscopic_appendectomy": "Laparoscopic appendectomy",
+    "open_hernia_repair": "Open hernia repair"
+  },
+  "templates": {
+    "laparoscopic_appendectomy": "Laparoscopic Appendectomy — 30-Day Recovery",
+    "open_hernia_repair": "Open Hernia Repair — 30-Day Recovery"
+  },
+  "metrics": {
+    "adherence": "Adherence",
+    "adherenceDenominator": "{{numerator}} of {{denominator}} tasks on time",
+    "openEscalations": "Open escalations",
+    "openEscalationsDenominator": "of {{total}} total",
+    "lastActive": "Last active",
+    "never": "No activity",
+    "noActivity": "No check-in or task completion yet"
+  },
+  "sections": {
+    "adherenceOverTime": "Adherence over time",
+    "taskHistory": "Task completion history",
+    "checkIns": "Check-ins",
+    "escalations": "Escalation history",
+    "consent": "Consent record"
+  },
+  "actions": {
+    "reissueCode": "Reissue code",
+    "reissuing": "Reissuing…",
+    "reissueError": "Could not reissue the enrolment code",
+    "reissueDone": "New enrolment code issued",
+    "withdraw": "Withdraw"
+  },
+  "withdrawnBanner": {
+    "title": "This patient has been withdrawn",
+    "body": "Future tasks and reminders are stopped. All history is retained for the record."
+  },
+  "attentionBanner": {
+    "title": "Needs attention",
+    "body": "Adherence is below 50% or there has been no activity for 3 or more days."
+  },
+  "withdrawDialog": {
+    "title": "Withdraw this patient?",
+    "body": "This stops future tasks and reminders. All history is retained and nothing is deleted. This cannot be undone from here.",
+    "confirm": "Withdraw patient"
+  },
+  "adherence": {
+    "emptyTitle": "No adherence data yet",
+    "emptyBody": "Adherence appears once tasks with a closed window have been assessed.",
+    "dayShort": "D{{n}}",
+    "dayLong": "Recovery day {{n}}",
+    "tableCaption": "Adherence percentage by recovery day",
+    "colDay": "Recovery day",
+    "colValue": "Adherence",
+    "notAssessed": "Not assessed yet",
+    "valueWithDenominator": "{{percent}}% / {{numerator}} of {{denominator}} tasks on time"
+  },
+  "taskHistory": {
+    "emptyTitle": "No tasks yet",
+    "emptyBody": "The recovery-plan task set appears here once generated.",
+    "day": "Day",
+    "taskType": "Task",
+    "status": "Status",
+    "onTime": "On time",
+    "completedAt": "Completed",
+    "onTimeYes": "Yes",
+    "onTimeNo": "No"
+  },
+  "taskTypes": {
+    "medication": "Medication",
+    "activity": "Activity",
+    "wound_care": "Wound care",
+    "education": "Education",
+    "checkin": "Check-in"
+  },
+  "taskStatus": {
+    "pending": "Pending",
+    "completed": "Completed",
+    "missed": "Missed"
+  },
+  "checkIns": {
+    "emptyTitle": "No check-ins yet",
+    "emptyBody": "Submitted check-ins appear here with their tier and outcome.",
+    "noTier": "No tier",
+    "noOutcome": "No outcome recorded"
+  },
+  "escalations": {
+    "emptyTitle": "No escalations",
+    "emptyBody": "This patient has not raised any escalations.",
+    "noOutcome": "No outcome recorded"
+  },
+  "outcomes": {
+    "advised_at_home": "Advised at home",
+    "attend_clinic": "Asked to attend clinic",
+    "referred_emergency": "Referred to emergency",
+    "no_action": "No action needed",
+    "unable_to_reach": "Unable to reach"
+  },
+  "consent": {
+    "version": "Consent version",
+    "acceptedAt": "Accepted at",
+    "immutable": "The consent record is immutable and cannot be edited.",
+    "none": "No consent record on file."
+  },
+  "create": {
+    "title": "Enrol a patient",
+    "subtitle": "Enter the patient's details and hand them the generated enrolment code.",
+    "phonePlaceholder": "90 123 45 67",
+    "planTemplateHint": "The recovery plan is matched to the selected procedure.",
+    "enrolling": "Enrolling…",
+    "submit": "Enrol patient",
+    "consentSnapshot": "Consent {{version}} was presented to and accepted by the patient at enrolment.",
+    "errors": {
+      "nameRequired": "Enter the patient's name.",
+      "phoneInvalid": "Enter a 9-digit mobile number after +998.",
+      "dischargeRequired": "Select the discharge date."
+    },
+    "successTitle": "Patient enrolled",
+    "successSubtitle": "{{name}} has been enrolled. Give them the code below to activate the app.",
+    "codeLabel": "Enrolment code",
+    "codeExpires": "Expires {{date}}",
+    "codeInstructions": "The patient enters this single-use code in the app to activate their recovery plan.",
+    "tasksGenerated": "{{count}} recovery tasks generated.",
+    "patientRef": "Reference {{ref}}",
+    "print": "Print",
+    "done": "Done"
+  }
+}

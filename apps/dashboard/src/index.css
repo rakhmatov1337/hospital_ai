@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background font-sans text-body text-text antialiased;
+  }
+
+  /* Respect 200% font scale / user zoom — layout uses rem-friendly tokens. */
+  a {
+    @apply text-primary;
+  }
+}

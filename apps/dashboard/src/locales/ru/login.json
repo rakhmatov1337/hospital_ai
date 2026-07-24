@@ -1,0 +1,14 @@
+{
+  "title": "Вход",
+  "subtitle": "Доступ клинициста к панели восстановления",
+  "emailLabel": "Эл. почта",
+  "emailPlaceholder": "you@clinic.example",
+  "passwordLabel": "Пароль",
+  "passwordPlaceholder": "Ваш пароль",
+  "submit": "Войти",
+  "submitting": "Вход…",
+  "forgotPassword": "Забыли пароль?",
+  "forgotPasswordHelp": "Обратитесь к администратору клиники для сброса пароля.",
+  "noRegistration": "Доступ предоставляется вашей клиникой. Самостоятельная регистрация недоступна.",
+  "invalidCredentials": "Неверная эл. почта или пароль."
+}

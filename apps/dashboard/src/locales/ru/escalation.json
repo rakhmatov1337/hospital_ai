@@ -1,0 +1,117 @@
+{
+  "title": "Детали эскалации",
+  "backToQueue": "Назад к очереди",
+  "loading": "Загрузка эскалации…",
+  "loadError": {
+    "title": "Не удалось загрузить эскалацию",
+    "retry": "Повторить"
+  },
+  "patient": {
+    "ageBand": "Возрастная группа",
+    "procedure": "Процедура",
+    "discharge": "Дата выписки",
+    "recoveryDay": "День восстановления",
+    "dayValue": "День {{n}}",
+    "ref": "ID пациента",
+    "callAria": "Позвонить пациенту по номеру {{phone}}"
+  },
+  "answers": {
+    "title": "Ответы чек-ина",
+    "subtitle": "Каждый вопрос с точным ответом пациента.",
+    "empty": "Ответы для этого чек-ина не записаны."
+  },
+  "questions": {},
+  "answerValues": {
+    "yes": "Да",
+    "no": "Нет",
+    "none": "Нет",
+    "mild": "Лёгкая",
+    "moderate": "Умеренная",
+    "severe": "Тяжёлая"
+  },
+  "timeline": {
+    "title": "Хронология",
+    "ruleVersion": "Правило {{version}}",
+    "submitted": "Чек-ин отправлен",
+    "notified": "Уведомлён(а) {{role}} (попытка {{attempt}})",
+    "deliveredVia": "Доставлено через {{channel}}",
+    "sentVia": "Отправлено через {{channel}}",
+    "acknowledged": "Принято в работу",
+    "contacted": "Пациент проинформирован",
+    "breached": "Эскалация просрочена",
+    "breachedDetail": "Нет подтверждения в пределах окна лестницы уведомлений.",
+    "reached": "Готово",
+    "pending": "Ожидается"
+  },
+  "roles": {
+    "on_duty": "Дежурный клиницист",
+    "on_duty_nurse": "Дежурная медсестра",
+    "backup": "Резервный клиницист",
+    "clinical_lead": "Клинический руководитель",
+    "clinic_head": "Заведующий клиникой"
+  },
+  "channels": {
+    "dashboard": "панель",
+    "in_dashboard": "панель",
+    "sms": "SMS",
+    "push": "push-уведомление",
+    "call": "звонок",
+    "email": "email"
+  },
+  "history": {
+    "title": "Недавняя история",
+    "adherence": "Соблюдение плана восстановления",
+    "adherenceNoData": "Пока нет выполненных задач",
+    "adherenceDenominator": "{{completed}} из {{total}} задач вовремя",
+    "recentCheckIns": "Последние 5 чек-инов",
+    "empty": "Нет предыдущих чек-инов.",
+    "noTier": "Без уровня"
+  },
+  "statusNames": {
+    "new": "Новая",
+    "acknowledged": "Принята",
+    "contacted": "Обработана",
+    "breached": "Просрочена"
+  },
+  "outcomes": {
+    "advised_at_home": "Рекомендовано лечение дома",
+    "attend_clinic": "Приглашён(а) в клинику",
+    "referred_emergency": "Направлен(а) в скорую помощь",
+    "no_action": "Действия не требуются",
+    "unable_to_reach": "Не удалось связаться"
+  },
+  "actions": {
+    "title": "Действия",
+    "acknowledge": "Принять в работу",
+    "acknowledging": "Принятие…",
+    "acknowledgeHint": "Принятие останавливает лестницу уведомлений.",
+    "acknowledgedTitle": "Принято в работу",
+    "acknowledgedBody": "Лестница уведомлений остановлена.",
+    "alreadyHandledTitle": "Уже обработано",
+    "alreadyHandledBody": "Другой сотрудник уже обработал эскалацию — сейчас статус: {{status}}.",
+    "contactTitle": "Отметить контакт с пациентом",
+    "outcomeSelectLabel": "Итог контакта (обязательно)",
+    "outcomePlaceholder": "Выберите итог…",
+    "clinicalNoteLabel": "Клиническая заметка (только для персонала)",
+    "clinicalNotePlaceholder": "Необязательно — никогда не показывается пациенту.",
+    "clinicalNoteHint": "Эта заметка видна только персоналу и никогда не показывается пациенту.",
+    "markContacted": "Отметить контакт",
+    "contacting": "Запись…",
+    "noDismissNote": "Эскалацию можно закрыть только с итогом — отклонить нельзя.",
+    "contactFailedTitle": "Не удалось записать контакт",
+    "closedTitle": "Эскалация закрыта",
+    "outcomeLabel": "Итог",
+    "clinicalNote": "Клиническая заметка",
+    "immutableNote": "Эта запись окончательна. Исправления добавляются, но не редактируются.",
+    "breachedTitle": "Эскалация просрочена",
+    "breachedBody": "Эта эскалация просрочила лестницу уведомлений. Следуйте протоколу клиники."
+  },
+  "errors": {
+    "default": "Что-то пошло не так. Попробуйте ещё раз.",
+    "DUPLICATE_REQUEST": "Эта эскалация уже обработана.",
+    "INVALID_STATUS_TRANSITION": "Это изменение статуса больше недопустимо.",
+    "NOT_FOUND": "Эскалация не найдена.",
+    "CROSS_CLINIC_FORBIDDEN": "Эта эскалация принадлежит другой клинике.",
+    "VALIDATION_ERROR": "Пожалуйста, выберите корректный итог и повторите."
+  }
+}

@@ -11,6 +11,7 @@ const CLINIC_SCOPED = new Set<string>([
   'RecoveryPlan',
   'EscalationRule',
   'Event',
+  'AuditLog',
 ]);
 
 /** Read/mutate operations that accept a general `where` filter. */

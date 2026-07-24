@@ -31,6 +31,7 @@ export class AuthContextInterceptor implements NestInterceptor {
         audience: principal.audience,
         staffId: principal.staffId,
         patientId: principal.patientId,
+        role: principal.role,
       });
     }
 

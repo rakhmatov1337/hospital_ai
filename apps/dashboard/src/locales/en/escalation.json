@@ -1,0 +1,117 @@
+{
+  "title": "Escalation detail",
+  "backToQueue": "Back to queue",
+  "loading": "Loading escalation…",
+  "loadError": {
+    "title": "Could not load this escalation",
+    "retry": "Retry"
+  },
+  "patient": {
+    "ageBand": "Age band",
+    "procedure": "Procedure",
+    "discharge": "Discharge date",
+    "recoveryDay": "Recovery day",
+    "dayValue": "Day {{n}}",
+    "ref": "Patient ref",
+    "callAria": "Call patient on {{phone}}"
+  },
+  "answers": {
+    "title": "Check-in answers",
+    "subtitle": "Every question with the patient's exact answer.",
+    "empty": "No answers were recorded for this check-in."
+  },
+  "questions": {},
+  "answerValues": {
+    "yes": "Yes",
+    "no": "No",
+    "none": "None",
+    "mild": "Mild",
+    "moderate": "Moderate",
+    "severe": "Severe"
+  },
+  "timeline": {
+    "title": "Timeline",
+    "ruleVersion": "Rule {{version}}",
+    "submitted": "Check-in submitted",
+    "notified": "Notified {{role}} (attempt {{attempt}})",
+    "deliveredVia": "Delivered via {{channel}}",
+    "sentVia": "Sent via {{channel}}",
+    "acknowledged": "Acknowledged",
+    "contacted": "Patient contacted",
+    "breached": "Escalation breached",
+    "breachedDetail": "No acknowledgement within the ladder window.",
+    "reached": "Done",
+    "pending": "Pending"
+  },
+  "roles": {
+    "on_duty": "On-duty clinician",
+    "on_duty_nurse": "On-duty nurse",
+    "backup": "Backup clinician",
+    "clinical_lead": "Clinical lead",
+    "clinic_head": "Clinic head"
+  },
+  "channels": {
+    "dashboard": "dashboard",
+    "in_dashboard": "dashboard",
+    "sms": "SMS",
+    "push": "push notification",
+    "call": "phone call",
+    "email": "email"
+  },
+  "history": {
+    "title": "Recent history",
+    "adherence": "Recovery-plan adherence",
+    "adherenceNoData": "No completed tasks yet",
+    "adherenceDenominator": "{{completed}} of {{total}} tasks on time",
+    "recentCheckIns": "Last 5 check-ins",
+    "empty": "No earlier check-ins.",
+    "noTier": "No tier"
+  },
+  "statusNames": {
+    "new": "New",
+    "acknowledged": "Acknowledged",
+    "contacted": "Contacted",
+    "breached": "Breached"
+  },
+  "outcomes": {
+    "advised_at_home": "Advised at home",
+    "attend_clinic": "Asked to attend clinic",
+    "referred_emergency": "Referred to emergency",
+    "no_action": "No action needed",
+    "unable_to_reach": "Unable to reach"
+  },
+  "actions": {
+    "title": "Actions",
+    "acknowledge": "Acknowledge",
+    "acknowledging": "Acknowledging…",
+    "acknowledgeHint": "Acknowledging halts the notification ladder.",
+    "acknowledgedTitle": "Acknowledged",
+    "acknowledgedBody": "The notification ladder has been halted.",
+    "alreadyHandledTitle": "Already handled",
+    "alreadyHandledBody": "Another staff member already handled this — it is now {{status}}.",
+    "contactTitle": "Mark patient contacted",
+    "outcomeSelectLabel": "Contact outcome (required)",
+    "outcomePlaceholder": "Select an outcome…",
+    "clinicalNoteLabel": "Clinical note (staff only)",
+    "clinicalNotePlaceholder": "Optional note — never shown to the patient.",
+    "clinicalNoteHint": "This note is staff-only and is never surfaced to the patient.",
+    "markContacted": "Mark contacted",
+    "contacting": "Recording…",
+    "noDismissNote": "An escalation can only be closed with an outcome — there is no dismiss.",
+    "contactFailedTitle": "Could not record contact",
+    "closedTitle": "Escalation closed",
+    "outcomeLabel": "Outcome",
+    "clinicalNote": "Clinical note",
+    "immutableNote": "This record is final. Corrections are appended, never edited.",
+    "breachedTitle": "Escalation breached",
+    "breachedBody": "This escalation breached the notification ladder. Follow your clinic's breach protocol."
+  },
+  "errors": {
+    "default": "Something went wrong. Please try again.",
+    "DUPLICATE_REQUEST": "This escalation was already handled.",
+    "INVALID_STATUS_TRANSITION": "That status change is no longer allowed.",
+    "NOT_FOUND": "That escalation could not be found.",
+    "CROSS_CLINIC_FORBIDDEN": "That escalation belongs to another clinic.",
+    "VALIDATION_ERROR": "Please choose a valid outcome and try again."
+  }
+}

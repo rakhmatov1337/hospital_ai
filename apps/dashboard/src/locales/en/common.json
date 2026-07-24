@@ -1,0 +1,57 @@
+{
+  "app": {
+    "name": "Hospital AI",
+    "subtitle": "Clinician Dashboard"
+  },
+  "nav": {
+    "queue": "Queue",
+    "patients": "Patients",
+    "metrics": "Metrics",
+    "settings": "Settings",
+    "content": "Content"
+  },
+  "topbar": {
+    "signOut": "Sign out",
+    "language": "Language"
+  },
+  "tier": {
+    "emergency": "Emergency",
+    "urgent": "Urgent",
+    "routine": "Routine"
+  },
+  "status": {
+    "new": "New",
+    "acknowledged": "Acknowledged",
+    "contacted": "Contacted",
+    "breached": "Breached"
+  },
+  "connection": {
+    "live": "Live",
+    "reconnecting": "Updating…",
+    "offline": "Offline",
+    "updatedAt": "Updated {{time}}"
+  },
+  "queueRow": {
+    "day": "Day {{n}}",
+    "submitted": "Submitted {{time}}",
+    "elapsedLabel": "Elapsed time",
+    "breached": "BREACHED",
+    "testTag": "[TEST]"
+  },
+  "actions": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "back": "Back",
+    "retry": "Retry"
+  },
+  "placeholderBanner": {
+    "title": "Placeholder clinical content is active",
+    "body": "Some content shown to patients is not yet clinician-approved. Review it under Content before go-live."
+  },
+  "loading": "Loading…",
+  "screenPlaceholder": {
+    "title": "{{screen}}",
+    "body": "This screen is scaffolded and will be completed by its screen agent."
+  }
+}

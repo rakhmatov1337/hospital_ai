@@ -1,0 +1,27 @@
+{
+  "title": "Check-in queue",
+  "subtitle": "Live — auto-refreshes every 30 seconds",
+  "loading": "Loading queue…",
+  "filter": {
+    "label": "Show",
+    "unresolved": "Unresolved",
+    "all": "All"
+  },
+  "section": {
+    "empty": "No items in this section"
+  },
+  "empty": {
+    "title": "Nothing needs attention",
+    "body": "There are no unresolved check-ins right now."
+  },
+  "newArrival": {
+    "title": "New urgent check-in",
+    "body": "A new urgent or emergency check-in just arrived.",
+    "dismiss": "Dismiss"
+  },
+  "error": {
+    "title": "Couldn't refresh the queue",
+    "body": "Showing the last data received. The connection will keep retrying.",
+    "retry": "Retry"
+  }
+}

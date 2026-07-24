@@ -1,0 +1,80 @@
+{
+  "title": "Метрики",
+  "subtitle": "Аналитика пилота по этой клинике в реальном времени. Рядом с каждым процентом показаны исходные цифры.",
+  "export": "Экспорт CSV",
+  "range": {
+    "label": "Период",
+    "all": "За всё время",
+    "last7": "Последние 7 дней",
+    "last14": "Последние 14 дней",
+    "last30": "Последние 30 дней"
+  },
+  "note": {
+    "noOutcome": "Только метрики процесса — без частоты повторных госпитализаций и клинических исходов."
+  },
+  "error": {
+    "title": "Не удалось обновить метрики",
+    "body": "Показаны последние загруженные цифры. Повтор выполняется автоматически."
+  },
+  "empty": {
+    "title": "Пока нет метрик",
+    "body": "Как только пациенты будут добавлены и начнут отправлять отчёты, здесь появятся их приверженность, удержание и эскалации."
+  },
+  "sections": {
+    "escalations": "Эскалации",
+    "adherenceByLanguage": "Приверженность по языку",
+    "satisfaction": "Удовлетворённость"
+  },
+  "cards": {
+    "adherence": "Приверженность плану восстановления",
+    "checkinCompletion": "Заполнение отчётов",
+    "retentionD30": "Активны на 30-й день",
+    "appOpens": "Средн. открытий/неделя",
+    "escalationsTotal": "Эскалации",
+    "breaches": "Просрочки",
+    "medianAck": "Медиана времени до подтверждения",
+    "medianContact": "Медиана времени до контакта"
+  },
+  "charts": {
+    "adherenceTrend": "Приверженность по дням восстановления",
+    "retention": "Кривая удержания",
+    "escalationsByTier": "Эскалации по уровню",
+    "languageSplit": "Пациенты по языку"
+  },
+  "retention": {
+    "d7": "День 7",
+    "d14": "День 14",
+    "d30": "День 30"
+  },
+  "satisfaction": {
+    "q1Helpful": "Было полезно",
+    "q2Easy": "Удобно пользоваться",
+    "q3AdherenceSupport": "Помогло соблюдать план",
+    "q4Recommend": "Порекомендовал(а) бы"
+  },
+  "units": {
+    "tasks": "задач",
+    "tasksOnTime": "задач вовремя",
+    "checkins": "отчётов заполнено",
+    "reachedDay30": "дошли до 30-го дня",
+    "patients": "пациентов",
+    "escalations": "эскалаций",
+    "acrossPatients_one": "среди {{count}} пациента",
+    "acrossPatients_few": "среди {{count}} пациентов",
+    "acrossPatients_many": "среди {{count}} пациентов",
+    "acrossPatients_other": "среди {{count}} пациентов",
+    "ofEscalations_one": "из {{count}} эскалации",
+    "ofEscalations_few": "из {{count}} эскалаций",
+    "ofEscalations_many": "из {{count}} эскалаций",
+    "ofEscalations_other": "из {{count}} эскалаций",
+    "fromEscalations": "из {{n}} из {{total}} эскалаций",
+    "responses_one": "{{count}} ответ",
+    "responses_few": "{{count}} ответа",
+    "responses_many": "{{count}} ответов",
+    "responses_other": "{{count}} ответов",
+    "responseCount_one": "{{count}} ответ",
+    "responseCount_few": "{{count}} ответа",
+    "responseCount_many": "{{count}} ответов",
+    "responseCount_other": "{{count}} ответов"
+  }
+}

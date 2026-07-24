@@ -1,0 +1,50 @@
+{
+  "title": "Patients",
+  "subtitle": "Everyone enrolled in your clinic's recovery programme.",
+  "addPatient": "Add patient",
+  "count_one": "{{count}} patient",
+  "count_other": "{{count}} patients",
+  "filter": {
+    "label": "Status",
+    "all": "All",
+    "active": "Active",
+    "completed": "Completed",
+    "withdrawn": "Withdrawn"
+  },
+  "columns": {
+    "name": "Name",
+    "procedure": "Procedure",
+    "discharge": "Discharge",
+    "recoveryDay": "Recovery day",
+    "adherence": "Adherence",
+    "lastActive": "Last active",
+    "openEscalations": "Open escalations",
+    "status": "Status"
+  },
+  "cell": {
+    "recoveryDay": "Day {{n}}",
+    "adherenceFraction": "{{num}} of {{den}} tasks",
+    "adherenceNone": "No data yet",
+    "lastActiveNone": "No activity",
+    "escalationsNone": "None"
+  },
+  "attention": {
+    "label": "Needs attention",
+    "aria": "Needs attention: low adherence or no recent activity"
+  },
+  "patientStatus": {
+    "enrolled": "Enrolled",
+    "active": "Active",
+    "completed": "Completed",
+    "withdrawn": "Withdrawn"
+  },
+  "empty": {
+    "title": "No patients to show",
+    "description": "No patients match this filter. Add a patient or change the status filter.",
+    "descriptionAll": "No patients are enrolled yet. Add your first patient to begin."
+  },
+  "error": {
+    "title": "Could not load patients",
+    "retry": "Retry"
+  }
+}

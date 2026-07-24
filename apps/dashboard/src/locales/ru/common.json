@@ -1,0 +1,57 @@
+{
+  "app": {
+    "name": "Hospital AI",
+    "subtitle": "Панель клинициста"
+  },
+  "nav": {
+    "queue": "Очередь",
+    "patients": "Пациенты",
+    "metrics": "Метрики",
+    "settings": "Настройки",
+    "content": "Контент"
+  },
+  "topbar": {
+    "signOut": "Выйти",
+    "language": "Язык"
+  },
+  "tier": {
+    "emergency": "Экстренно",
+    "urgent": "Срочно",
+    "routine": "Плановый"
+  },
+  "status": {
+    "new": "Новый",
+    "acknowledged": "Принят",
+    "contacted": "Связались",
+    "breached": "Просрочен"
+  },
+  "connection": {
+    "live": "В сети",
+    "reconnecting": "Обновление…",
+    "offline": "Нет связи",
+    "updatedAt": "Обновлено {{time}}"
+  },
+  "queueRow": {
+    "day": "День {{n}}",
+    "submitted": "Отправлено {{time}}",
+    "elapsedLabel": "Прошло времени",
+    "breached": "ПРОСРОЧЕН",
+    "testTag": "[ТЕСТ]"
+  },
+  "actions": {
+    "cancel": "Отмена",
+    "confirm": "Подтвердить",
+    "save": "Сохранить",
+    "back": "Назад",
+    "retry": "Повторить"
+  },
+  "placeholderBanner": {
+    "title": "Активен временный клинический контент",
+    "body": "Часть контента для пациентов ещё не утверждена клиницистом. Проверьте его в разделе «Контент» перед запуском."
+  },
+  "loading": "Загрузка…",
+  "screenPlaceholder": {
+    "title": "{{screen}}",
+    "body": "Экран подготовлен и будет заполнен ответственным агентом."
+  }
+}

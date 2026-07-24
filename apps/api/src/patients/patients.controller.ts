@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -15,13 +16,15 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import {
+  PatientDetailView,
+  PatientListPage,
+  ReissueCodeResult,
+  WithdrawPatientResult,
+} from '@hospital-ai/shared-types';
 import { Audience, StaffJwtGuard } from '../auth/guards';
 import { EnrolmentResult, EnrolmentService } from './enrolment.service';
-import {
-  PatientDetail,
-  PatientPage,
-  PatientsService,
-} from './patients.service';
+import { PatientsService } from './patients.service';
 import { EnrolPatientDto } from './dto/enrol-patient.dto';
 import { ListPatientsQueryDto } from './dto/list-patients.dto';
 
@@ -51,16 +54,39 @@ export class PatientsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'List patients for the authenticated clinic (cursor pagination).' })
-  @ApiOkResponse({ description: 'A cursor-paginated page of the clinic\'s patients.' })
-  list(@Query() query: ListPatientsQueryDto): Promise<PatientPage> {
+  @ApiOperation({
+    summary:
+      'List patients for the authenticated clinic (enriched: adherence %, last active, open escalations, attention flag).',
+  })
+  @ApiOkResponse({ description: "A cursor-paginated page of the clinic's enriched patients." })
+  list(@Query() query: ListPatientsQueryDto): Promise<PatientListPage> {
     return this.patientsService.list(query.cursor, query.limit);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get one patient (clinic-scoped; cross-clinic access forbidden).' })
-  @ApiOkResponse({ description: 'Patient detail.' })
-  get(@Param('id') id: string): Promise<PatientDetail> {
+  @ApiOkResponse({ description: 'Full patient detail (adherence series, task/check-in/escalation history, consent).' })
+  get(@Param('id') id: string): Promise<PatientDetailView> {
     return this.patientsService.get(id);
+  }
+
+  @Post(':id/reissue-code')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Re-issue the patient enrolment code (invalidates the old code; single-use, 14-day expiry).',
+  })
+  @ApiOkResponse({ description: 'The new enrolment code + expiry.' })
+  reissueCode(@Param('id') id: string): Promise<ReissueCodeResult> {
+    return this.patientsService.reissueCode(id);
+  }
+
+  @Patch(':id/withdraw')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Withdraw a patient: stops future tasks/reminders, retains all history, flags status withdrawn.',
+  })
+  @ApiOkResponse({ description: 'The patient, now withdrawn.' })
+  withdraw(@Param('id') id: string): Promise<WithdrawPatientResult> {
+    return this.patientsService.withdraw(id);
   }
 }
