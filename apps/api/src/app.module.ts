@@ -19,6 +19,7 @@ import { EscalationsModule } from './escalations/escalations.module';
 import { ContentModule } from './content/content.module';
 import { TelemetryModule } from './telemetry/telemetry.module';
 import { MeModule } from './me/me.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { MeModule } from './me/me.module';
     ContentModule,
     TelemetryModule,
     MeModule,
+    AiModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: AppExceptionFilter }],
 })
