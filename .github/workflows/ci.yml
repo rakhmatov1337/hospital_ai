@@ -76,3 +76,36 @@ jobs:
 
       - name: Test (unit + mandatory negative e2e)
         run: pnpm --filter api test
+
+  # SP3-A adversarial QA release gate — one failure = no release. This job is a
+  # required, release-blocking status check: a red gate blocks merge/release.
+  # It is deterministic and DB-free (proves harmlessness by reading the code), so
+  # it needs no Postgres service — only a built shared-types + generated client.
+  qa-gate:
+    name: qa gate (AI safety — release blocker)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared-types
+        run: pnpm --filter @hospital-ai/shared-types build
+
+      - name: Generate Prisma client
+        run: pnpm --filter api exec prisma generate
+
+      - name: Run the AI safety QA gate (Layers 1–3, exits non-zero on any failure)
+        run: pnpm --filter api qa:gate

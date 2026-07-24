@@ -10,6 +10,7 @@
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main.js",
     "seed": "ts-node -P tsconfig.json src/seed/seed.ts",
+    "qa:gate": "ts-node --transpile-only -P tsconfig.json src/ai/qa/run-gate.ts",
     "test": "jest --passWithNoTests && jest --config test/jest-e2e.json --runInBand --passWithNoTests",
     "test:unit": "jest --passWithNoTests",
     "test:e2e": "jest --config test/jest-e2e.json --runInBand --passWithNoTests",

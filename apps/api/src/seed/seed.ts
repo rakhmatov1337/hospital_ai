@@ -26,6 +26,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TaskGenerationService } from '../plans/task-generation.service';
 import { buildContentPack, SAFETY_KEYS, CHECKIN_QUESTION_KEYS } from './content-pack';
 import { PLAN_TEMPLATES, buildPlanItemTemplates } from './plan-templates';
+import { assertSelectionOnly } from '../plans/care-plan-assembler';
 import { seedDemoPatients, DEMO_PATIENTS } from './demo-patients';
 
 const CLINIC_TZ = 'Asia/Tashkent';
@@ -142,6 +143,10 @@ async function seedPlans(
       scheduledTime: it.scheduledTime,
       windowMinutes: it.windowMinutes,
     }));
+    // Selection guard (SP3-A §2): every plan item must reference the approved
+    // content library by KEY — never carry an inline literal. Fails loud before
+    // any PlanItem is persisted, proving care-plan = SELECT, never compose.
+    assertSelectionOnly(items);
     await prisma.planItem.createMany({ data: items });
   }
   return planByProcedure;

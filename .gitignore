@@ -57,3 +57,7 @@ Thumbs.db
 
 # Claude Code local artifacts
 .claude/settings.local.json
+
+# SP3-A QA gate run-logs (diligence artifacts, regenerated each gate run)
+qa-runs/
+apps/api/qa-runs/
