@@ -65,16 +65,40 @@ jobs:
           pm2 restart hospital-studio --update-env
           pm2 save
 
+          # NestJS needs a few seconds to connect Prisma and map routes. Without
+          # this wait the smoke test races the boot and nginx answers 502.
+          echo "--- waiting for the api to become ready"
+          ready=""
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 http://localhost:3012/v1/docs || true)
+            if [ "$code" = "200" ]; then ready="yes"; echo "api ready after ~$((i*2))s"; break; fi
+            sleep 2
+          done
+          if [ -z "$ready" ]; then
+            echo "api did NOT become ready — recent errors:"
+            pm2 logs hospital-api --lines 40 --nostream --err || true
+            exit 1
+          fi
+
           echo "--- deployed: $(git rev-parse --short HEAD)"
           REMOTE
 
       - name: Smoke test the live stack
         run: |
           set -e
-          api=$(curl -s -o /dev/null -w '%{http_code}' --max-time 25 https://api.hospital-ai.uz/v1/docs)
-          echo "api /v1/docs      -> $api"
-          dash=$(curl -s -o /dev/null -w '%{http_code}' --max-time 25 https://dashboard.hospital-ai.uz)
-          echo "dashboard         -> $dash"
-          [ "$api" = "200" ] || { echo "API smoke test FAILED"; exit 1; }
-          [ "$dash" = "200" ] || { echo "Dashboard smoke test FAILED"; exit 1; }
+          # Retry rather than assert once — the remote readiness gate already
+          # passed, so a blip here is transient, not a failed deploy.
+          probe() {
+            local url="$1" name="$2" code=""
+            for i in $(seq 1 10); do
+              code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$url" || true)
+              if [ "$code" = "200" ]; then echo "$name -> 200"; return 0; fi
+              echo "$name -> $code (attempt $i, retrying)"
+              sleep 5
+            done
+            echo "$name SMOKE TEST FAILED (last: $code)"
+            return 1
+          }
+          probe "https://api.hospital-ai.uz/v1/docs" "api /v1/docs"
+          probe "https://dashboard.hospital-ai.uz"   "dashboard"
           echo "deploy verified"
