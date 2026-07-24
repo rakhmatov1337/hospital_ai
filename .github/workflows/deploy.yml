@@ -1,0 +1,80 @@
+name: Deploy
+
+# Deploys ONLY after CI is green on main — a red build (or a red AI-safety QA
+# gate) must never reach the server. `workflow_dispatch` allows a manual redeploy.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+# Never run two deploys at once; never cancel one mid-flight (it would leave the
+# server half-updated).
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: deploy to hospital-ai.uz
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+
+    steps:
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          echo "ssh configured for $DEPLOY_HOST"
+
+      - name: Deploy over SSH
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o ConnectTimeout=30 \
+            "$DEPLOY_USER@$DEPLOY_HOST" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          # node/pnpm/pm2 live in root's nvm and are not on the default PATH.
+          export PATH=/root/.nvm/versions/node/v24.18.0/bin:$PATH
+          cd /home/django/hospital-ai
+
+          echo "--- pull"
+          git pull --ff-only origin main
+
+          echo "--- install"
+          pnpm install --frozen-lockfile
+
+          echo "--- migrate (never reset: this is a live database)"
+          pnpm --filter api exec prisma migrate deploy
+
+          echo "--- build"
+          pnpm --filter api build
+          pnpm --filter dashboard build
+
+          echo "--- restart"
+          pm2 restart hospital-api --update-env
+          pm2 restart hospital-studio --update-env
+          pm2 save
+
+          echo "--- deployed: $(git rev-parse --short HEAD)"
+          REMOTE
+
+      - name: Smoke test the live stack
+        run: |
+          set -e
+          api=$(curl -s -o /dev/null -w '%{http_code}' --max-time 25 https://api.hospital-ai.uz/v1/docs)
+          echo "api /v1/docs      -> $api"
+          dash=$(curl -s -o /dev/null -w '%{http_code}' --max-time 25 https://dashboard.hospital-ai.uz)
+          echo "dashboard         -> $dash"
+          [ "$api" = "200" ] || { echo "API smoke test FAILED"; exit 1; }
+          [ "$dash" = "200" ] || { echo "Dashboard smoke test FAILED"; exit 1; }
+          echo "deploy verified"
