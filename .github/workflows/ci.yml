@@ -77,6 +77,55 @@ jobs:
       - name: Test (unit + mandatory negative e2e)
         run: pnpm --filter api test
 
+  # Dashboard: typecheck, unit tests and the Playwright e2e suite. The e2e specs
+  # mock the API at the network layer, so this job needs no backend, no database
+  # and no secrets.
+  dashboard:
+    name: dashboard (typecheck · test · e2e)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared-types
+        run: pnpm --filter @hospital-ai/shared-types build
+
+      - name: Typecheck
+        run: pnpm --filter dashboard lint
+
+      - name: Unit tests
+        run: pnpm --filter dashboard test -- --run
+
+      - name: Build
+        run: pnpm --filter dashboard build
+
+      - name: Install Playwright browser
+        run: pnpm --filter dashboard exec playwright install --with-deps chromium
+
+      - name: E2E (Playwright)
+        run: pnpm --filter dashboard test:e2e
+
+      - name: Upload the Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/dashboard/playwright-report/
+          retention-days: 7
+
   # SP3-A adversarial QA release gate — one failure = no release. This job is a
   # required, release-blocking status check: a red gate blocks merge/release.
   # It is deterministic and DB-free (proves harmlessness by reading the code), so

@@ -1,6 +1,6 @@
 /// <reference types="vitest/config" />
 import { fileURLToPath, URL } from 'node:url';
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
 // Vite + Vitest config. The `test` block is typed via vitest/config.
@@ -39,5 +39,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     css: true,
+    // Playwright owns e2e/ — vitest must not try to run those specs.
+    exclude: [...configDefaults.exclude, 'e2e/**'],
   },
 });

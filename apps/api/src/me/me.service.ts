@@ -309,13 +309,31 @@ export class MeService {
   // -------------------------------------------------------------------------
   // 5. GET /me/checkin/questions — the structured check-in form contract.
   // -------------------------------------------------------------------------
-  checkinQuestions(): CheckinQuestionView[] {
+  async checkinQuestions(): Promise<CheckinQuestionView[]> {
+    // The question TEXT is a content key the app resolves via GET /v1/content/:key,
+    // but the answer OPTIONS are part of this structured contract — so they must be
+    // returned already localised, in the patient's own language. Without this the
+    // app would render English options to an Uzbek patient.
+    const patient = await this.loadScopedPatient();
+    const label = (o: { label: string; labelUz: string; labelRu: string }): string => {
+      switch (patient.language as Language) {
+        case 'UZ':
+          return o.labelUz;
+        case 'RU':
+          return o.labelRu;
+        default:
+          return o.label;
+      }
+    };
+
     return CHECKIN_QUESTIONS.map((q) => ({
       ref: q.ref,
       questionContentKey: q.contentKey,
       type: q.type,
       ...(q.scale ? { scale: q.scale } : {}),
-      ...(q.options ? { options: q.options.map((o) => ({ code: o.code, label: o.label })) } : {}),
+      ...(q.options
+        ? { options: q.options.map((o) => ({ code: o.code, label: label(o) })) }
+        : {}),
     }));
   }
 

@@ -95,10 +95,10 @@ export class MeController {
   @Get('checkin/questions')
   @ApiOperation({
     summary:
-      'Check-in form contract (P10): the structured CHECKIN_QUESTIONS as [{ ref, questionContentKey, type, options:[{code,label}] }]. Submit via POST /v1/checkins.',
+      'Check-in form contract (P10): the structured CHECKIN_QUESTIONS as [{ ref, questionContentKey, type, options:[{code,label}] }]. Option labels come back in the patient\'s own language (EN/UZ/RU); the question text is a content key to resolve via GET /v1/content/:key. Submit via POST /v1/checkins.',
   })
   @ApiOkResponse({ description: 'The structured check-in question set.' })
-  checkinQuestions(): CheckinQuestionView[] {
+  checkinQuestions(): Promise<CheckinQuestionView[]> {
     return this.me.checkinQuestions();
   }
 

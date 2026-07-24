@@ -15,7 +15,7 @@
     "test:unit": "jest --passWithNoTests",
     "test:e2e": "jest --config test/jest-e2e.json --runInBand --passWithNoTests",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
-    "lint": "echo \"(lint configured in a later task)\"",
+    "lint": "node scripts/no-patient-literals.mjs",
     "prisma:migrate": "prisma migrate dev",
     "prisma:generate": "prisma generate",
     "studio": "mastra dev"
