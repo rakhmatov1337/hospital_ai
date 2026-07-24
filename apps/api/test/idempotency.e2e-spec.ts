@@ -1,3 +1,4 @@
+import { generateKeyPairSync } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
@@ -60,6 +61,17 @@ describe('Idempotent task completion (e2e)', () => {
 
   beforeAll(async () => {
     ensureDatabaseUrl();
+
+    // Self-contained RS256 keypair so the suite does not depend on .env keys —
+    // CI checks out without apps/api/.env (it is gitignored), so JwtTokenService
+    // would otherwise fail to construct. Same pattern as the auth/me e2e specs.
+    const { publicKey, privateKey } = generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+      publicKeyEncoding: { type: 'spki', format: 'pem' },
+      privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+    });
+    process.env.JWT_PRIVATE_KEY = privateKey;
+    process.env.JWT_PUBLIC_KEY = publicKey;
 
     raw = new PrismaClient();
     await raw.$connect();
