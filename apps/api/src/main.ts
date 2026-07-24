@@ -7,6 +7,11 @@ import { AppModule } from './app.module';
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
+  // The dashboard is a separate origin (Vite dev server / static host). We use
+  // Bearer tokens (no cookies), so reflecting any origin is safe here. Lock this
+  // down to the known dashboard origin(s) before a real deployment.
+  app.enableCors({ origin: true });
+
   app.setGlobalPrefix('v1');
 
   app.useGlobalPipes(
