@@ -12,6 +12,7 @@ import { uuidv7 } from 'uuidv7';
 import request from 'supertest';
 
 import { AppModule } from '../src/app.module';
+import { JwtTokenService } from '../src/auth/jwt';
 
 /**
  * MANDATORY negative test (5): a duplicate `Idempotency-Key` on task completion
@@ -55,6 +56,7 @@ const IDEMPOTENCY_KEY = `idem-${taskId}`;
 describe('Idempotent task completion (e2e)', () => {
   let app: INestApplication;
   let raw: PrismaClient;
+  let patientToken: string;
 
   beforeAll(async () => {
     ensureDatabaseUrl();
@@ -69,6 +71,11 @@ describe('Idempotent task completion (e2e)', () => {
     app.setGlobalPrefix('v1');
     app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
     await app.init();
+
+    // Task completion is a PATIENT action — `aud:"patient"`, scoped to the
+    // caller's own patient (never the request body) — so the replay must carry a
+    // patient token for this patient.
+    patientToken = moduleRef.get(JwtTokenService).signPatientAccess(patientId, clinicId);
   });
 
   afterAll(async () => {
@@ -81,6 +88,7 @@ describe('Idempotent task completion (e2e)', () => {
     const call = () =>
       request(app.getHttpServer())
         .post(`/v1/tasks/${taskId}/complete`)
+        .set('Authorization', `Bearer ${patientToken}`)
         .set('Idempotency-Key', IDEMPOTENCY_KEY);
 
     const first = await call();

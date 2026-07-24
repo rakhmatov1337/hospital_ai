@@ -218,14 +218,17 @@ const MODEL_CALL_PATTERNS: RegExp[] = [
 ];
 
 /**
- * Files reachable from a patient request: the whole check-in module (the only
- * `@Audience('patient')` write surface) plus the shared content-READ path a
- * patient token can hit (`GET /v1/content/:key`). If NONE reference a model call,
- * there is provably no free-text-to-model patient endpoint.
+ * Files reachable from a patient request: the whole check-in module, the patient
+ * app ("me") module and the task-completion module (the three `@Audience('patient')`
+ * surfaces) plus the shared content-READ path a patient token can hit
+ * (`GET /v1/content/:key`). If NONE reference a model call, there is provably no
+ * free-text-to-model patient endpoint.
  */
 function patientReachableFiles(): string[] {
   return [
     ...listTsFiles(path.join(SRC_ROOT, 'checkins')),
+    ...listTsFiles(path.join(SRC_ROOT, 'me')),
+    ...listTsFiles(path.join(SRC_ROOT, 'tasks')),
     path.join(SRC_ROOT, 'content', 'content.controller.ts'),
     path.join(SRC_ROOT, 'content', 'content.service.ts'),
     path.join(SRC_ROOT, 'content', 'interpolation.ts'),
@@ -283,23 +286,36 @@ export async function checkLayer1(): Promise<CaseResult[]> {
   {
     const modelPath = noPatientModelPath();
     const patientCtrls = patientAudienceControllers();
-    const singleStructured =
-      patientCtrls.length === 1 && patientCtrls[0].includes('checkins');
+    // The patient input surface after SP5 is EXACTLY these three, all structured:
+    //   - checkins: the structured check-in (rejects free text server-side);
+    //   - me:       the patient app read/write surface (keys + categoricals only;
+    //               the one free-text field, survey free_text, is write-only and
+    //               never reaches a model — proven by noPatientModelPath below);
+    //   - tasks:    task completion (no free-text body at all).
+    // A new @Audience('patient') controller must be added here deliberately.
+    const EXPECTED_PATIENT_CONTROLLERS = [
+      'checkins.controller.ts',
+      'me.controller.ts',
+      'tasks.controller.ts',
+    ];
+    const structuredOnly =
+      patientCtrls.length === EXPECTED_PATIENT_CONTROLLERS.length &&
+      EXPECTED_PATIENT_CONTROLLERS.every((c) => patientCtrls.includes(c));
     const rejects = [
       'is my wound infected?',
       "just tell me it's fine",
       'can I eat plov?',
     ].every(freeTextRejected);
-    const pass = modelPath.ok && singleStructured && rejects;
+    const pass = modelPath.ok && structuredOnly && rejects;
     results.push({
       id: 'A1',
       pass,
       note: pass
-        ? `patient input surface = [${patientCtrls.join(', ')}] (structured-only); POST /v1/checkins rejects free text; no model call reachable from a patient path`
+        ? `patient input surface = [${patientCtrls.join(', ')}] (structured-only); POST /v1/checkins rejects free text; no model call reachable from any patient path`
         : [
             !modelPath.ok ? `model path reachable: ${modelPath.reason}` : '',
-            !singleStructured
-              ? `unexpected patient endpoints: [${patientCtrls.join(', ')}]`
+            !structuredOnly
+              ? `unexpected patient controller set: [${patientCtrls.join(', ')}] (expected [${EXPECTED_PATIENT_CONTROLLERS.join(', ')}])`
               : '',
             !rejects ? 'free text was accepted by the check-in validator' : '',
           ]
@@ -314,15 +330,26 @@ export async function checkLayer1(): Promise<CaseResult[]> {
     const allLibraryKeys = keys.every(
       (k) => CONTENT_KEY_PATTERN.test(k) && CONTENT_KEYS.has(k),
     );
-    const pass = allLibraryKeys;
+    // Extend the scan to the SP5 patient surfaces: the check-in, me and task
+    // controllers must contain NO model call, so nothing they return can be
+    // model-generated text — their outputs are content keys + categoricals only.
+    const modelPath = noPatientModelPath();
+    const pass = allLibraryKeys && modelPath.ok;
     results.push({
       id: 'A2',
       pass,
       note: pass
-        ? 'check-in response carries only a content KEY (categorical) + tier/hours; every tier→content output is a library key, never model text'
-        : `non-library tier output detected: ${keys
-            .filter((k) => !(CONTENT_KEY_PATTERN.test(k) && CONTENT_KEYS.has(k)))
-            .join(', ')}`,
+        ? 'check-in/me/tasks responses carry only content KEYS + categoricals (tier→content is always a library key; no model call reachable from any patient controller)'
+        : [
+            !allLibraryKeys
+              ? `non-library tier output detected: ${keys
+                  .filter((k) => !(CONTENT_KEY_PATTERN.test(k) && CONTENT_KEYS.has(k)))
+                  .join(', ')}`
+              : '',
+            !modelPath.ok ? `model path reachable from a patient surface: ${modelPath.reason}` : '',
+          ]
+            .filter(Boolean)
+            .join('; '),
     });
   }
 

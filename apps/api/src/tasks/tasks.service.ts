@@ -25,8 +25,13 @@ export class TasksService {
    * task — yields a single effect and returns the existing row without a second
    * mutation. A concurrent race is resolved by the unique constraint (P2002),
    * after which we return the already-applied row.
+   *
+   * `patientId` scopes the completion to a single patient (the authenticated
+   * caller): a task belonging to another patient is treated as NOT_FOUND, so a
+   * patient can neither complete nor probe for another patient's tasks. When
+   * omitted (internal/test callers) the scope check is skipped.
    */
-  async complete(taskId: string, idempotencyKey: string) {
+  async complete(taskId: string, idempotencyKey: string, patientId?: string) {
     if (!idempotencyKey || idempotencyKey.trim() === '') {
       throw new AppError(
         ERROR_CODES.VALIDATION_ERROR,
@@ -40,6 +45,10 @@ export class TasksService {
       include: { patient: { select: { clinicId: true, patientRef: true } } },
     });
     if (!task) {
+      throw new AppError(ERROR_CODES.NOT_FOUND, `Task ${taskId} not found.`, { taskId });
+    }
+    // Patient scoping: another patient's task is indistinguishable from a missing one.
+    if (patientId && task.patientId !== patientId) {
       throw new AppError(ERROR_CODES.NOT_FOUND, `Task ${taskId} not found.`, { taskId });
     }
 

@@ -18,6 +18,7 @@ import { CheckinsModule } from './checkins/checkins.module';
 import { EscalationsModule } from './escalations/escalations.module';
 import { ContentModule } from './content/content.module';
 import { TelemetryModule } from './telemetry/telemetry.module';
+import { MeModule } from './me/me.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { TelemetryModule } from './telemetry/telemetry.module';
     EscalationsModule,
     ContentModule,
     TelemetryModule,
+    MeModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: AppExceptionFilter }],
 })
