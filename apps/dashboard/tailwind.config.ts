@@ -74,6 +74,18 @@ const config: Config = {
           4: 'var(--chart-4)',
           5: 'var(--chart-5)',
         },
+        // The branded sidebar rail (dark) — wired so `bg-sidebar`, `text-sidebar-*`,
+        // `bg-sidebar-accent`, `border-sidebar-border` etc. resolve to the CSS vars.
+        sidebar: {
+          DEFAULT: 'var(--sidebar)',
+          foreground: 'var(--sidebar-foreground)',
+          primary: 'var(--sidebar-primary)',
+          'primary-foreground': 'var(--sidebar-primary-foreground)',
+          accent: 'var(--sidebar-accent)',
+          'accent-foreground': 'var(--sidebar-accent-foreground)',
+          border: 'var(--sidebar-border)',
+          ring: 'var(--sidebar-ring)',
+        },
         // Bridge: existing screens use `text-text` / `text-text-muted` / `bg-surface`.
         // Alias them onto the preset vars so they adopt the new theme in place.
         text: {

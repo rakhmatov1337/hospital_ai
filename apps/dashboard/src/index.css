@@ -15,40 +15,42 @@
 
 :root {
   color-scheme: light;
-  /* Premium clinical palette — a deep, confident teal (the hospital-ai brand,
-     not the stock indigo) on a softly tinted canvas so white cards elevate. */
-  --background: oklch(0.986 0.006 196);
-  --foreground: oklch(0.23 0.024 220);
+  /* Refined graphite palette — premium, monochrome, timeless (not colorful
+     template). Near-black primary, clean neutral surfaces, one restrained
+     blue reserved for the sidebar active state + charts. */
+  --background: oklch(0.988 0.002 264);
+  --foreground: oklch(0.205 0.015 264);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.23 0.024 220);
+  --card-foreground: oklch(0.205 0.015 264);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.23 0.024 220);
-  --primary: oklch(0.49 0.088 197);
-  --primary-foreground: oklch(0.99 0.01 196);
-  --secondary: oklch(0.958 0.011 200);
-  --secondary-foreground: oklch(0.32 0.03 210);
-  --muted: oklch(0.965 0.008 205);
-  --muted-foreground: oklch(0.52 0.022 216);
-  --accent: oklch(0.945 0.03 191);
-  --accent-foreground: oklch(0.34 0.05 197);
+  --popover-foreground: oklch(0.205 0.015 264);
+  --primary: oklch(0.26 0.018 264);
+  --primary-foreground: oklch(0.985 0.001 264);
+  --secondary: oklch(0.966 0.003 264);
+  --secondary-foreground: oklch(0.3 0.015 264);
+  --muted: oklch(0.966 0.003 264);
+  --muted-foreground: oklch(0.53 0.013 264);
+  --accent: oklch(0.958 0.004 264);
+  --accent-foreground: oklch(0.26 0.018 264);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.906 0.01 210);
-  --input: oklch(0.906 0.01 210);
-  --ring: oklch(0.49 0.088 197);
-  --chart-1: oklch(0.68 0.1 190);
-  --chart-2: oklch(0.58 0.11 200);
-  --chart-3: oklch(0.49 0.088 197);
-  --chart-4: oklch(0.44 0.08 208);
-  --chart-5: oklch(0.62 0.12 155);
-  --radius: 0.7rem;
-  --sidebar: oklch(0.981 0.008 198);
-  --sidebar-foreground: oklch(0.23 0.024 220);
-  --sidebar-primary: oklch(0.49 0.088 197);
-  --sidebar-primary-foreground: oklch(0.99 0.01 196);
-  --sidebar-accent: oklch(0.945 0.03 191);
-  --sidebar-accent-foreground: oklch(0.34 0.05 197);
-  --sidebar-border: oklch(0.906 0.01 210);
-  --sidebar-ring: oklch(0.49 0.088 197);
+  --border: oklch(0.912 0.004 264);
+  --input: oklch(0.912 0.004 264);
+  --ring: oklch(0.55 0.12 255);
+  --chart-1: oklch(0.62 0.13 250);
+  --chart-2: oklch(0.55 0.14 262);
+  --chart-3: oklch(0.7 0.1 232);
+  --chart-4: oklch(0.6 0.12 200);
+  --chart-5: oklch(0.48 0.13 275);
+  --radius: 0.625rem;
+  /* Signature dark graphite rail with a subtle blue active accent. */
+  --sidebar: oklch(0.22 0.014 264);
+  --sidebar-foreground: oklch(0.88 0.006 264);
+  --sidebar-primary: oklch(0.62 0.13 252);
+  --sidebar-primary-foreground: oklch(0.99 0.002 264);
+  --sidebar-accent: oklch(0.3 0.016 264);
+  --sidebar-accent-foreground: oklch(0.98 0.003 264);
+  --sidebar-border: oklch(0.32 0.014 264);
+  --sidebar-ring: oklch(0.62 0.13 252);
 }
 
 .dark {

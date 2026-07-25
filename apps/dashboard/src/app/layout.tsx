@@ -17,7 +17,7 @@ import { apiClient } from '../lib/api-client';
 import type { ClinicView } from '../lib/api-types';
 import { useAuth } from '../lib/auth';
 import { setLanguage, SUPPORTED_LANGUAGES, type DashboardLanguage } from '../lib/i18n';
-import { Button, ConnectionStatus } from '../ui';
+import { ConnectionStatus } from '../ui';
 import {
   Sidebar,
   SidebarContent,
@@ -92,12 +92,14 @@ export function AppLayout() {
       <Sidebar collapsible="icon">
         <SidebarHeader className="px-3 py-4">
           <div className="flex items-center gap-2">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-input bg-primary text-primary-foreground">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-input bg-sidebar-primary text-sidebar-primary-foreground">
               <IconActivityHeartbeat className="size-5" aria-hidden="true" />
             </div>
             <div className="grid min-w-0 leading-tight group-data-[collapsible=icon]:hidden">
-              <span className="truncate text-body font-bold text-primary">{t('app.name')}</span>
-              <span className="truncate text-caption text-muted-foreground">
+              <span className="truncate text-body font-bold text-sidebar-foreground">
+                {t('app.name')}
+              </span>
+              <span className="truncate text-caption text-sidebar-foreground/60">
                 {t('app.subtitle')}
               </span>
             </div>
@@ -148,28 +150,27 @@ export function AppLayout() {
         <SidebarFooter className="gap-2">
           {clinicQuery.data?.name && (
             <p
-              className="truncate px-2 text-caption font-semibold text-text group-data-[collapsible=icon]:hidden"
+              className="truncate px-2 text-caption font-semibold text-sidebar-foreground/80 group-data-[collapsible=icon]:hidden"
               title={clinicQuery.data.name}
             >
               {clinicQuery.data.name}
             </p>
           )}
           {/* Full-width sign-out when expanded; icon-only when collapsed (P2-4). */}
-          <Button
-            variant="secondary"
-            size="sm"
-            fullWidth
+          <button
+            type="button"
             onClick={handleSignOut}
-            className="group-data-[collapsible=icon]:hidden"
+            className="flex h-9 items-center justify-center gap-2 rounded-input border border-sidebar-border text-caption font-semibold text-sidebar-foreground outline-none transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring group-data-[collapsible=icon]:hidden"
           >
+            <IconLogout className="size-4" aria-hidden="true" />
             {t('topbar.signOut')}
-          </Button>
+          </button>
           <button
             type="button"
             onClick={handleSignOut}
             aria-label={t('topbar.signOut')}
             title={t('topbar.signOut')}
-            className="hidden size-8 items-center justify-center rounded-input text-text-muted outline-none hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary group-data-[collapsible=icon]:flex"
+            className="hidden size-8 items-center justify-center rounded-input text-sidebar-foreground/70 outline-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring group-data-[collapsible=icon]:flex"
           >
             <IconLogout className="size-5" aria-hidden="true" />
           </button>
