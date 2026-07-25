@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Banner, Button, ConnectionStatus, EmptyState, Spinner } from '../../ui';
+import { Banner, Button, Card, ConnectionStatus, EmptyState, Spinner } from '../../ui';
 import { cn } from '../../lib/cn';
 import { useEscalationQueue, type QueueFilter } from './api';
 import { QueueBoard } from './QueueBoard';
@@ -44,32 +44,32 @@ export function QueuePage() {
           />
         </div>
 
-        <div
+        <Card
           role="group"
           aria-label={t('filter.label', { defaultValue: 'Show' })}
-          className="inline-flex w-fit gap-1 rounded-input border border-border bg-surface p-1"
+          padded={false}
+          className="inline-flex w-fit gap-1 p-1"
         >
           {FILTERS.map((value) => {
             const selected = filter === value;
             return (
-              <button
+              <Button
                 key={value}
-                type="button"
+                variant="ghost"
+                size="sm"
                 aria-pressed={selected}
                 onClick={() => setFilter(value)}
                 className={cn(
-                  'rounded-input px-4 py-1.5 text-body font-semibold outline-none transition-colors',
-                  'focus-visible:ring-2 focus-visible:ring-primary',
                   selected
-                    ? 'bg-primary text-white'
-                    : 'text-text-muted hover:bg-primary-light',
+                    ? 'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground'
+                    : 'text-text-muted',
                 )}
               >
                 {t(`filter.${value}`, { defaultValue: value })}
-              </button>
+              </Button>
             );
           })}
-        </div>
+        </Card>
       </header>
 
       {alert.active && (

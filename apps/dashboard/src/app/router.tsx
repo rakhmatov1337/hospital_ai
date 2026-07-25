@@ -9,6 +9,8 @@ import { PatientCreatePage, PatientDetailPage } from '../features/patient-detail
 import { MetricsPage } from '../features/metrics/page';
 import { SettingsPage } from '../features/settings/page';
 import { ContentPage } from '../features/content/page';
+import { ShellPreview } from '../features/dev/shell-preview';
+import { ScreensPreview } from '../features/dev/screens-preview';
 
 /**
  * All routes. Non-login routes are wrapped in <RequireAuth> inside <AppLayout>.
@@ -18,6 +20,15 @@ export function AppRouter() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/dev/shell" element={<AppLayout />}>
+        <Route index element={<ShellPreview />} />
+      </Route>
+      <Route path="/dev/screens" element={<ScreensPreview />}>
+        <Route index element={<QueuePage />} />
+        <Route path="content" element={<ContentPage />} />
+        <Route path="patients" element={<PatientsPage />} />
+        <Route path="settings" element={<SettingsPage />} />
+      </Route>
 
       <Route
         element={

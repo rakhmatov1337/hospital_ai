@@ -1,0 +1,117 @@
+{
+  "title": "Eskalatsiya tafsilotlari",
+  "backToQueue": "Navbatga qaytish",
+  "loading": "Eskalatsiya yuklanmoqda…",
+  "loadError": {
+    "title": "Ushbu eskalatsiyani yuklab bo'lmadi",
+    "retry": "Qayta urinish"
+  },
+  "patient": {
+    "ageBand": "Yosh guruhi",
+    "procedure": "Muolaja",
+    "discharge": "Chiqish sanasi",
+    "recoveryDay": "Tiklanish kuni",
+    "dayValue": "{{n}}-kun",
+    "ref": "Bemor ID",
+    "callAria": "Bemorga {{phone}} raqamiga qo'ng'iroq qilish"
+  },
+  "answers": {
+    "title": "Ko'rik javoblari",
+    "subtitle": "Har bir savol bemorning aniq javobi bilan.",
+    "empty": "Ushbu ko'rik uchun javoblar qayd etilmagan."
+  },
+  "questions": {},
+  "answerValues": {
+    "yes": "Ha",
+    "no": "Yo'q",
+    "none": "Yo'q",
+    "mild": "Yengil",
+    "moderate": "O'rtacha",
+    "severe": "Og'ir"
+  },
+  "timeline": {
+    "title": "Xronologiya",
+    "ruleVersion": "Qoida {{version}}",
+    "submitted": "Ko'rik yuborildi",
+    "notified": "{{role}} xabardor qilindi ({{attempt}}-urinish)",
+    "deliveredVia": "{{channel}} orqali yetkazildi",
+    "sentVia": "{{channel}} orqali yuborildi",
+    "acknowledged": "Qabul qilindi",
+    "contacted": "Bemor bilan bog'lanildi",
+    "breached": "Eskalatsiya muddati o'tdi",
+    "breachedDetail": "Xabardor qilish bosqichlari oynasida tasdiq olinmadi.",
+    "reached": "Bajarildi",
+    "pending": "Kutilmoqda"
+  },
+  "roles": {
+    "on_duty": "Navbatchi klinisist",
+    "on_duty_nurse": "Navbatchi hamshira",
+    "backup": "Zaxira klinisist",
+    "clinical_lead": "Klinik rahbar",
+    "clinic_head": "Klinika mudiri"
+  },
+  "channels": {
+    "dashboard": "boshqaruv paneli",
+    "in_dashboard": "boshqaruv paneli",
+    "sms": "SMS",
+    "push": "push-bildirishnoma",
+    "call": "telefon qo'ng'irog'i",
+    "email": "email"
+  },
+  "history": {
+    "title": "So'nggi tarix",
+    "adherence": "Tiklanish rejasiga rioya qilish",
+    "adherenceNoData": "Hozircha bajarilgan vazifalar yo'q",
+    "adherenceDenominator": "{{total}} vazifadan {{completed}} tasi o'z vaqtida",
+    "recentCheckIns": "So'nggi 5 ta ko'rik",
+    "empty": "Oldingi ko'riklar yo'q.",
+    "noTier": "Darajasiz"
+  },
+  "statusNames": {
+    "new": "Yangi",
+    "acknowledged": "Qabul qilingan",
+    "contacted": "Bog'lanilgan",
+    "breached": "Muddati o'tgan"
+  },
+  "outcomes": {
+    "advised_at_home": "Uyda davolanish tavsiya qilindi",
+    "attend_clinic": "Klinikaga kelish so'raldi",
+    "referred_emergency": "Tez yordamga yo'naltirildi",
+    "no_action": "Chora talab etilmaydi",
+    "unable_to_reach": "Bog'lanib bo'lmadi"
+  },
+  "actions": {
+    "title": "Amallar",
+    "acknowledge": "Qabul qilish",
+    "acknowledging": "Qabul qilinmoqda…",
+    "acknowledgeHint": "Qabul qilish xabardor qilish bosqichlarini to'xtatadi.",
+    "acknowledgedTitle": "Qabul qilindi",
+    "acknowledgedBody": "Xabardor qilish bosqichlari to'xtatildi.",
+    "alreadyHandledTitle": "Allaqachon ko'rib chiqilgan",
+    "alreadyHandledBody": "Boshqa xodim buni allaqachon ko'rib chiqqan — hozir holati: {{status}}.",
+    "contactTitle": "Bemor bilan bog'lanilgan deb belgilash",
+    "outcomeSelectLabel": "Bog'lanish natijasi (majburiy)",
+    "outcomePlaceholder": "Natijani tanlang…",
+    "clinicalNoteLabel": "Klinik eslatma (faqat xodimlar uchun)",
+    "clinicalNotePlaceholder": "Ixtiyoriy eslatma — bemorga hech qachon ko'rsatilmaydi.",
+    "clinicalNoteHint": "Ushbu eslatma faqat xodimlar uchun va bemorga hech qachon ko'rsatilmaydi.",
+    "markContacted": "Bog'lanilgan deb belgilash",
+    "contacting": "Yozib olinmoqda…",
+    "noDismissNote": "Eskalatsiyani faqat natija bilan yopish mumkin — rad etish imkoni yo'q.",
+    "contactFailedTitle": "Bog'lanishni yozib bo'lmadi",
+    "closedTitle": "Eskalatsiya yopildi",
+    "outcomeLabel": "Natija",
+    "clinicalNote": "Klinik eslatma",
+    "immutableNote": "Ushbu yozuv yakuniy. Tuzatishlar qo'shiladi, tahrirlanmaydi.",
+    "breachedTitle": "Eskalatsiya muddati o'tdi",
+    "breachedBody": "Bu eskalatsiya xabardor qilish bosqichlari muddatini o'tkazib yubordi. Klinikangizning muddat o'tishi bo'yicha protokoliga amal qiling."
+  },
+  "errors": {
+    "default": "Nimadir xato ketdi. Iltimos, qayta urinib ko'ring.",
+    "DUPLICATE_REQUEST": "Bu eskalatsiya allaqachon ko'rib chiqilgan.",
+    "INVALID_STATUS_TRANSITION": "Bu holat o'zgarishiga endi ruxsat berilmaydi.",
+    "NOT_FOUND": "Eskalatsiya topilmadi.",
+    "CROSS_CLINIC_FORBIDDEN": "Bu eskalatsiya boshqa klinikaga tegishli.",
+    "VALIDATION_ERROR": "Iltimos, to'g'ri natijani tanlab, qayta urinib ko'ring."
+  }
+}

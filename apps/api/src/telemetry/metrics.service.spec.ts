@@ -11,9 +11,11 @@ import {
   AdherenceTaskRow,
   MetricsService,
   computeAdherence,
+  dateWhere,
   groupAdherence,
   meanScore,
   median,
+  parseWindow,
 } from './metrics.service';
 
 const NOW = new Date('2026-07-23T12:00:00.000Z');
@@ -106,6 +108,55 @@ describe('median / meanScore (pure)', () => {
     expect(result.denominator).toBe(3);
     expect(result.numerator).toBe(12);
     expect(result.value).toBeCloseTo(4);
+  });
+});
+
+describe('parseWindow (date-range query → resolved window)', () => {
+  it('returns an all-null window when both bounds are absent (the "All" preset)', () => {
+    expect(parseWindow(undefined, undefined)).toEqual({ from: null, to: null });
+    expect(parseWindow(null, null)).toEqual({ from: null, to: null });
+  });
+
+  it('anchors a date-only `from` at the START of that UTC day', () => {
+    expect(parseWindow('2026-07-18', undefined).from?.toISOString()).toBe(
+      '2026-07-18T00:00:00.000Z',
+    );
+  });
+
+  it('expands a date-only `to` to the INCLUSIVE end of that UTC day', () => {
+    // Without this, "…to today" would exclude everything recorded today.
+    expect(parseWindow(undefined, '2026-07-25').to?.toISOString()).toBe(
+      '2026-07-25T23:59:59.999Z',
+    );
+  });
+
+  it('passes a full ISO datetime through untouched', () => {
+    expect(parseWindow('2026-07-18T09:30:00.000Z', '2026-07-25T09:30:00.000Z')).toEqual({
+      from: new Date('2026-07-18T09:30:00.000Z'),
+      to: new Date('2026-07-25T09:30:00.000Z'),
+    });
+  });
+
+  it('treats an unparseable bound as null (unbounded on that side)', () => {
+    expect(parseWindow('not-a-date', undefined).from).toBeNull();
+  });
+});
+
+describe('dateWhere (window → Prisma date filter)', () => {
+  it('is undefined (no filter) for an all-time window, so reads stay unbounded', () => {
+    expect(dateWhere('scheduledFor', undefined)).toBeUndefined();
+    expect(dateWhere('scheduledFor', { from: null, to: null })).toBeUndefined();
+  });
+
+  it('emits a gte+lte range on the named field for a bounded window', () => {
+    const from = new Date('2026-07-18T00:00:00.000Z');
+    const to = new Date('2026-07-25T23:59:59.999Z');
+    expect(dateWhere('createdAt', { from, to })).toEqual({ createdAt: { gte: from, lte: to } });
+  });
+
+  it('emits a one-sided bound when only one end is set', () => {
+    const from = new Date('2026-07-18T00:00:00.000Z');
+    expect(dateWhere('occurredAt', { from, to: null })).toEqual({ occurredAt: { gte: from } });
   });
 });
 

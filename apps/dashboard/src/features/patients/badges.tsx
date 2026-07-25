@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { PatientStatus } from '@hospital-ai/shared-types';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '../../lib/cn';
 
 /**
@@ -9,7 +10,7 @@ import { cn } from '../../lib/cn';
  * reserved `success` token per the design system.
  */
 const STATUS_STYLE: Record<PatientStatus, { box: string; icon: string }> = {
-  [PatientStatus.enrolled]: { box: 'bg-primary-light text-primary-dark border-border', icon: '○' },
+  [PatientStatus.enrolled]: { box: 'bg-primary/10 text-primary border-border', icon: '○' },
   [PatientStatus.active]: { box: 'bg-surface text-primary border-primary', icon: '▶' },
   [PatientStatus.completed]: { box: 'bg-success text-white border-success', icon: '✓' },
   [PatientStatus.withdrawn]: { box: 'bg-background text-text-muted border-border', icon: '⊘' },
@@ -19,16 +20,16 @@ export function PatientStatusBadge({ status }: { status: PatientStatus }) {
   const { t } = useTranslation('patients');
   const style = STATUS_STYLE[status];
   return (
-    <span
+    <Badge
       data-patient-status={status}
       className={cn(
-        'inline-flex items-center gap-1 rounded-input border px-2.5 py-0.5 text-caption font-semibold',
+        'gap-1 rounded-input border px-2.5 py-0.5 text-caption font-semibold',
         style.box,
       )}
     >
       <span aria-hidden="true">{style.icon}</span>
       {t(`patientStatus.${status}`)}
-    </span>
+    </Badge>
   );
 }
 
@@ -40,14 +41,14 @@ export function PatientStatusBadge({ status }: { status: PatientStatus }) {
 export function AttentionBadge() {
   const { t } = useTranslation('patients');
   return (
-    <span
+    <Badge
       data-attention="true"
       title={t('attention.aria')}
-      className="inline-flex items-center gap-1 rounded-input border border-text-muted bg-surface px-2 py-0.5 text-caption font-semibold text-text"
+      className="gap-1 rounded-input border border-text-muted bg-surface px-2 py-0.5 text-caption font-semibold text-text"
     >
       <span aria-hidden="true">⚠</span>
       <span className="sr-only">{t('attention.aria')}</span>
       <span aria-hidden="true">{t('attention.label')}</span>
-    </span>
+    </Badge>
   );
 }

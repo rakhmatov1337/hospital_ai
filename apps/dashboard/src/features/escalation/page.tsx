@@ -18,7 +18,11 @@ import { ActionPanel } from './ActionPanel';
  */
 export function EscalationDetailPage() {
   const { t, i18n } = useTranslation('escalation');
-  const lang: DashboardLanguage = i18n.language.startsWith('ru') ? 'ru' : 'en';
+  const lang: DashboardLanguage = i18n.language.startsWith('ru')
+    ? 'ru'
+    : i18n.language.startsWith('uz')
+      ? 'uz'
+      : 'en';
   const { id = '' } = useParams<{ id: string }>();
   const { data, isLoading, isError, error, refetch } = useEscalationDetail(id);
 

@@ -10,6 +10,15 @@ import {
   type TooltipProps,
 } from 'recharts';
 import type { AdherencePoint } from '@hospital-ai/shared-types';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
+} from '@/components/ui/table';
 import { EmptyState } from '../../ui';
 
 /** Design-system palette (spec §2) — components consume tokens, charts need hex. */
@@ -85,31 +94,33 @@ export function AdherenceChart({ series }: { series: AdherencePoint[] }) {
       </div>
 
       {/* Accessible equivalent of the chart (never colour alone; readable at 200%). */}
-      <table className="sr-only">
-        <caption>{t('patient-detail:adherence.tableCaption')}</caption>
-        <thead>
-          <tr>
-            <th>{t('patient-detail:adherence.colDay')}</th>
-            <th>{t('patient-detail:adherence.colValue')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.recoveryDay}>
-              <td>{t('patient-detail:adherence.dayShort', { n: r.recoveryDay })}</td>
-              <td>
-                {r.percent === null
-                  ? t('patient-detail:adherence.notAssessed')
-                  : t('patient-detail:adherence.valueWithDenominator', {
-                      percent: r.percent,
-                      numerator: r.numerator,
-                      denominator: r.denominator,
-                    })}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="sr-only">
+        <Table>
+          <TableCaption>{t('patient-detail:adherence.tableCaption')}</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t('patient-detail:adherence.colDay')}</TableHead>
+              <TableHead>{t('patient-detail:adherence.colValue')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rows.map((r) => (
+              <TableRow key={r.recoveryDay}>
+                <TableCell>{t('patient-detail:adherence.dayShort', { n: r.recoveryDay })}</TableCell>
+                <TableCell>
+                  {r.percent === null
+                    ? t('patient-detail:adherence.notAssessed')
+                    : t('patient-detail:adherence.valueWithDenominator', {
+                        percent: r.percent,
+                        numerator: r.numerator,
+                        denominator: r.denominator,
+                      })}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

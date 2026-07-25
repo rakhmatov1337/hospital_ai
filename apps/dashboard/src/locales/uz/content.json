@@ -1,0 +1,84 @@
+{
+  "title": "Kontentni tasdiqlash",
+  "subtitle": "Bemorlarga ko'rsatiladigan kontentni har bir element va har bir til bo'yicha ko'rib chiqing va tasdiqlang.",
+  "blocker": {
+    "pending": "{{total}} ta kontent elementidan {{count}} tasi hali tasdiqlanishi kerak",
+    "pending_one": "{{total}} ta kontent elementidan {{count}} tasi hali tasdiqlanishi kerak",
+    "clear": "Barcha {{total}} ta kontent elementi tasdiqlangan",
+    "pendingBody": "Bemorlar faqat klinisist tomonidan tasdiqlangan kontentni ko'radi. Ishga tushirishdan oldin har bir element uchala tilda ham tasdiqlanishi shart — bu ishga tushirishni to'sib turgan omil.",
+    "clearBody": "Har bir kontent elementi uchala tilda ham klinisistning haqiqiy tasdig'iga ega. Ishga tushirishga hech narsa to'sqinlik qilmayapti."
+  },
+  "editWarning": {
+    "title": "Tasdiqlangan kontentni tahrirlash uni Qoralama holatiga qaytaradi",
+    "body": "Tasdiqlangan tarjimaga o'zgartirish so'rash yangi Qoralama versiyasini yaratadi, elementni Ko'rib chiqilishi kerak holatiga qaytaradi va qayta tasdiqlanmaguncha ushbu kontentni bemor ilovasidan olib qo'yadi. Tasdiqlar doimiy va o'zgartirib bo'lmaydigan yozuvlardir."
+  },
+  "filters": {
+    "label": "Kontentni filtrlash",
+    "all": "Barchasi",
+    "needsApproval": "Tasdiqlash kerak",
+    "missingTranslation": "Tarjima mavjud emas",
+    "approved": "Tasdiqlangan"
+  },
+  "list": {
+    "item": "Element",
+    "category": "Toifa",
+    "status": "Holat",
+    "languages": "Tillar",
+    "lastApproved": "Oxirgi tasdiq",
+    "lastApprovedBy": "{{who}} tomonidan",
+    "never": "Hali tasdiqlanmagan",
+    "emptyTitle": "Bu filtrga mos kontent elementi yo'q",
+    "emptyBody": "Ko'proq kontentni ko'rish uchun boshqa filtrni sinab ko'ring."
+  },
+  "itemStatus": {
+    "approved": "Tasdiqlangan",
+    "needs_review": "Ko'rib chiqilishi kerak"
+  },
+  "reviewStatus": {
+    "approved": "Tasdiqlangan",
+    "needs_review": "Ko'rib chiqilishi kerak",
+    "draft": "Qoralama",
+    "missing": "Mavjud emas"
+  },
+  "detail": {
+    "heading": "Kontent elementi",
+    "close": "Yopish",
+    "sideBySide": "Uchala til yonma-yon",
+    "current": "Joriy versiya",
+    "versionHistory": "Versiyalar tarixi",
+    "version": "v{{n}}",
+    "noHistory": "Oldingi versiyalar yo'q.",
+    "missingText": "Bu til uchun hali tarjima mavjud emas.",
+    "approvedBy": "{{who}} tomonidan tasdiqlangan",
+    "approvedAt": "{{time}} tasdiqlangan",
+    "created": "{{time}} yaratilgan",
+    "placeholderNote": "O'rniga qo'yilgan matn — klinisistning haqiqiy tasdig'i kutilmoqda."
+  },
+  "actions": {
+    "approve": "{{lang}} tilini tasdiqlash",
+    "requestChanges": "O'zgartirish so'rash",
+    "submitRequest": "So'rovni yuborish",
+    "cancel": "Bekor qilish",
+    "noteLabel": "Ko'rib chiquvchi izohi (audit jurnaliga yoziladi)",
+    "notePlaceholder": "Nimani o'zgartirish kerakligini tushuntiring…",
+    "proposedLabel": "Taklif etilgan almashtirish matni (ixtiyoriy)",
+    "proposedPlaceholder": "Joriy matnni yangi qoralama sifatida saqlash uchun bo'sh qoldiring…",
+    "approveHint": "{{lang}} tilini tasdiqlash boshqa tillarni tasdiqlamaydi.",
+    "alreadyApproved": "Allaqachon tasdiqlangan.",
+    "cannotApproveMissing": "Tasdiqlashdan oldin tarjima qo'shing."
+  },
+  "permission": {
+    "leadOnly": "Faqat klinik rahbar tasdiqlashi yoki o'zgartirish so'rashi mumkin.",
+    "leadOnlyShort": "Faqat klinik rahbar"
+  },
+  "toast": {
+    "approved": "{{lang}} tili tasdiqlandi.",
+    "requested": "{{lang}} tili uchun o'zgartirish so'raldi — yangi qoralama yaratildi.",
+    "error": "Bu amalni bajarib bo'lmadi. Iltimos, qayta urinib ko'ring."
+  },
+  "lang": {
+    "EN": "Ingliz tili",
+    "UZ": "O'zbek tili",
+    "RU": "Rus tili"
+  }
+}

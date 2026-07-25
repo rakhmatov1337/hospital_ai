@@ -1,7 +1,22 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StaffRole, type StaffAccount } from '@hospital-ai/shared-types';
-import { Banner, Button, Card, Input, Select, Spinner } from '../../ui';
+import { Banner, Button, Card, Input, Select, SelectItem, Spinner } from '../../ui';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { errorCodeOf } from '../../lib/api-client';
 import { useAuth } from '../../lib/auth';
 import {
@@ -114,36 +129,36 @@ export function StaffSection() {
       ) : (staffQuery.data?.length ?? 0) === 0 ? (
         <p className="text-body text-text-muted">{t('settings:staff.empty')}</p>
       ) : (
-        <div className="overflow-x-auto rounded-card border border-border">
-          <table className="w-full border-collapse text-body">
-            <thead>
-              <tr className="border-b border-border">
-                <th scope="col" className="px-4 py-3 text-left text-caption font-semibold uppercase tracking-wide text-text-muted">
+        <div className="overflow-hidden rounded-card border border-border">
+          <Table className="text-body">
+            <TableHeader>
+              <TableRow className="border-border">
+                <TableHead className="px-4 py-3 text-caption font-semibold uppercase tracking-wide text-text-muted">
                   {t('settings:staff.name')}
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-caption font-semibold uppercase tracking-wide text-text-muted">
+                </TableHead>
+                <TableHead className="px-4 py-3 text-caption font-semibold uppercase tracking-wide text-text-muted">
                   {t('settings:staff.email')}
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-caption font-semibold uppercase tracking-wide text-text-muted">
+                </TableHead>
+                <TableHead className="px-4 py-3 text-caption font-semibold uppercase tracking-wide text-text-muted">
                   {t('settings:staff.role')}
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-caption font-semibold uppercase tracking-wide text-text-muted">
+                </TableHead>
+                <TableHead className="px-4 py-3 text-caption font-semibold uppercase tracking-wide text-text-muted">
                   {t('settings:staff.status')}
-                </th>
+                </TableHead>
                 {isLead && (
-                  <th scope="col" className="px-4 py-3 text-right text-caption font-semibold uppercase tracking-wide text-text-muted">
+                  <TableHead className="px-4 py-3 text-right text-caption font-semibold uppercase tracking-wide text-text-muted">
                     {t('settings:staff.actions')}
-                  </th>
+                  </TableHead>
                 )}
-              </tr>
-            </thead>
-            <tbody>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {staffQuery.data?.map((account) => (
-                <tr key={account.id} className="border-b border-border last:border-b-0">
-                  <td className="px-4 py-3 text-text">{account.name}</td>
-                  <td className="px-4 py-3 text-text-muted">{account.email}</td>
-                  <td className="px-4 py-3 text-text">{t(`settings:roles.${account.role}`)}</td>
-                  <td className="px-4 py-3">
+                <TableRow key={account.id} className="border-border">
+                  <TableCell className="px-4 py-3 text-text">{account.name}</TableCell>
+                  <TableCell className="px-4 py-3 text-text-muted">{account.email}</TableCell>
+                  <TableCell className="px-4 py-3 text-text">{t(`settings:roles.${account.role}`)}</TableCell>
+                  <TableCell className="px-4 py-3">
                     <span
                       className={
                         account.active
@@ -153,9 +168,9 @@ export function StaffSection() {
                     >
                       {account.active ? t('settings:staff.active') : t('settings:staff.inactive')}
                     </span>
-                  </td>
+                  </TableCell>
                   {isLead && (
-                    <td className="px-4 py-3 text-right">
+                    <TableCell className="px-4 py-3 text-right">
                       <div className="inline-flex gap-2">
                         <Button size="sm" variant="ghost" onClick={() => setEditing(account)}>
                           {t('settings:actions.edit')}
@@ -171,33 +186,29 @@ export function StaffSection() {
                             : t('settings:actions.activate')}
                         </Button>
                       </div>
-                    </td>
+                    </TableCell>
                   )}
-                </tr>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
 
-      {modalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-text/40 p-4"
-          onClick={closeModal}
-        >
-          <form
-            role="dialog"
-            aria-modal="true"
-            aria-label={editing ? t('settings:staffForm.editTitle') : t('settings:staffForm.addTitle')}
-            onClick={(e) => e.stopPropagation()}
-            onSubmit={(e) => void onSubmit(e)}
-            className="flex w-full max-w-md flex-col gap-4 rounded-card border border-border bg-surface p-6 shadow-card"
-            noValidate
-          >
-            <h3 className="text-h1 font-bold text-text">
+      <Dialog
+        open={modalOpen}
+        onOpenChange={(next) => {
+          if (!next) closeModal();
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-h1 font-bold text-text">
               {editing ? t('settings:staffForm.editTitle') : t('settings:staffForm.addTitle')}
-            </h3>
+            </DialogTitle>
+          </DialogHeader>
 
+          <form onSubmit={(e) => void onSubmit(e)} className="flex flex-col gap-4" noValidate>
             <Input
               label={t('settings:staff.name')}
               value={form.name}
@@ -215,10 +226,12 @@ export function StaffSection() {
             <Select
               label={t('settings:staff.role')}
               value={form.role}
-              onChange={(e) => setForm((p) => ({ ...p, role: e.target.value as StaffRole }))}
+              onValueChange={(v) => setForm((p) => ({ ...p, role: v as StaffRole }))}
             >
-              <option value={StaffRole.staff}>{t('settings:roles.staff')}</option>
-              <option value={StaffRole.clinical_lead}>{t('settings:roles.clinical_lead')}</option>
+              <SelectItem value={StaffRole.staff}>{t('settings:roles.staff')}</SelectItem>
+              <SelectItem value={StaffRole.clinical_lead}>
+                {t('settings:roles.clinical_lead')}
+              </SelectItem>
             </Select>
             <Input
               label={t('settings:staffForm.password')}
@@ -232,7 +245,7 @@ export function StaffSection() {
 
             {error && <Banner tone="danger">{error}</Banner>}
 
-            <div className="mt-2 flex justify-end gap-3">
+            <DialogFooter>
               <Button variant="secondary" onClick={closeModal} disabled={busy}>
                 {t('common:actions.cancel')}
               </Button>
@@ -243,10 +256,10 @@ export function StaffSection() {
                     ? t('settings:staffForm.update')
                     : t('settings:staffForm.create')}
               </Button>
-            </div>
+            </DialogFooter>
           </form>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

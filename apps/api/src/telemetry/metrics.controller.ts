@@ -1,8 +1,9 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Audience, StaffJwtGuard } from '../auth/guards';
 import { RequestContext } from '../common/request-context';
-import { MetricsReport, MetricsService } from './metrics.service';
+import { MetricsReport, MetricsService, parseWindow } from './metrics.service';
+import { MetricsQueryDto } from './dto/metrics-query.dto';
 
 /**
  * Staff-facing pilot metrics (design spec §9). Read-only: it derives counts,
@@ -23,10 +24,10 @@ export class MetricsController {
   @Get()
   @ApiOperation({
     summary:
-      'Pilot metrics for the authenticated clinic: adherence (overall/by-day/by-type), retention, check-in completion, escalations, language split, satisfaction and raw readmission count — every metric carries its denominator.',
+      'Pilot metrics for the authenticated clinic: adherence (overall/by-day/by-type), retention, check-in completion, escalations, language split, satisfaction and raw readmission count — every metric carries its denominator. Optional `from`/`to` bound the report to a date window (omit both for all-time).',
   })
   @ApiOkResponse({ description: 'The pilot metrics report (each ratio carries its numerator + denominator).' })
-  get(): Promise<MetricsReport> {
-    return this.metrics.compute(this.ctx.requireClinicId());
+  get(@Query() query: MetricsQueryDto): Promise<MetricsReport> {
+    return this.metrics.compute(this.ctx.requireClinicId(), parseWindow(query.from, query.to));
   }
 }

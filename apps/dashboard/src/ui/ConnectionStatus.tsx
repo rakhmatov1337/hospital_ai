@@ -28,7 +28,7 @@ export function ConnectionStatus({
 
   const dot: Record<State, string> = {
     live: 'bg-success',
-    reconnecting: 'bg-tier-urgent animate-pulse',
+    reconnecting: 'bg-tier-urgent motion-safe:animate-pulse',
     offline: 'bg-overdue',
   };
   const defaultLabel: Record<State, string> = {

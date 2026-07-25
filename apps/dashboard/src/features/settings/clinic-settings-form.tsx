@@ -94,6 +94,16 @@ export function ClinicSettingsForm({ clinic }: ClinicSettingsFormProps) {
 
   const isDirty = Object.keys(payload).length > 0;
 
+  // P1-1 — the escalation ladder must never decrease: notify ≤ ack ≤ breach.
+  // Guards the queue's tier routing against a save that would corrupt the ladder.
+  const timingInvalid = useMemo<boolean>(() => {
+    const notify = Number(form.notifyMinutes);
+    const ack = Number(form.ackMinutes);
+    const breach = Number(form.breachMinutes);
+    if (![notify, ack, breach].every(Number.isFinite)) return false;
+    return !(notify <= ack && ack <= breach);
+  }, [form.notifyMinutes, form.ackMinutes, form.breachMinutes]);
+
   async function persist(): Promise<void> {
     setError(null);
     try {
@@ -109,7 +119,7 @@ export function ClinicSettingsForm({ clinic }: ClinicSettingsFormProps) {
 
   function onSubmit(e: FormEvent<HTMLFormElement>): void {
     e.preventDefault();
-    if (!isDirty || updateClinic.isPending) return;
+    if (!isDirty || updateClinic.isPending || timingInvalid) return;
     if (changedSensitive.length > 0) {
       setConfirmOpen(true);
       return;
@@ -126,24 +136,21 @@ export function ClinicSettingsForm({ clinic }: ClinicSettingsFormProps) {
           <p className="mt-1 text-caption text-text-muted">{t('settings:hints.patientFacing')}</p>
         </div>
         <Input
-          label={t('settings:fields.name')}
+          label={`${t('settings:fields.name')} · ${t('settings:hints.patientFacingTag')}`}
           value={form.name}
           onChange={set('name')}
-          hint={t('settings:hints.patientFacing')}
         />
         <Input
-          label={t('settings:fields.phone')}
+          label={`${t('settings:fields.phone')} · ${t('settings:hints.patientFacingTag')}`}
           value={form.phone}
           onChange={set('phone')}
           inputMode="tel"
-          hint={t('settings:hints.patientFacing')}
         />
         <Input
-          label={t('settings:fields.emergencyNumber')}
+          label={`${t('settings:fields.emergencyNumber')} · ${t('settings:hints.patientFacingTag')}`}
           value={form.emergencyNumber}
           onChange={set('emergencyNumber')}
           inputMode="tel"
-          hint={t('settings:hints.patientFacing')}
         />
       </Card>
 
@@ -201,6 +208,7 @@ export function ClinicSettingsForm({ clinic }: ClinicSettingsFormProps) {
             max={1440}
             value={form.notifyMinutes}
             onChange={set('notifyMinutes')}
+            aria-invalid={timingInvalid || undefined}
           />
           <Input
             label={t('settings:fields.ackMinutes')}
@@ -209,6 +217,7 @@ export function ClinicSettingsForm({ clinic }: ClinicSettingsFormProps) {
             max={1440}
             value={form.ackMinutes}
             onChange={set('ackMinutes')}
+            aria-invalid={timingInvalid || undefined}
           />
           <Input
             label={t('settings:fields.breachMinutes')}
@@ -217,15 +226,21 @@ export function ClinicSettingsForm({ clinic }: ClinicSettingsFormProps) {
             max={1440}
             value={form.breachMinutes}
             onChange={set('breachMinutes')}
+            aria-invalid={timingInvalid || undefined}
           />
         </div>
+        {timingInvalid && (
+          <p role="alert" className="text-caption text-destructive">
+            {t('settings:timing.order')}
+          </p>
+        )}
       </Card>
 
       {error && <Banner tone="danger">{error}</Banner>}
       {saved && !isDirty && <Banner tone="success">{t('settings:saved')}</Banner>}
 
       <div className="flex items-center justify-end gap-3">
-        <Button type="submit" size="lg" disabled={!isDirty || updateClinic.isPending}>
+        <Button type="submit" size="lg" disabled={!isDirty || updateClinic.isPending || timingInvalid}>
           {updateClinic.isPending ? t('settings:actions.saving') : t('settings:actions.save')}
         </Button>
       </div>

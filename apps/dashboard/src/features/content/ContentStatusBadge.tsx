@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '../../lib/cn';
 
 export type ContentBadgeStatus = 'approved' | 'needs_review' | 'draft' | 'missing';
@@ -10,7 +11,7 @@ export type ContentBadgeStatus = 'approved' | 'needs_review' | 'draft' | 'missin
  */
 const STYLES: Record<ContentBadgeStatus, { box: string; icon: string }> = {
   approved: { box: 'bg-surface text-success border border-success', icon: '✓' },
-  needs_review: { box: 'bg-primary-light text-primary-dark border border-primary', icon: '◐' },
+  needs_review: { box: 'bg-primary/10 text-primary border border-primary', icon: '◐' },
   draft: { box: 'bg-background text-text-muted border border-border', icon: '✎' },
   missing: { box: 'bg-background text-overdue border border-border', icon: '—' },
 };
@@ -25,16 +26,12 @@ export function ContentStatusBadge({
   const { t } = useTranslation('content');
   const style = STYLES[status];
   return (
-    <span
+    <Badge
       data-content-status={status}
-      className={cn(
-        'inline-flex items-center gap-1 rounded-input px-2.5 py-0.5 text-caption font-semibold',
-        style.box,
-        className,
-      )}
+      className={cn('gap-1 rounded-input text-caption font-semibold', style.box, className)}
     >
       <span aria-hidden="true">{style.icon}</span>
       {t(`reviewStatus.${status}`)}
-    </span>
+    </Badge>
   );
 }

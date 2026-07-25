@@ -1,0 +1,14 @@
+{
+  "title": "Kirish",
+  "subtitle": "Klinisistning tiklanish paneliga kirishi",
+  "emailLabel": "Elektron pochta",
+  "emailPlaceholder": "siz@klinika.example",
+  "passwordLabel": "Parol",
+  "passwordPlaceholder": "Parolingiz",
+  "submit": "Kirish",
+  "submitting": "Kirilmoqda…",
+  "forgotPassword": "Parolni unutdingizmi?",
+  "forgotPasswordHelp": "Parolni tiklash uchun klinika administratoriga murojaat qiling.",
+  "noRegistration": "Kirish huquqi klinikangiz tomonidan beriladi. Mustaqil ro'yxatdan o'tish mavjud emas.",
+  "invalidCredentials": "Elektron pochta yoki parol noto'g'ri."
+}

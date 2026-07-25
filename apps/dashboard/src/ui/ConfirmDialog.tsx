@@ -1,6 +1,13 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from './Button';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -16,7 +23,12 @@ export interface ConfirmDialogProps {
   onCancel: () => void;
 }
 
-/** Accessible modal confirmation. Used for withdraw, name/phone changes, etc. */
+/**
+ * Accessible modal confirmation — built on the shadcn/Base-UI `Dialog`, which owns
+ * focus trapping, the backdrop, and Escape-to-close. Used for withdraw, sensitive
+ * clinic changes, etc. `children` may contain block content (lists), so it is placed
+ * in a plain container rather than the paragraph-only `DialogDescription`.
+ */
 export function ConfirmDialog({
   open,
   title,
@@ -29,51 +41,32 @@ export function ConfirmDialog({
   onCancel,
 }: ConfirmDialogProps) {
   const { t } = useTranslation('common');
-  const confirmRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (open) confirmRef.current?.focus();
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCancel();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onCancel]);
-
-  if (!open) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-text/40 p-4"
-      onClick={onCancel}
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) onCancel();
+      }}
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-card border border-border bg-surface p-6 shadow-card"
-      >
-        <h2 className="text-h1 font-bold text-text">{title}</h2>
-        {children && <div className="mt-3 text-body text-text-muted">{children}</div>}
-        <div className="mt-6 flex justify-end gap-3">
+      <DialogContent showCloseButton={false} className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-h1 font-bold text-text">{title}</DialogTitle>
+        </DialogHeader>
+        {children && <div className="text-body text-text-muted">{children}</div>}
+        <DialogFooter>
           <Button variant="secondary" onClick={onCancel} disabled={busy}>
             {cancelLabel ?? t('actions.cancel', { defaultValue: 'Cancel' })}
           </Button>
           <Button
-            ref={confirmRef}
             variant={tone === 'danger' ? 'danger' : 'primary'}
             onClick={onConfirm}
             disabled={busy}
           >
             {confirmLabel ?? t('actions.confirm', { defaultValue: 'Confirm' })}
           </Button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

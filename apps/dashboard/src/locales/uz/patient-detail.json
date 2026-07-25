@@ -1,0 +1,158 @@
+{
+  "backToList": "Bemorlar ro'yxatiga qaytish",
+  "patientRef": "Identifikator {{ref}}",
+  "loadError": "Ushbu bemor ma'lumotlarini yuklab bo'lmadi",
+  "dayValue": "{{n}}-kun",
+  "codeExpires": "Amal qilish muddati {{date}}",
+  "patientStatus": {
+    "enrolled": "Ro'yxatga olingan",
+    "active": "Faol",
+    "completed": "Yakunlangan",
+    "withdrawn": "Chiqarilgan"
+  },
+  "fields": {
+    "name": "To'liq ismi",
+    "phone": "Telefon",
+    "ageBand": "Yosh guruhi",
+    "language": "Til",
+    "procedureType": "Protsedura",
+    "dischargeDate": "Chiqarilgan sana",
+    "recoveryDay": "Tiklanish kuni",
+    "planTemplate": "Tiklanish rejasi shabloni"
+  },
+  "languages": {
+    "UZ": "O'zbekcha",
+    "RU": "Ruscha",
+    "EN": "Inglizcha"
+  },
+  "procedures": {
+    "laparoscopic_appendectomy": "Laparoskopik appendektomiya",
+    "open_hernia_repair": "Ochiq churrani tuzatish"
+  },
+  "templates": {
+    "laparoscopic_appendectomy": "Laparoskopik appendektomiya — 30 kunlik tiklanish",
+    "open_hernia_repair": "Ochiq churrani tuzatish — 30 kunlik tiklanish"
+  },
+  "metrics": {
+    "adherence": "Rioya qilish",
+    "adherenceDenominator": "{{denominator}} tadan {{numerator}} ta vazifa o'z vaqtida",
+    "openEscalations": "Ochiq eskalatsiyalar",
+    "openEscalationsDenominator": "jami {{total}} tadan",
+    "lastActive": "Oxirgi faollik",
+    "never": "Faollik yo'q",
+    "noActivity": "Hali na ko'rik, na vazifa bajarilishi bor"
+  },
+  "sections": {
+    "adherenceOverTime": "Kunlar bo'yicha rioya qilish",
+    "taskHistory": "Vazifalarni bajarish tarixi",
+    "checkIns": "Ko'riklar",
+    "escalations": "Eskalatsiyalar tarixi",
+    "consent": "Rozilik yozuvi"
+  },
+  "actions": {
+    "reissueCode": "Kodni qayta chiqarish",
+    "reissuing": "Qayta chiqarilmoqda…",
+    "reissueError": "Ro'yxatga olish kodini qayta chiqarib bo'lmadi",
+    "reissueDone": "Yangi ro'yxatga olish kodi chiqarildi",
+    "withdraw": "Chiqarish"
+  },
+  "withdrawnBanner": {
+    "title": "Ushbu bemor chiqarilgan",
+    "body": "Kelgusi vazifalar va eslatmalar to'xtatildi. Butun tarix yozuv uchun saqlanadi."
+  },
+  "attentionBanner": {
+    "title": "E'tibor talab qiladi",
+    "body": "Rioya qilish 50% dan past yoki 3 va undan ortiq kun davomida faollik bo'lmagan."
+  },
+  "withdrawDialog": {
+    "title": "Ushbu bemor chiqarilsinmi?",
+    "body": "Bu kelgusi vazifalar va eslatmalarni to'xtatadi. Butun tarix saqlanadi, hech narsa o'chirilmaydi. Bu amalni bu yerdan bekor qilib bo'lmaydi.",
+    "confirm": "Bemorni chiqarish"
+  },
+  "reissueDialog": {
+    "title": "Ro'yxatga olish kodi qayta chiqarilsinmi?",
+    "body": "Bu bemorning joriy ro'yxatga olish kodini darhol bekor qiladi. Agar unda hali eski kod bo'lsa, u ishlamay qoladi va yangi koddan foydalanishi kerak bo'ladi. Faqat joriy kod yo'qolgan bo'lsa qayta chiqaring.",
+    "confirm": "Kodni qayta chiqarish"
+  },
+  "adherence": {
+    "emptyTitle": "Hali rioya qilish ma'lumotlari yo'q",
+    "emptyBody": "Rioya qilish oynasi yopilgan vazifalar baholangach paydo bo'ladi.",
+    "dayShort": "K{{n}}",
+    "dayLong": "Tiklanish kuni {{n}}",
+    "tableCaption": "Tiklanish kunlari bo'yicha rioya qilish foizi",
+    "colDay": "Tiklanish kuni",
+    "colValue": "Rioya qilish",
+    "notAssessed": "Hali baholanmagan",
+    "valueWithDenominator": "{{percent}}% / {{denominator}} tadan {{numerator}} ta vazifa o'z vaqtida"
+  },
+  "taskHistory": {
+    "emptyTitle": "Hali vazifalar yo'q",
+    "emptyBody": "Tiklanish rejasidagi vazifalar to'plami yaratilgach shu yerda paydo bo'ladi.",
+    "day": "Kun",
+    "taskType": "Vazifa",
+    "status": "Holat",
+    "onTime": "O'z vaqtida",
+    "completedAt": "Bajarilgan",
+    "onTimeYes": "Ha",
+    "onTimeNo": "Yo'q"
+  },
+  "taskTypes": {
+    "medication": "Dori qabul qilish",
+    "activity": "Faollik",
+    "wound_care": "Yara parvarishi",
+    "education": "Ta'lim",
+    "checkin": "Ko'rik"
+  },
+  "taskStatus": {
+    "pending": "Kutilmoqda",
+    "completed": "Bajarilgan",
+    "missed": "O'tkazib yuborilgan"
+  },
+  "checkIns": {
+    "emptyTitle": "Hali ko'riklar yo'q",
+    "emptyBody": "Yuborilgan ko'riklar bu yerda o'z darajasi va natijasi bilan paydo bo'ladi.",
+    "noTier": "Daraja yo'q",
+    "noOutcome": "Natija qayd etilmagan"
+  },
+  "escalations": {
+    "emptyTitle": "Eskalatsiyalar yo'q",
+    "emptyBody": "Ushbu bemor hech qanday eskalatsiya ko'tarmagan.",
+    "noOutcome": "Natija qayd etilmagan"
+  },
+  "outcomes": {
+    "advised_at_home": "Uyda parvarish tavsiya etildi",
+    "attend_clinic": "Klinikaga kelish so'raldi",
+    "referred_emergency": "Shoshilinch yordamga yo'naltirildi",
+    "no_action": "Chora talab etilmaydi",
+    "unable_to_reach": "Bog'lanib bo'lmadi"
+  },
+  "consent": {
+    "version": "Rozilik versiyasi",
+    "acceptedAt": "Qabul qilingan",
+    "immutable": "Rozilik yozuvi o'zgarmasdir va uni tahrirlab bo'lmaydi.",
+    "none": "Rozilik yozuvi mavjud emas."
+  },
+  "create": {
+    "title": "Bemorni ro'yxatga olish",
+    "subtitle": "Bemor ma'lumotlarini kiriting va unga yaratilgan ro'yxatga olish kodini bering.",
+    "phonePlaceholder": "90 123 45 67",
+    "planTemplateHint": "Tiklanish rejasi tanlangan protseduraga mos ravishda belgilanadi.",
+    "enrolling": "Ro'yxatga olinmoqda…",
+    "submit": "Bemorni ro'yxatga olish",
+    "consentSnapshot": "{{version}} rozilik bemorga taqdim etildi va u ro'yxatga olish paytida uni qabul qildi.",
+    "errors": {
+      "nameRequired": "Bemor ismini kiriting.",
+      "phoneInvalid": "+998 dan keyingi 9 xonali mobil raqamni kiriting.",
+      "dischargeRequired": "Chiqarilgan sanani tanlang."
+    },
+    "successTitle": "Bemor ro'yxatga olindi",
+    "successSubtitle": "{{name}} ro'yxatga olindi. Ilovani faollashtirish uchun quyidagi kodni unga bering.",
+    "codeLabel": "Ro'yxatga olish kodi",
+    "codeExpires": "Amal qilish muddati {{date}}",
+    "codeInstructions": "Bemor tiklanish rejasini faollashtirish uchun ushbu bir martalik kodni ilovaga kiritadi.",
+    "tasksGenerated": "{{count}} ta tiklanish vazifasi yaratildi.",
+    "patientRef": "Identifikator {{ref}}",
+    "print": "Chop etish",
+    "done": "Tayyor"
+  }
+}

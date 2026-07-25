@@ -1,4 +1,5 @@
-import { forwardRef, type ButtonHTMLAttributes } from 'react';
+import type { ButtonHTMLAttributes } from 'react';
+import { Button as ShButton } from '@/components/ui/button';
 import { cn } from '../lib/cn';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -10,38 +11,49 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   fullWidth?: boolean;
 }
 
-const VARIANTS: Record<ButtonVariant, string> = {
-  primary: 'bg-primary text-white hover:bg-primary-dark focus-visible:ring-primary',
-  secondary:
-    'bg-surface text-primary border border-primary hover:bg-primary-light focus-visible:ring-primary',
-  ghost: 'bg-transparent text-primary hover:bg-primary-light focus-visible:ring-primary',
-  danger: 'bg-tier-emergency text-white hover:opacity-90 focus-visible:ring-tier-emergency',
+/**
+ * Design-system button — a thin wrapper over the shadcn/Base-UI `Button` that keeps
+ * the app's 4-variant vocabulary and the clinical design-spec sizes (large touch
+ * targets, SP4 §2) rather than base-nova's compact defaults.
+ *
+ * `danger` renders a FILLED destructive (strong affordance for withdraw/confirm),
+ * using the preset's `--destructive` — the reserved tier colours are never spent on
+ * generic actions.
+ */
+const VARIANT_MAP: Record<ButtonVariant, 'default' | 'outline' | 'ghost' | 'destructive'> = {
+  primary: 'default',
+  secondary: 'outline',
+  ghost: 'ghost',
+  danger: 'destructive',
 };
 
-const SIZES: Record<ButtonSize, string> = {
+const SIZE_CLASS: Record<ButtonSize, string> = {
   sm: 'h-11 px-4 text-body',
   md: 'h-12 px-6 text-button',
   lg: 'h-input px-8 text-button',
 };
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'primary', size = 'md', fullWidth, className, type = 'button', ...rest },
-  ref,
-) {
+export function Button({
+  variant = 'primary',
+  size = 'md',
+  fullWidth,
+  className,
+  type = 'button',
+  ...rest
+}: ButtonProps) {
   return (
-    <button
-      ref={ref}
+    <ShButton
       type={type}
+      variant={VARIANT_MAP[variant]}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-input font-semibold outline-none transition-colors',
-        'focus-visible:ring-2 focus-visible:ring-offset-2',
-        'disabled:cursor-not-allowed disabled:opacity-50',
-        VARIANTS[variant],
-        SIZES[size],
+        'rounded-input font-semibold',
+        SIZE_CLASS[size],
+        variant === 'danger' &&
+          'border-transparent bg-destructive text-white hover:bg-destructive/90',
         fullWidth && 'w-full',
         className,
       )}
       {...rest}
     />
   );
-});
+}

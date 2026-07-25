@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Language, type ContentListItem } from '@hospital-ai/shared-types';
-import { Banner, Card, DataTable, Spinner, type Column } from '../../ui';
+import { Banner, Button, Card, DataTable, Spinner, type Column } from '../../ui';
 import { cn } from '../../lib/cn';
 import { ContentStatusBadge } from './ContentStatusBadge';
 import { ContentDetail } from './ContentDetail';
@@ -38,7 +38,7 @@ function LanguagePresence({ item }: { item: ContentListItem }) {
             className={cn(
               'inline-flex items-center gap-0.5 rounded-input px-1.5 py-0.5 text-caption font-semibold',
               has
-                ? 'border border-primary bg-primary-light text-primary-dark'
+                ? 'border border-primary bg-primary/10 text-primary'
                 : 'border border-border bg-background text-text-muted',
             )}
           >
@@ -68,7 +68,12 @@ export function ContentPage() {
   const dateFmt = (iso: string | null): string => {
     if (!iso) return t('list.never');
     try {
-      return new Intl.DateTimeFormat(i18n.language === 'ru' ? 'ru-RU' : 'en-GB', {
+      const dateLocale = i18n.language.startsWith('ru')
+        ? 'ru-RU'
+        : i18n.language.startsWith('uz')
+          ? 'uz'
+          : 'en-GB';
+      return new Intl.DateTimeFormat(dateLocale, {
         dateStyle: 'medium',
         timeStyle: 'short',
       }).format(new Date(iso));
@@ -146,10 +151,15 @@ export function ContentPage() {
         </Banner>
       )}
 
-      {/* Editing-approved-content note (safety line). */}
-      <Banner tone="info" title={t('editWarning.title')}>
-        {t('editWarning.body')}
-      </Banner>
+      {/* Editing-approved-content note (safety line) — compact so it doesn't
+          compete with the launch-blocker above it. */}
+      <p className="flex items-start gap-2 text-caption text-text-muted">
+        <span aria-hidden="true" className="mt-px">ⓘ</span>
+        <span>
+          <span className="font-semibold text-text">{t('editWarning.title')}</span>{' '}
+          {t('editWarning.body')}
+        </span>
+      </p>
 
       {/* Filters. */}
       <div
@@ -158,20 +168,20 @@ export function ContentPage() {
         aria-label={t('filters.label')}
       >
         {FILTERS.map((f) => (
-          <button
+          <Button
             key={f}
-            type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => setFilter(f)}
             aria-pressed={filter === f}
             className={cn(
-              'rounded-input border px-4 py-2 text-body font-semibold',
               filter === f
-                ? 'border-primary bg-primary text-white'
-                : 'border-border bg-surface text-text-muted hover:bg-primary-light',
+                ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                : 'text-text-muted hover:bg-primary/10',
             )}
           >
             {t(`filters.${f}`)}
-          </button>
+          </Button>
         ))}
       </div>
 

@@ -17,7 +17,7 @@
   "tier": {
     "emergency": "Экстренно",
     "urgent": "Срочно",
-    "routine": "Плановый"
+    "routine": "Планово"
   },
   "status": {
     "new": "Новый",

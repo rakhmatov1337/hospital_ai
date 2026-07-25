@@ -11,7 +11,7 @@ import { initReactI18next } from 'react-i18next';
  */
 
 const LANG_KEY = 'hospital_ai.lang';
-export const SUPPORTED_LANGUAGES = ['en', 'ru'] as const;
+export const SUPPORTED_LANGUAGES = ['en', 'ru', 'uz'] as const;
 export type DashboardLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
 // Lazy loaders keyed by "../locales/<lng>/<ns>.json".
@@ -44,7 +44,7 @@ const lazyBackend: BackendModule = {
 function initialLanguage(): DashboardLanguage {
   try {
     const stored = localStorage.getItem(LANG_KEY);
-    if (stored === 'en' || stored === 'ru') return stored;
+    if (stored === 'en' || stored === 'ru' || stored === 'uz') return stored;
   } catch {
     /* ignore */
   }

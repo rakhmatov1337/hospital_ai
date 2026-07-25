@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Tier } from '@hospital-ai/shared-types';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '../lib/cn';
 import { TIER_META } from './tier';
 
@@ -21,12 +22,12 @@ export function TierBadge({ tier, variant = 'soft', size = 'md', className }: Ti
   const label = t(`tier.${tier}`, { defaultValue: meta.defaultLabel });
 
   return (
-    <span
+    <Badge
       data-tier={tier}
       role="status"
       aria-label={label}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-input font-semibold',
+        'gap-1.5 rounded-input font-semibold',
         size === 'sm' ? 'px-2 py-0.5 text-caption' : 'px-3 py-1 text-body',
         variant === 'solid'
           ? cn(meta.bgClass, 'text-white')
@@ -36,6 +37,6 @@ export function TierBadge({ tier, variant = 'soft', size = 'md', className }: Ti
     >
       <span aria-hidden="true">{meta.icon}</span>
       <span>{label}</span>
-    </span>
+    </Badge>
   );
 }

@@ -1,0 +1,16 @@
+{
+  "default": "Xatolik yuz berdi. Iltimos, qayta urinib ko'ring.",
+  "UNAUTHORIZED": "Sessiya muddati tugadi. Iltimos, qaytadan tizimga kiring.",
+  "FORBIDDEN": "Sizda bu amalni bajarishga ruxsat yo'q.",
+  "VALIDATION_ERROR": "Belgilangan maydonlarni tekshirib, qayta urinib ko'ring.",
+  "NOT_FOUND": "Bunday yozuv topilmadi.",
+  "CROSS_CLINIC_FORBIDDEN": "Bu yozuv boshqa klinikaga tegishli.",
+  "WRONG_TOKEN_AUDIENCE": "Iltimos, xodim hisobi bilan tizimga kiring.",
+  "DUPLICATE_REQUEST": "Bu so'rov allaqachon yuborilgan.",
+  "CONTENT_NOT_APPROVED": "Bu kontent hali tasdiqlanmagan.",
+  "CLINICAL_CONTENT_NOT_APPROVED": "Ro'yxatga olish to'xtatildi: talab qilinadigan klinik kontent klinik rahbar tomonidan tasdiqlanmagan.",
+  "APPEND_ONLY_VIOLATION": "Bu yozuv faqat qo'shish uchun mo'ljallangan va o'zgartirib bo'lmaydi.",
+  "CONTENT_IMMUTABLE": "Tasdiqlangan kontentni to'g'ridan-to'g'ri tahrirlab bo'lmaydi; yangi qoralama yaratiladi.",
+  "INVALID_STATUS_TRANSITION": "Bunday holat o'zgarishiga ruxsat berilmagan.",
+  "INTERNAL_ERROR": "Xatolik yuz berdi. Iltimos, qayta urinib ko'ring."
+}

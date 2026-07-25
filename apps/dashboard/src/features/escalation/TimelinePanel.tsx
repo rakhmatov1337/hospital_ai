@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Tier } from '@hospital-ai/shared-types';
 import { Card, TierBadge } from '../../ui';
+import { Badge } from '@/components/ui/badge';
 import type { DashboardLanguage } from '../../lib/i18n';
 import type { EscalationDetail } from './api';
 import { formatDateTime } from './format';
@@ -134,9 +135,12 @@ export function TimelinePanel({
                   >
                     {s.title}
                   </span>
-                  <span className="text-caption text-text-muted">
+                  <Badge
+                    variant={s.reached ? 'secondary' : 'outline'}
+                    className="text-text-muted"
+                  >
                     {s.reached ? t('timeline.reached') : t('timeline.pending')}
-                  </span>
+                  </Badge>
                 </div>
                 {s.detail && <p className="text-caption text-text-muted">{s.detail}</p>}
                 {s.time && <p className="text-caption text-text-muted">{s.time}</p>}

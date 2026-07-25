@@ -75,7 +75,7 @@ export function QueueRow({
       }}
       className={cn(
         'grid min-h-row cursor-pointer grid-cols-[1fr_auto] items-center gap-3 border border-l-4 border-border bg-surface px-4 py-2',
-        'rounded-input outline-none transition-colors hover:bg-primary-light/40',
+        'rounded-input outline-none transition-colors hover:bg-primary/5',
         'focus-visible:ring-2 focus-visible:ring-primary',
         borderClass,
         isTest && 'border-dashed opacity-60',

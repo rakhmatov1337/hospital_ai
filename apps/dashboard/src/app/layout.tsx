@@ -1,27 +1,50 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import {
+  IconClipboardList,
+  IconUsers,
+  IconChartBar,
+  IconSettings,
+  IconFileText,
+  IconActivityHeartbeat,
+} from '@tabler/icons-react';
 import { apiClient } from '../lib/api-client';
 import type { ClinicView } from '../lib/api-types';
 import { useAuth } from '../lib/auth';
 import { setLanguage, SUPPORTED_LANGUAGES, type DashboardLanguage } from '../lib/i18n';
 import { Button, ConnectionStatus } from '../ui';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+} from '@/components/ui/sidebar';
 import { cn } from '../lib/cn';
 import { PlaceholderBanner } from './placeholder-banner';
 
 const NAV_ITEMS = [
-  { to: '/queue', key: 'nav.queue' },
-  { to: '/patients', key: 'nav.patients' },
-  { to: '/metrics', key: 'nav.metrics' },
-  { to: '/settings', key: 'nav.settings' },
-  { to: '/content', key: 'nav.content' },
+  { to: '/queue', key: 'nav.queue', icon: IconClipboardList },
+  { to: '/patients', key: 'nav.patients', icon: IconUsers },
+  { to: '/metrics', key: 'nav.metrics', icon: IconChartBar },
+  { to: '/settings', key: 'nav.settings', icon: IconSettings },
+  { to: '/content', key: 'nav.content', icon: IconFileText },
 ] as const;
 
-/** Authenticated app shell: left nav + topbar + placeholder banner + routed content. */
+/** Authenticated app shell: collapsible shadcn sidebar + topbar + routed content. */
 export function AppLayout() {
   const { t, i18n } = useTranslation('common');
   const { signOut } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   const clinicQuery = useQuery({
     queryKey: ['clinics', 'me'],
@@ -35,68 +58,87 @@ export function AppLayout() {
   }
 
   return (
-    <div className="flex min-h-full bg-background">
-      {/* Left navigation */}
-      <aside className="flex w-56 shrink-0 flex-col gap-6 border-r border-border bg-surface p-4">
-        <div>
-          <p className="text-h2 font-bold text-primary">{t('app.name')}</p>
-          <p className="text-caption text-text-muted">{t('app.subtitle')}</p>
-        </div>
-        <nav className="flex flex-col gap-1" aria-label={t('app.subtitle')}>
-          {NAV_ITEMS.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                cn(
-                  'rounded-input px-3 py-2 text-body font-semibold outline-none transition-colors',
-                  'focus-visible:ring-2 focus-visible:ring-primary',
-                  isActive
-                    ? 'bg-primary text-white'
-                    : 'text-text hover:bg-primary-light',
-                )
-              }
-            >
-              {t(item.key)}
-            </NavLink>
-          ))}
-        </nav>
-      </aside>
-
-      {/* Main column */}
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between gap-4 border-b border-border bg-surface px-6 py-3">
-          <div className="min-w-0">
-            <p className="truncate text-h2 font-semibold text-text">
-              {clinicQuery.data?.name ?? t('loading')}
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <ConnectionStatus
-              isFetching={clinicQuery.isFetching}
-              isError={clinicQuery.isError}
-              lastUpdatedAt={clinicQuery.dataUpdatedAt || null}
-            />
-            <div className="flex gap-1" role="group" aria-label={t('topbar.language')}>
-              {SUPPORTED_LANGUAGES.map((lng) => (
-                <button
-                  key={lng}
-                  type="button"
-                  onClick={() => setLanguage(lng as DashboardLanguage)}
-                  className={cn(
-                    'rounded-input px-2 py-1 text-caption font-semibold uppercase outline-none focus-visible:ring-2 focus-visible:ring-primary',
-                    i18n.resolvedLanguage === lng
-                      ? 'bg-primary text-white'
-                      : 'text-text-muted hover:bg-primary-light',
-                  )}
-                >
-                  {lng}
-                </button>
-              ))}
+    <SidebarProvider>
+      <Sidebar collapsible="icon">
+        <SidebarHeader className="px-3 py-4">
+          <div className="flex items-center gap-2">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-input bg-primary text-primary-foreground">
+              <IconActivityHeartbeat className="size-5" aria-hidden="true" />
             </div>
-            <Button variant="secondary" size="sm" onClick={handleSignOut}>
-              {t('topbar.signOut')}
-            </Button>
+            <div className="grid min-w-0 leading-tight group-data-[collapsible=icon]:hidden">
+              <span className="truncate text-body font-bold text-primary">{t('app.name')}</span>
+              <span className="truncate text-caption text-muted-foreground">
+                {t('app.subtitle')}
+              </span>
+            </div>
+          </div>
+        </SidebarHeader>
+
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {NAV_ITEMS.map((item) => {
+                  const isActive = pathname === item.to || pathname.startsWith(`${item.to}/`);
+                  const label = t(item.key);
+                  return (
+                    <SidebarMenuItem key={item.to}>
+                      <SidebarMenuButton
+                        isActive={isActive}
+                        tooltip={label}
+                        render={<NavLink to={item.to} />}
+                      >
+                        <item.icon aria-hidden="true" />
+                        <span>{label}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+
+        <SidebarFooter className="gap-2 group-data-[collapsible=icon]:hidden">
+          {clinicQuery.data?.name && (
+            <p className="truncate px-2 text-caption font-semibold text-text" title={clinicQuery.data.name}>
+              {clinicQuery.data.name}
+            </p>
+          )}
+          <Button variant="secondary" size="sm" fullWidth onClick={handleSignOut}>
+            {t('topbar.signOut')}
+          </Button>
+        </SidebarFooter>
+      </Sidebar>
+
+      <SidebarInset className="min-w-0">
+        <header className="flex items-center gap-3 border-b border-border bg-background px-4 py-3 sm:px-6">
+          <SidebarTrigger className="text-text-muted" />
+          <p className="min-w-0 flex-1 truncate text-h2 font-semibold text-text">
+            {clinicQuery.data?.name ?? t('loading')}
+          </p>
+          <ConnectionStatus
+            isFetching={clinicQuery.isFetching}
+            isError={clinicQuery.isError}
+            lastUpdatedAt={clinicQuery.dataUpdatedAt || null}
+          />
+          <div className="flex gap-1" role="group" aria-label={t('topbar.language')}>
+            {SUPPORTED_LANGUAGES.map((lng) => (
+              <button
+                key={lng}
+                type="button"
+                onClick={() => setLanguage(lng as DashboardLanguage)}
+                className={cn(
+                  'rounded-input px-2 py-1 text-caption font-semibold outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                  lng === 'uz' ? 'normal-case' : 'uppercase',
+                  i18n.resolvedLanguage === lng
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-text-muted hover:bg-primary/10',
+                )}
+              >
+                {lng === 'uz' ? "O'zbekcha" : lng}
+              </button>
+            ))}
           </div>
         </header>
 
@@ -104,7 +146,7 @@ export function AppLayout() {
           <PlaceholderBanner />
           <Outlet />
         </main>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

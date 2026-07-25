@@ -5,7 +5,7 @@ export { Card } from './Card';
 export type { CardProps } from './Card';
 export { Input } from './Input';
 export type { InputProps } from './Input';
-export { Select } from './Select';
+export { Select, SelectItem } from './Select';
 export type { SelectProps } from './Select';
 export { StatusChip } from './StatusChip';
 export type { StatusChipProps } from './StatusChip';

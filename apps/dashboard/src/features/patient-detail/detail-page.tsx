@@ -18,6 +18,15 @@ import {
   StatusChip,
   TierBadge,
 } from '../../ui';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '../../lib/cn';
 import { errorCodeOf } from '../../lib/api-client';
 import { AdherenceChart } from './AdherenceChart';
@@ -39,6 +48,7 @@ export function PatientDetailPage() {
   const withdraw = useWithdrawPatient(id ?? '');
 
   const [confirmWithdraw, setConfirmWithdraw] = useState(false);
+  const [confirmReissue, setConfirmReissue] = useState(false);
 
   if (query.isLoading) {
     return (
@@ -69,8 +79,8 @@ export function PatientDetailPage() {
       <div className="flex flex-col gap-3">
         <BackLink label={t('patient-detail:backToList')} />
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 className="text-display font-bold text-text">{p.name}</h1>
+          <div className="min-w-0">
+            <h1 className="text-display font-bold text-text break-words">{p.name}</h1>
             <p className="text-body text-text-muted">
               {t('patient-detail:patientRef', { ref: p.patientRef })}
             </p>
@@ -79,7 +89,7 @@ export function PatientDetailPage() {
             <PatientStatusPill status={p.status} label={t(`patient-detail:patientStatus.${p.status}`)} />
             <Button
               variant="secondary"
-              onClick={() => reissue.mutate()}
+              onClick={() => setConfirmReissue(true)}
               disabled={withdrawn || reissue.isPending}
             >
               {reissue.isPending
@@ -229,6 +239,22 @@ export function PatientDetailPage() {
       >
         {t('patient-detail:withdrawDialog.body')}
       </ConfirmDialog>
+
+      <ConfirmDialog
+        open={confirmReissue}
+        tone="danger"
+        title={t('patient-detail:reissueDialog.title')}
+        confirmLabel={t('patient-detail:reissueDialog.confirm')}
+        busy={reissue.isPending}
+        onCancel={() => setConfirmReissue(false)}
+        onConfirm={() =>
+          reissue.mutate(undefined, {
+            onSuccess: () => setConfirmReissue(false),
+          })
+        }
+      >
+        {t('patient-detail:reissueDialog.body')}
+      </ConfirmDialog>
     </div>
   );
 }
@@ -252,7 +278,7 @@ function BackLink({ label }: { label: string }) {
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="text-h1 font-bold text-text">{title}</h2>
+      <h2 className="text-h1 font-bold text-text break-words">{title}</h2>
       {children}
     </section>
   );
@@ -269,20 +295,18 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 
 function PatientStatusPill({ status, label }: { status: PatientStatus; label: string }) {
   const styles: Record<PatientStatus, string> = {
-    [PatientStatus.enrolled]: 'bg-primary-light text-primary-dark border border-border',
-    [PatientStatus.active]: 'bg-primary-light text-primary-dark border border-border',
+    [PatientStatus.enrolled]: 'bg-primary/10 text-primary border border-border',
+    [PatientStatus.active]: 'bg-primary/10 text-primary border border-border',
     [PatientStatus.completed]: 'bg-surface text-success border border-success',
     [PatientStatus.withdrawn]: 'bg-surface text-text-muted border border-border',
   };
   return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-input px-3 py-1 text-caption font-semibold',
-        styles[status],
-      )}
+    <Badge
+      data-status={status}
+      className={cn('rounded-input px-3 py-1 text-caption font-semibold', styles[status])}
     >
       {label}
-    </span>
+    </Badge>
   );
 }
 
@@ -298,38 +322,49 @@ function TaskHistoryTable({ tasks, lang }: { tasks: TaskHistoryItem[]; lang: str
     [TaskStatus.pending]: 'text-text-muted',
   };
 
+  const headClass =
+    'h-auto whitespace-normal px-4 py-3 text-caption font-semibold uppercase tracking-wide text-text-muted';
+  const cellClass = 'px-4 py-3 text-text whitespace-normal';
+
   return (
     <div className="overflow-x-auto rounded-card border border-border bg-surface">
-      <table className="w-full border-collapse text-body">
-        <thead>
-          <tr className="border-b border-border">
-            <Th>{t('taskHistory.day')}</Th>
-            <Th>{t('taskHistory.taskType')}</Th>
-            <Th>{t('taskHistory.status')}</Th>
-            <Th>{t('taskHistory.onTime')}</Th>
-            <Th>{t('taskHistory.completedAt')}</Th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table className="text-body">
+        <TableHeader>
+          <TableRow className="border-b border-border hover:bg-transparent">
+            <TableHead className={headClass}>{t('taskHistory.day')}</TableHead>
+            <TableHead className={headClass}>{t('taskHistory.taskType')}</TableHead>
+            <TableHead className={headClass}>{t('taskHistory.status')}</TableHead>
+            <TableHead className={headClass}>{t('taskHistory.onTime')}</TableHead>
+            <TableHead className={headClass}>{t('taskHistory.completedAt')}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {tasks.map((task) => (
-            <tr key={task.id} className="border-b border-border last:border-b-0">
-              <Td>{t('dayValue', { n: task.recoveryDay })}</Td>
-              <Td>{t(`taskTypes.${task.taskType}`, { defaultValue: task.taskType })}</Td>
-              <Td className={cn('font-semibold', statusClass[task.status])}>
+            <TableRow
+              key={task.id}
+              className="border-b border-border last:border-b-0 hover:bg-transparent"
+            >
+              <TableCell className={cellClass}>{t('dayValue', { n: task.recoveryDay })}</TableCell>
+              <TableCell className={cellClass}>
+                {t(`taskTypes.${task.taskType}`, { defaultValue: task.taskType })}
+              </TableCell>
+              <TableCell className={cn(cellClass, 'font-semibold', statusClass[task.status])}>
                 {t(`taskStatus.${task.status}`, { defaultValue: task.status })}
-              </Td>
-              <Td>
+              </TableCell>
+              <TableCell className={cellClass}>
                 {task.onTime === null
                   ? '—'
                   : task.onTime
                     ? t('taskHistory.onTimeYes')
                     : t('taskHistory.onTimeNo')}
-              </Td>
-              <Td>{task.completedAt ? formatDateTime(task.completedAt, lang) : '—'}</Td>
-            </tr>
+              </TableCell>
+              <TableCell className={cellClass}>
+                {task.completedAt ? formatDateTime(task.completedAt, lang) : '—'}
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }
@@ -379,7 +414,7 @@ function EscalationList({ items, lang }: { items: EscalationHistoryItem[]; lang:
     <div className="flex flex-col gap-2">
       {items.map((e) => (
         <Link key={e.id} to={`/escalations/${e.id}`} className="block">
-          <Card className="flex flex-wrap items-center justify-between gap-3 transition-colors hover:bg-primary-light/40">
+          <Card className="flex flex-wrap items-center justify-between gap-3 transition-colors hover:bg-primary/5">
             <div className="flex flex-wrap items-center gap-3">
               <TierBadge tier={e.tier} size="sm" />
               <StatusChip status={e.status} />
@@ -399,14 +434,3 @@ function EscalationList({ items, lang }: { items: EscalationHistoryItem[]; lang:
   );
 }
 
-function Th({ children }: { children: ReactNode }) {
-  return (
-    <th className="px-4 py-3 text-left text-caption font-semibold uppercase tracking-wide text-text-muted">
-      {children}
-    </th>
-  );
-}
-
-function Td({ children, className }: { children: ReactNode; className?: string }) {
-  return <td className={cn('px-4 py-3 text-text', className)}>{children}</td>;
-}

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { Language } from '@hospital-ai/shared-types';
-import { Button, Card, Input, Select } from '../../ui';
+import { Button, Card, Input, Select, SelectItem } from '../../ui';
 import { errorCodeOf } from '../../lib/api-client';
 import { formatDate } from './format';
 import {
@@ -139,6 +139,7 @@ export function PatientCreatePage() {
             value={form.name}
             onChange={(e) => update('name', e.target.value)}
             error={fieldErrors.name}
+            autoFocus
             required
           />
 
@@ -167,24 +168,24 @@ export function PatientCreatePage() {
             <Select
               label={t('patient-detail:fields.ageBand')}
               value={form.ageBand}
-              onChange={(e) => update('ageBand', e.target.value)}
+              onValueChange={(v) => update('ageBand', v)}
             >
               {AGE_BANDS.map((band) => (
-                <option key={band} value={band}>
+                <SelectItem key={band} value={band}>
                   {band}
-                </option>
+                </SelectItem>
               ))}
             </Select>
 
             <Select
               label={t('patient-detail:fields.language')}
               value={form.language}
-              onChange={(e) => update('language', e.target.value as Language)}
+              onValueChange={(v) => update('language', v as Language)}
             >
               {LANGUAGE_OPTIONS.map((l) => (
-                <option key={l} value={l}>
+                <SelectItem key={l} value={l}>
                   {t(`patient-detail:languages.${l}`, { defaultValue: l })}
-                </option>
+                </SelectItem>
               ))}
             </Select>
           </div>
@@ -192,12 +193,12 @@ export function PatientCreatePage() {
           <Select
             label={t('patient-detail:fields.procedureType')}
             value={form.procedureType}
-            onChange={(e) => update('procedureType', e.target.value)}
+            onValueChange={(v) => update('procedureType', v)}
           >
             {PROCEDURE_OPTIONS.map((proc) => (
-              <option key={proc} value={proc}>
+              <SelectItem key={proc} value={proc}>
                 {t(`patient-detail:procedures.${proc}`, { defaultValue: proc })}
-              </option>
+              </SelectItem>
             ))}
           </Select>
 
@@ -205,12 +206,12 @@ export function PatientCreatePage() {
             label={t('patient-detail:fields.planTemplate')}
             hint={t('patient-detail:create.planTemplateHint')}
             value={form.planTemplateId}
-            onChange={(e) => update('planTemplateId', e.target.value)}
+            onValueChange={(v) => update('planTemplateId', v)}
           >
             {templates.map((tpl) => (
-              <option key={tpl.id} value={tpl.id}>
+              <SelectItem key={tpl.id} value={tpl.id}>
                 {t(`patient-detail:${tpl.labelKey}`, { defaultValue: tpl.id })}
-              </option>
+              </SelectItem>
             ))}
           </Select>
 

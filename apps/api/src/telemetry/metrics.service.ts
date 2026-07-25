@@ -183,6 +183,48 @@ export function meanScore(values: Array<number | null | undefined>): Denominated
   return denominated(sum, present.length);
 }
 
+/**
+ * A resolved date window. `null` on either side means "unbounded on that side";
+ * both null = all-time (the dashboard's "All" preset).
+ */
+export interface MetricsWindow {
+  from: Date | null;
+  to: Date | null;
+}
+
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Turn the raw `from`/`to` query strings into a `MetricsWindow`. The dashboard
+ * sends date-only ISO strings (`YYYY-MM-DD`); a bare `to` date is expanded to the
+ * INCLUSIVE end of that day so "…to today" includes everything recorded today.
+ * Full ISO datetimes are passed through untouched. Unparseable/absent → null.
+ */
+export function parseWindow(from?: string | null, to?: string | null): MetricsWindow {
+  const start = from ? new Date(DATE_ONLY.test(from) ? `${from}T00:00:00.000Z` : from) : null;
+  const end = to ? new Date(DATE_ONLY.test(to) ? `${to}T23:59:59.999Z` : to) : null;
+  return {
+    from: start && !Number.isNaN(start.getTime()) ? start : null,
+    to: end && !Number.isNaN(end.getTime()) ? end : null,
+  };
+}
+
+/**
+ * Build a Prisma date `where` fragment (`{ [field]: { gte, lte } }`) for a window,
+ * or `undefined` when the window imposes no bound — so callers can spread it into a
+ * relation `where` and get "no filter" for the all-time case.
+ */
+export function dateWhere(
+  field: string,
+  window: MetricsWindow | undefined,
+): Record<string, { gte?: Date; lte?: Date }> | undefined {
+  if (!window || (!window.from && !window.to)) return undefined;
+  const range: { gte?: Date; lte?: Date } = {};
+  if (window.from) range.gte = window.from;
+  if (window.to) range.lte = window.to;
+  return { [field]: range };
+}
+
 // ---------------------------------------------------------------------------
 // Service
 // ---------------------------------------------------------------------------
@@ -216,8 +258,17 @@ export class MetricsService {
    * Compute the full pilot metrics report for one clinic. `clinicId` is passed
    * explicitly (the controller supplies it from the authenticated staff token via
    * RequestContext) so the computation is testable without a request context.
+   *
+   * `window` bounds the report to a date range. It filters the **timestamped
+   * activity records** — tasks (by `scheduledFor`), check-ins (by `submittedAt`),
+   * escalations (by `createdAt`), survey responses (by `completedAt`) and events
+   * (by `occurredAt`) — so adherence, escalations, satisfaction, engagement and
+   * retention reflect the selected window. The enrolled **cohort** itself is not
+   * windowed: `patientPopulation` and the readmission population stay the full
+   * clinic roster (context, not activity). Omitting the window (both bounds null)
+   * reproduces the all-time report exactly.
    */
-  async compute(clinicId: string): Promise<MetricsReport> {
+  async compute(clinicId: string, window?: MetricsWindow): Promise<MetricsReport> {
     const now = this.clock.now();
 
     // clinic (for timezone) + clinic-scoped reads (tenancy extension injects clinic_id).
@@ -228,6 +279,7 @@ export class MetricsService {
     const patients = (await scoped.patient.findMany({
       include: {
         tasks: {
+          where: dateWhere('scheduledFor', window),
           select: {
             taskType: true,
             status: true,
@@ -236,8 +288,9 @@ export class MetricsService {
             recoveryDay: true,
           },
         },
-        checkIns: { select: { recoveryDay: true } },
+        checkIns: { where: dateWhere('submittedAt', window), select: { recoveryDay: true } },
         surveyResponses: {
+          where: dateWhere('completedAt', window),
           select: {
             q1Helpful: true,
             q2Easy: true,
@@ -245,11 +298,15 @@ export class MetricsService {
             q4Recommend: true,
           },
         },
-        escalations: { select: { id: true, tier: true, status: true, createdAt: true } },
+        escalations: {
+          where: dateWhere('createdAt', window),
+          select: { id: true, tier: true, status: true, createdAt: true },
+        },
       },
     })) as unknown as PatientWithData[];
 
     const events = (await scoped.event.findMany({
+      where: dateWhere('occurredAt', window),
       select: { eventName: true, patientRef: true, occurredAt: true },
     })) as Array<{ eventName: string; patientRef: string | null; occurredAt: Date }>;
 

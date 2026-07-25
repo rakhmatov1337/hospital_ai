@@ -46,7 +46,7 @@
     "sideBySide": "Все три языка рядом",
     "current": "Текущая версия",
     "versionHistory": "История версий",
-    "version": "в{{n}}",
+    "version": "в.{{n}}",
     "noHistory": "Более ранних версий нет.",
     "missingText": "Для этого языка перевода ещё нет.",
     "approvedBy": "Утвердил: {{who}}",

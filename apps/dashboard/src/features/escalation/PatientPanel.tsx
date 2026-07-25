@@ -31,7 +31,7 @@ export function PatientPanel({
         </div>
         <a
           href={`tel:${patient.phone.replace(/\s+/g, '')}`}
-          className="inline-flex items-center gap-2 rounded-input border border-primary bg-surface px-4 py-2 text-button font-semibold text-primary hover:bg-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="inline-flex items-center gap-2 rounded-input border border-primary bg-surface px-4 py-2 text-button font-semibold text-primary hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           aria-label={t('patient.callAria', { phone: patient.phone })}
         >
           <span aria-hidden="true">☎</span>

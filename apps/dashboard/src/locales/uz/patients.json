@@ -1,0 +1,50 @@
+{
+  "title": "Bemorlar",
+  "subtitle": "Klinikangizning tiklanish dasturiga yozilgan barcha bemorlar.",
+  "addPatient": "Bemor qo'shish",
+  "count_one": "{{count}} bemor",
+  "count_other": "{{count}} bemor",
+  "filter": {
+    "label": "Holat",
+    "all": "Barchasi",
+    "active": "Faol",
+    "completed": "Yakunlangan",
+    "withdrawn": "Chiqarilgan"
+  },
+  "columns": {
+    "name": "Ism",
+    "procedure": "Muolaja",
+    "discharge": "Chiqarish",
+    "recoveryDay": "Tiklanish kuni",
+    "adherence": "Rioya qilish",
+    "lastActive": "So'nggi faollik",
+    "openEscalations": "Ochiq eskalatsiyalar",
+    "status": "Holat"
+  },
+  "cell": {
+    "recoveryDay": "{{n}}-kun",
+    "adherenceFraction": "{{den}} vazifadan {{num}} tasi",
+    "adherenceNone": "Hozircha ma'lumot yo'q",
+    "lastActiveNone": "Faollik yo'q",
+    "escalationsNone": "Yo'q"
+  },
+  "attention": {
+    "label": "E'tibor talab qiladi",
+    "aria": "E'tibor talab qiladi: rioya qilish past yoki yaqinda faollik bo'lmagan"
+  },
+  "patientStatus": {
+    "enrolled": "Ro'yxatga olingan",
+    "active": "Faol",
+    "completed": "Yakunlangan",
+    "withdrawn": "Chiqarilgan"
+  },
+  "empty": {
+    "title": "Ko'rsatiladigan bemorlar yo'q",
+    "description": "Ushbu filtrga mos bemorlar yo'q. Bemor qo'shing yoki holat filtrini o'zgartiring.",
+    "descriptionAll": "Hozircha birorta bemor ro'yxatga olinmagan. Boshlash uchun birinchi bemoringizni qo'shing."
+  },
+  "error": {
+    "title": "Bemorlarni yuklab bo'lmadi",
+    "retry": "Qayta urinish"
+  }
+}

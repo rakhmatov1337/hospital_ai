@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { cn } from '../lib/cn';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 export type BannerTone = 'info' | 'warning' | 'danger' | 'success';
 
@@ -14,20 +15,20 @@ export interface BannerProps {
 }
 
 const TONES: Record<BannerTone, { box: string; icon: string }> = {
-  info: { box: 'bg-primary-light border-primary text-primary-dark', icon: 'ⓘ' },
-  warning: { box: 'bg-primary-light border-tier-urgent text-text', icon: '⚠' },
-  danger: { box: 'bg-primary-light border-tier-emergency text-text', icon: '■' },
-  success: { box: 'bg-primary-light border-success text-text', icon: '✓' },
+  info: { box: 'bg-primary/5 border-primary', icon: 'ⓘ' },
+  warning: { box: 'bg-muted border-tier-urgent', icon: '⚠' },
+  danger: { box: 'bg-muted border-destructive', icon: '■' },
+  success: { box: 'bg-muted border-success', icon: '✓' },
 };
 
 /** Inline banner. Used for notices and the placeholder-content warning. */
 export function Banner({ tone = 'info', title, children, action, icon, className }: BannerProps) {
   const style = TONES[tone];
   return (
-    <div
+    <Alert
       role="status"
       className={cn(
-        'flex items-start gap-3 rounded-card border-l-4 border px-4 py-3 text-body',
+        'flex items-start gap-3 rounded-card border-l-4 px-4 py-3 text-body text-foreground',
         style.box,
         className,
       )}
@@ -36,10 +37,10 @@ export function Banner({ tone = 'info', title, children, action, icon, className
         {icon ?? style.icon}
       </span>
       <div className="flex-1">
-        {title && <p className="font-semibold">{title}</p>}
-        {children && <div className="text-body">{children}</div>}
+        {title && <AlertTitle className="font-semibold text-foreground">{title}</AlertTitle>}
+        {children && <AlertDescription className="text-body text-foreground">{children}</AlertDescription>}
       </div>
       {action && <div className="shrink-0">{action}</div>}
-    </div>
+    </Alert>
   );
 }

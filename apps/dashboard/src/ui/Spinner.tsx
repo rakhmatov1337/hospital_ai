@@ -18,7 +18,7 @@ export function Spinner({ size = 'md', label = 'Loading', className }: SpinnerPr
     <span role="status" aria-live="polite" className={cn('inline-flex items-center gap-2', className)}>
       <span
         className={cn(
-          'inline-block animate-spin rounded-full border-border border-t-primary',
+          'inline-block motion-safe:animate-spin rounded-full border-border border-t-primary',
           SIZES[size],
         )}
         aria-hidden="true"

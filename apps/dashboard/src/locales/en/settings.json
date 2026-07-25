@@ -23,9 +23,13 @@
   },
   "hints": {
     "patientFacing": "Appears in patient-facing safety messages.",
+    "patientFacingTag": "Patient-facing",
     "workingHours": "e.g. 09:00-18:00",
     "workingDays": "e.g. Mon-Sat",
     "escalation": "Defaults 5 / 15 / 30 minutes. Changes take effect immediately for tier routing."
+  },
+  "timing": {
+    "order": "Escalation timings must not decrease: notify ≤ acknowledge ≤ breach."
   },
   "actions": {
     "save": "Save changes",
@@ -54,7 +58,14 @@
     "active": "Active",
     "inactive": "Inactive",
     "leadOnly": "Only a clinical lead can add or edit staff accounts.",
-    "empty": "No staff accounts yet."
+    "empty": "No staff accounts yet.",
+    "updateError": "Could not update the account. Please try again."
+  },
+  "staffConfirm": {
+    "deactivateTitle": "Deactivate this account?",
+    "deactivateBody": "{{name}} will be signed out and blocked from the dashboard until an administrator reactivates the account.",
+    "confirm": "Deactivate",
+    "cancel": "Keep active"
   },
   "roles": {
     "staff": "Staff",

@@ -1,0 +1,27 @@
+{
+  "title": "Ko'riklar navbati",
+  "subtitle": "Jonli — har 30 soniyada avtomatik yangilanadi",
+  "loading": "Navbat yuklanmoqda…",
+  "filter": {
+    "label": "Ko'rsatish",
+    "unresolved": "Hal qilinmagan",
+    "all": "Barchasi"
+  },
+  "section": {
+    "empty": "Bu bo'limda yozuvlar yo'q"
+  },
+  "empty": {
+    "title": "Hech narsa e'tibor talab qilmaydi",
+    "body": "Hozircha hal qilinmagan ko'riklar yo'q."
+  },
+  "newArrival": {
+    "title": "Yangi shoshilinch ko'rik",
+    "body": "Hozirgina yangi shoshilinch yoki favqulodda ko'rik keldi.",
+    "dismiss": "Yopish"
+  },
+  "error": {
+    "title": "Navbatni yangilab bo'lmadi",
+    "body": "Oxirgi olingan ma'lumotlar ko'rsatilmoqda. Ulanish avtomatik qayta tiklanadi.",
+    "retry": "Qayta urinish"
+  }
+}

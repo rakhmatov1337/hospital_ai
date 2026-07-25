@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { PatientListItem } from '@hospital-ai/shared-types';
 import { Banner, Button, Card, DataTable, Spinner } from '../../ui';
 import type { Column } from '../../ui';
+import { cn } from '../../lib/cn';
 import { errorCodeOf } from '../../lib/api-client';
 import { usePatients } from './api';
 import { filterPatients, PATIENT_FILTERS, type PatientFilter } from './filter';
@@ -129,7 +130,7 @@ export function PatientsPage() {
   ];
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-h1 font-bold text-text">{t('patients:title')}</h1>
@@ -150,19 +151,21 @@ export function PatientsPage() {
           {PATIENT_FILTERS.map((option) => {
             const active = filter === option;
             return (
-              <button
+              <Button
                 key={option}
-                type="button"
+                variant="ghost"
+                size="sm"
                 aria-pressed={active}
                 onClick={() => setFilter(option)}
-                className={
+                className={cn(
+                  'text-caption',
                   active
-                    ? 'rounded-input bg-primary px-4 py-2 text-caption font-semibold text-white'
-                    : 'rounded-input border border-border bg-surface px-4 py-2 text-caption font-semibold text-text-muted hover:bg-primary-light'
-                }
+                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                    : 'border border-border bg-surface text-text-muted hover:bg-primary/10',
+                )}
               >
                 {t(`patients:filter.${option}`)}
-              </button>
+              </Button>
             );
           })}
         </div>

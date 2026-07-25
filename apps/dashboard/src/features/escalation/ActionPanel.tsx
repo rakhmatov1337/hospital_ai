@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EscalationStatus } from '@hospital-ai/shared-types';
-import { Banner, Button, Card, Select, StatusChip } from '../../ui';
+import { Banner, Button, Card, Select, SelectItem, StatusChip } from '../../ui';
 import { ApiError, errorCodeOf } from '../../lib/api-client';
 import {
   OUTCOME_CODES,
@@ -138,13 +138,13 @@ export function ActionPanel({ detail }: { detail: EscalationDetail }) {
           <Select
             label={t('actions.outcomeSelectLabel')}
             value={outcome}
-            onChange={(e) => setOutcome(e.target.value as '' | OutcomeCode)}
+            onValueChange={(v) => setOutcome(v as OutcomeCode)}
+            placeholder={t('actions.outcomePlaceholder')}
           >
-            <option value="">{t('actions.outcomePlaceholder')}</option>
             {OUTCOME_CODES.map((code) => (
-              <option key={code} value={code}>
+              <SelectItem key={code} value={code}>
                 {t(`outcomes.${code}`)}
-              </option>
+              </SelectItem>
             ))}
           </Select>
 

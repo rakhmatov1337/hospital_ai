@@ -1,5 +1,13 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { cn } from '../lib/cn';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table';
 import { EmptyState } from './EmptyState';
 
 export interface Column<T> {
@@ -19,6 +27,8 @@ export interface DataTableProps<T> {
   rows: T[];
   getRowKey: (row: T) => string;
   onRowClick?: (row: T) => void;
+  /** Accessible label for a clickable row (used when onRowClick is set). */
+  getRowLabel?: (row: T) => string;
   emptyTitle?: string;
   emptyDescription?: string;
   className?: string;
@@ -32,6 +42,7 @@ export function DataTable<T>({
   rows,
   getRowKey,
   onRowClick,
+  getRowLabel,
   emptyTitle,
   emptyDescription,
   className,
@@ -71,21 +82,21 @@ export function DataTable<T>({
     a === 'right' ? 'text-right' : a === 'center' ? 'text-center' : 'text-left';
 
   return (
-    <div className={cn('overflow-x-auto rounded-card border border-border bg-surface', className)}>
-      <table className="w-full border-collapse text-body">
-        <thead>
-          <tr className="border-b border-border">
+    <div className={cn('overflow-x-auto rounded-card border border-border bg-card', className)}>
+      <Table className="text-body">
+        <TableHeader>
+          <TableRow className="border-b border-border hover:bg-transparent">
             {columns.map((col) => {
               const active = sortKey === col.key;
               return (
-                <th
+                <TableHead
                   key={col.key}
                   scope="col"
                   aria-sort={
                     col.sortable ? (active ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none') : undefined
                   }
                   className={cn(
-                    'px-4 py-3 text-caption font-semibold uppercase tracking-wide text-text-muted',
+                    'h-auto whitespace-normal px-4 py-3 text-caption font-semibold uppercase tracking-wide text-text-muted',
                     alignClass(col.align),
                     col.className,
                   )}
@@ -102,42 +113,47 @@ export function DataTable<T>({
                   ) : (
                     col.header
                   )}
-                </th>
+                </TableHead>
               );
             })}
-          </tr>
-        </thead>
-        <tbody>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {sortedRows.map((row) => (
-            <tr
+            <TableRow
               key={getRowKey(row)}
+              role={onRowClick ? 'button' : undefined}
+              aria-label={onRowClick ? (getRowLabel?.(row) ?? 'View details') : undefined}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
               tabIndex={onRowClick ? 0 : undefined}
               onKeyDown={
                 onRowClick
                   ? (e) => {
-                      if (e.key === 'Enter') onRowClick(row);
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onRowClick(row);
+                      }
                     }
                   : undefined
               }
               className={cn(
-                'border-b border-border last:border-b-0',
+                'border-b border-border last:border-b-0 hover:bg-transparent',
                 onRowClick &&
-                  'cursor-pointer outline-none hover:bg-primary-light/40 focus-visible:bg-primary-light/40',
+                  'cursor-pointer outline-none hover:bg-primary/5 focus-visible:bg-primary/5',
               )}
             >
               {columns.map((col) => (
-                <td
+                <TableCell
                   key={col.key}
-                  className={cn('px-4 py-3 text-text', alignClass(col.align), col.className)}
+                  className={cn('px-4 py-3 text-text whitespace-normal', alignClass(col.align), col.className)}
                 >
                   {col.render(row)}
-                </td>
+                </TableCell>
               ))}
-            </tr>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }

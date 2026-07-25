@@ -1,4 +1,5 @@
 import type { HTMLAttributes, ReactNode } from 'react';
+import { Card as ShadcnCard } from '@/components/ui/card';
 import { cn } from '../lib/cn';
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
@@ -10,15 +11,16 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
 /** Surface container: white bg, 1px border, radius 12, subtle shadow. */
 export function Card({ padded = true, className, children, ...rest }: CardProps) {
   return (
-    <div
+    <ShadcnCard
       className={cn(
         'rounded-card border border-border bg-surface shadow-card',
-        padded && 'p-4',
+        // Override the shadcn Card's default vertical padding either way.
+        padded ? 'p-4' : 'p-0',
         className,
       )}
       {...rest}
     >
       {children}
-    </div>
+    </ShadcnCard>
   );
 }

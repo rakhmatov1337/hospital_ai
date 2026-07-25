@@ -1,0 +1,57 @@
+{
+  "app": {
+    "name": "Hospital AI",
+    "subtitle": "Klinisist paneli"
+  },
+  "nav": {
+    "queue": "Navbat",
+    "patients": "Bemorlar",
+    "metrics": "Ko'rsatkichlar",
+    "settings": "Sozlamalar",
+    "content": "Kontent"
+  },
+  "topbar": {
+    "signOut": "Chiqish",
+    "language": "Til"
+  },
+  "tier": {
+    "emergency": "Favqulodda",
+    "urgent": "Shoshilinch",
+    "routine": "Oddiy"
+  },
+  "status": {
+    "new": "Yangi",
+    "acknowledged": "Qabul qilingan",
+    "contacted": "Bog'lanilgan",
+    "breached": "Muddati o'tgan"
+  },
+  "connection": {
+    "live": "Jonli",
+    "reconnecting": "Yangilanmoqda…",
+    "offline": "Oflayn",
+    "updatedAt": "Yangilandi {{time}}"
+  },
+  "queueRow": {
+    "day": "{{n}}-kun",
+    "submitted": "Yuborilgan {{time}}",
+    "elapsedLabel": "O'tgan vaqt",
+    "breached": "MUDDATI O'TGAN",
+    "testTag": "[TEST]"
+  },
+  "actions": {
+    "cancel": "Bekor qilish",
+    "confirm": "Tasdiqlash",
+    "save": "Saqlash",
+    "back": "Orqaga",
+    "retry": "Qayta urinish"
+  },
+  "placeholderBanner": {
+    "title": "Vaqtinchalik klinik kontent faol",
+    "body": "Bemorlarga ko'rsatilayotgan ayrim kontent hali klinisist tomonidan tasdiqlanmagan. Ishga tushirishdan oldin uni Kontent bo'limida ko'rib chiqing."
+  },
+  "loading": "Yuklanmoqda…",
+  "screenPlaceholder": {
+    "title": "{{screen}}",
+    "body": "Bu ekran tayyorlangan va o'zining ekran agenti tomonidan yakunlanadi."
+  }
+}

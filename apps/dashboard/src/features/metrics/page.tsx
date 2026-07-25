@@ -8,6 +8,7 @@ import {
   EmptyState,
   MetricCard,
   Select,
+  SelectItem,
   Spinner,
 } from '../../ui';
 import { rangeForPreset, useMetrics, type RangePresetId } from './api';
@@ -48,13 +49,13 @@ export function MetricsPage() {
           <Select
             label={t('metrics:range.label')}
             value={preset}
-            onChange={(e) => setPreset(e.target.value as RangePresetId)}
+            onValueChange={(v) => setPreset(v as RangePresetId)}
             className="min-w-44"
           >
             {PRESETS.map((p) => (
-              <option key={p} value={p}>
+              <SelectItem key={p} value={p}>
                 {t(`metrics:range.${p}`)}
-              </option>
+              </SelectItem>
             ))}
           </Select>
           <Button
@@ -78,7 +79,15 @@ export function MetricsPage() {
 
       {/* Error (stale data may still be shown beneath) */}
       {query.isError && (
-        <Banner tone="danger" title={t('metrics:error.title')}>
+        <Banner
+          tone="danger"
+          title={t('metrics:error.title')}
+          action={
+            <Button variant="secondary" size="sm" onClick={() => void query.refetch()}>
+              {t('metrics:error.retry')}
+            </Button>
+          }
+        >
           {t('metrics:error.body')}
         </Banner>
       )}

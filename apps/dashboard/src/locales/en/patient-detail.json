@@ -69,6 +69,11 @@
     "body": "This stops future tasks and reminders. All history is retained and nothing is deleted. This cannot be undone from here.",
     "confirm": "Withdraw patient"
   },
+  "reissueDialog": {
+    "title": "Reissue the enrolment code?",
+    "body": "This immediately voids the patient's current enrolment code. If they still hold the old code, it will stop working and they must use the new one. Only reissue if the current code has been lost.",
+    "confirm": "Reissue code"
+  },
   "adherence": {
     "emptyTitle": "No adherence data yet",
     "emptyBody": "Adherence appears once tasks with a closed window have been assessed.",

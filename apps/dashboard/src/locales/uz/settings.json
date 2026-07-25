@@ -1,0 +1,85 @@
+{
+  "title": "Klinika sozlamalari",
+  "subtitle": "Ushbu klinika konfiguratsiyasi. Ba'zi maydonlar bemorlar ko'radigan xavfsizlik xabarlarida aks etadi.",
+  "sections": {
+    "details": "Klinika ma'lumotlari",
+    "hours": "Ish vaqti",
+    "contacts": "Navbatchi kontaktlar",
+    "escalation": "Eskalatsiya vaqtlari",
+    "staff": "Xodim hisoblari"
+  },
+  "fields": {
+    "name": "Klinika nomi",
+    "phone": "Klinika telefoni",
+    "emergencyNumber": "Mahalliy favqulodda xizmat raqami",
+    "workingHours": "Ish vaqti",
+    "workingDays": "Ish kunlari",
+    "onDutyContact": "Navbatchi kontakt",
+    "backupContact": "Zaxira kontakt",
+    "headContact": "Klinika rahbari kontakti",
+    "notifyMinutes": "Xabar berish (daqiqadan so'ng)",
+    "ackMinutes": "Qabul qilish muddati (daqiqa)",
+    "breachMinutes": "Muddati o'tishi (daqiqadan so'ng)"
+  },
+  "hints": {
+    "patientFacing": "Bemorlar ko'radigan xavfsizlik xabarlarida aks etadi.",
+    "patientFacingTag": "Bemorlar uchun",
+    "workingHours": "masalan 09:00-18:00",
+    "workingDays": "masalan Dush-Shan",
+    "escalation": "Standart qiymatlar 5 / 15 / 30 daqiqa. O'zgarishlar tier yo'naltirish uchun darhol kuchga kiradi."
+  },
+  "timing": {
+    "order": "Eskalatsiya vaqtlari kamaymasligi kerak: xabar berish ≤ qabul qilish ≤ muddat o'tishi."
+  },
+  "actions": {
+    "save": "O'zgarishlarni saqlash",
+    "saving": "Saqlanmoqda…",
+    "addStaff": "Xodim hisobini qo'shish",
+    "edit": "Tahrirlash",
+    "deactivate": "Faolsizlantirish",
+    "activate": "Faollashtirish"
+  },
+  "confirm": {
+    "title": "Bemorlarga ko'rinadigan o'zgarishlarni tasdiqlang",
+    "body": "Siz bemorlarga ko'rinadigan xavfsizlik ko'rsatmalarida aks etadigan ma'lumotlarni o'zgartirmoqdasiz. Ushbu o'zgarishlar audit jurnaliga ismingiz va vaqti bilan yoziladi.",
+    "changes": "O'zgarishlar",
+    "confirm": "Saqlash va yozib qo'yish",
+    "cancel": "Tahrirlashda davom etish",
+    "arrow": "→",
+    "empty": "(bo'sh)"
+  },
+  "saved": "Sozlamalar saqlandi.",
+  "staff": {
+    "name": "Ism",
+    "email": "Elektron pochta",
+    "role": "Rol",
+    "status": "Holat",
+    "actions": "Amallar",
+    "active": "Faol",
+    "inactive": "Faolsiz",
+    "leadOnly": "Faqat klinik rahbar xodim hisoblarini qo'sha yoki tahrirlashi mumkin.",
+    "empty": "Hozircha xodim hisoblari yo'q.",
+    "updateError": "Hisobni yangilab bo'lmadi. Iltimos, qayta urinib ko'ring."
+  },
+  "staffConfirm": {
+    "deactivateTitle": "Hisob faolsizlantirilsinmi?",
+    "deactivateBody": "{{name}} tizimdan chiqariladi va administrator hisobni qayta faollashtirmaguncha panelga kira olmaydi.",
+    "confirm": "Faolsizlantirish",
+    "cancel": "Faol qoldirish"
+  },
+  "roles": {
+    "staff": "Xodim",
+    "clinical_lead": "Klinik rahbar"
+  },
+  "staffForm": {
+    "addTitle": "Xodim hisobini qo'shish",
+    "editTitle": "Xodim hisobini tahrirlash",
+    "password": "Parol",
+    "passwordHint": "Kamida 8 ta belgi.",
+    "passwordEditHint": "Joriy parolni saqlab qolish uchun bo'sh qoldiring.",
+    "create": "Hisob yaratish",
+    "update": "Hisobni saqlash",
+    "saving": "Saqlanmoqda…"
+  },
+  "error": "Saqlab bo'lmadi. Iltimos, qayta urinib ko'ring."
+}

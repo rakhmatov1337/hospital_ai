@@ -1,4 +1,5 @@
-import { forwardRef, useId, type InputHTMLAttributes } from 'react';
+import { useId, type InputHTMLAttributes } from 'react';
+import { Input as ShInput } from '@/components/ui/input';
 import { cn } from '../lib/cn';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -7,11 +8,13 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   hint?: string;
 }
 
-/** Text input: height 56, radius 8. Label + hint + error slots. */
-export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { label, error, hint, id, className, ...rest },
-  ref,
-) {
+/**
+ * Text field — the shadcn/Base-UI `Input` under the hood, kept at the design-spec
+ * size (height 56, radius 8) with the app's label + hint + error slots. Validation
+ * errors are surfaced via `aria-invalid` (which drives the destructive ring) and a
+ * `text-destructive` message — the reserved tier-emergency colour is not spent here.
+ */
+export function Input({ label, error, hint, id, className, ...rest }: InputProps) {
   const autoId = useId();
   const inputId = id ?? autoId;
   const describedBy = error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined;
@@ -23,19 +26,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           {label}
         </label>
       )}
-      <input
+      <ShInput
         id={inputId}
-        ref={ref}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
-        className={cn(
-          'h-input rounded-input border border-border bg-surface px-4 text-body text-text',
-          'placeholder:text-text-muted outline-none',
-          'focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30',
-          'disabled:cursor-not-allowed disabled:bg-background',
-          error && 'border-tier-emergency',
-          className,
-        )}
+        className={cn('h-input rounded-input px-4 text-body', className)}
         {...rest}
       />
       {hint && !error && (
@@ -44,10 +39,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         </span>
       )}
       {error && (
-        <span id={`${inputId}-error`} role="alert" className="text-caption text-tier-emergency">
+        <span id={`${inputId}-error`} role="alert" className="text-caption text-destructive">
           {error}
         </span>
       )}
     </div>
   );
-});
+}

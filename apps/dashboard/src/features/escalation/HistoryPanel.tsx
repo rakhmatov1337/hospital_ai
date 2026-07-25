@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Tier } from '@hospital-ai/shared-types';
 import { Card, TierBadge } from '../../ui';
+import { Badge } from '@/components/ui/badge';
 import type { DashboardLanguage } from '../../lib/i18n';
 import type { AdherenceSnapshot, RecentCheckIn } from './api';
 import { adherencePercent, formatDateTime } from './format';
@@ -60,7 +61,9 @@ export function HistoryPanel({
               {c.tier ? (
                 <TierBadge tier={c.tier as Tier} variant="soft" size="sm" />
               ) : (
-                <span className="text-caption text-text-muted">{t('history.noTier')}</span>
+                <Badge variant="outline" className="text-text-muted">
+                  {t('history.noTier')}
+                </Badge>
               )}
             </li>
           ))}

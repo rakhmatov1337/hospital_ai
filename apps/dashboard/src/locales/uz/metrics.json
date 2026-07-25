@@ -1,0 +1,72 @@
+{
+  "title": "Ko'rsatkichlar",
+  "subtitle": "Ushbu klinika bo'yicha jonli pilot tahlili. Har bir foiz ortida uning asosidagi raqamlar ko'rsatiladi.",
+  "export": "CSV eksport",
+  "range": {
+    "label": "Sana oralig'i",
+    "all": "Butun davr",
+    "last7": "So'nggi 7 kun",
+    "last14": "So'nggi 14 kun",
+    "last30": "So'nggi 30 kun"
+  },
+  "note": {
+    "noOutcome": "Faqat jarayon ko'rsatkichlari — qayta yotqizish darajasi yoki klinik natija da'volari yo'q."
+  },
+  "error": {
+    "title": "Ko'rsatkichlarni yangilab bo'lmadi",
+    "body": "Oxirgi yuklangan raqamlar ko'rsatilmoqda. Avtomatik qayta urinilmoqda."
+  },
+  "empty": {
+    "title": "Hozircha ko'rsatkichlar yo'q",
+    "body": "Bemorlar ro'yxatga olinib, ko'rikdan o'ta boshlagach, ularning rioya qilish, dasturda qolish va eskalatsiya ko'rsatkichlari shu yerda paydo bo'ladi."
+  },
+  "sections": {
+    "escalations": "Eskalatsiyalar",
+    "adherenceByLanguage": "Til bo'yicha rioya qilish",
+    "satisfaction": "Qoniqish"
+  },
+  "cards": {
+    "adherence": "Tiklanish rejasiga rioya qilish",
+    "checkinCompletion": "Ko'rikni yakunlash",
+    "retentionD30": "30-kunda faol",
+    "appOpens": "Haftasiga o'rtacha ochilishlar",
+    "escalationsTotal": "Eskalatsiyalar",
+    "breaches": "Muddati o'tganlar",
+    "medianAck": "Qabul qilishgacha median vaqt",
+    "medianContact": "Bog'lanishgacha median vaqt"
+  },
+  "charts": {
+    "adherenceTrend": "Tiklanish kuni bo'yicha rioya qilish",
+    "retention": "Dasturda qolish egri chizig'i",
+    "escalationsByTier": "Daraja bo'yicha eskalatsiyalar",
+    "languageSplit": "Til bo'yicha bemorlar"
+  },
+  "retention": {
+    "d7": "7-kun",
+    "d14": "14-kun",
+    "d30": "30-kun"
+  },
+  "satisfaction": {
+    "q1Helpful": "Foydali bo'ldi",
+    "q2Easy": "Foydalanish oson",
+    "q3AdherenceSupport": "Rioya qilishga yordam berdi",
+    "q4Recommend": "Tavsiya qilardim"
+  },
+  "units": {
+    "tasks": "vazifa",
+    "tasksOnTime": "vazifa o'z vaqtida",
+    "checkins": "ko'rik yakunlandi",
+    "reachedDay30": "30-kunga yetdi",
+    "patients": "bemor",
+    "escalations": "eskalatsiya",
+    "acrossPatients_one": "{{count}} bemor bo'yicha",
+    "acrossPatients_other": "{{count}} bemor bo'yicha",
+    "ofEscalations_one": "{{count}} eskalatsiyadan",
+    "ofEscalations_other": "{{count}} eskalatsiyadan",
+    "fromEscalations": "{{total}} eskalatsiyadan {{n}} tasidan",
+    "responses_one": "{{count}} javob",
+    "responses_other": "{{count}} javob",
+    "responseCount_one": "{{count}} javob",
+    "responseCount_other": "{{count}} javob"
+  }
+}

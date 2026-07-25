@@ -1,7 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ContentLanguageState, ContentTranslationView } from '@hospital-ai/shared-types';
 import { Banner, Button, Spinner } from '../../ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { useAuth } from '../../lib/auth';
 import { cn } from '../../lib/cn';
 import { ContentStatusBadge, type ContentBadgeStatus } from './ContentStatusBadge';
@@ -194,40 +201,33 @@ function LanguageColumn({ state }: { state: ContentLanguageState }) {
 export function ContentDetail({ itemId, onClose }: { itemId: string; onClose: () => void }) {
   const { t } = useTranslation('content');
   const { data, isLoading, isError } = useContentItem(itemId);
-  const closeRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-text/40 p-4 sm:p-6"
-      onClick={onClose}
+    <Dialog
+      open
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={t('detail.heading')}
-        onClick={(e) => e.stopPropagation()}
-        className="my-4 w-full max-w-6xl rounded-card border border-border bg-background p-6 shadow-card"
+      <DialogContent
+        showCloseButton={false}
+        className="max-h-[90vh] overflow-y-auto sm:max-w-6xl"
       >
-        <div className="mb-4 flex items-start justify-between gap-4">
+        <DialogHeader className="flex-row items-start justify-between gap-4">
           <div>
-            <h2 className="text-h1 font-bold text-text">
+            <DialogTitle className="text-h1 font-bold text-text">
               {data ? data.contentKey : t('detail.heading')}
-            </h2>
-            {data && <p className="text-body text-text-muted">{data.category}</p>}
+            </DialogTitle>
+            {data && (
+              <DialogDescription className="text-body text-text-muted">
+                {data.category}
+              </DialogDescription>
+            )}
           </div>
-          <Button ref={closeRef} variant="secondary" size="sm" onClick={onClose}>
+          <Button variant="secondary" size="sm" onClick={onClose}>
             {t('detail.close')}
           </Button>
-        </div>
+        </DialogHeader>
 
         <Banner tone="warning" title={t('editWarning.title')} className="mb-4">
           {t('editWarning.body')}
@@ -252,7 +252,7 @@ export function ContentDetail({ itemId, onClose }: { itemId: string; onClose: ()
             </div>
           </>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
