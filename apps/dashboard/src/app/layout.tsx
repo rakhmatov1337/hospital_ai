@@ -111,15 +111,25 @@ export function AppLayout() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {NAV_ITEMS.map((item) => {
-                  const isActive = pathname === item.to || pathname.startsWith(`${item.to}/`);
+                  const isActive =
+                    pathname === item.to ||
+                    pathname.startsWith(`${item.to}/`) ||
+                    pathname.endsWith(item.to);
                   const label = t(item.key);
                   const showBadge = item.to === '/queue' && criticalCount > 0;
                   return (
                     <SidebarMenuItem key={item.to}>
+                      {isActive && (
+                        <span
+                          aria-hidden="true"
+                          className="absolute inset-y-1.5 left-0 z-10 w-1 rounded-r-full bg-sidebar-primary"
+                        />
+                      )}
                       <SidebarMenuButton
                         isActive={isActive}
                         tooltip={label}
                         render={<NavLink to={item.to} />}
+                        className="h-9 gap-3 text-body font-medium text-sidebar-foreground data-[active=true]:font-semibold"
                       >
                         <item.icon aria-hidden="true" />
                         <span>{label}</span>
