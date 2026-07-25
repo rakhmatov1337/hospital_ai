@@ -124,7 +124,8 @@ const config: Config = {
         row: '64px',
       },
       boxShadow: {
-        card: '0 1px 2px 0 rgba(26, 36, 48, 0.06), 0 1px 3px 0 rgba(26, 36, 48, 0.08)',
+        // Soft, layered elevation — cards float gently over the tinted canvas.
+        card: '0 1px 2px -1px rgb(15 34 42 / 0.06), 0 6px 18px -6px rgb(15 34 42 / 0.10)',
       },
     },
   },
