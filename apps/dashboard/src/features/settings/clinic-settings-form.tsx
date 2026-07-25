@@ -4,7 +4,7 @@ import { Banner, Button, ConfirmDialog, Input } from '../../ui';
 import { errorCodeOf } from '../../lib/api-client';
 import { useUpdateClinic, type ClinicUpdatePayload, type ClinicView } from './api';
 
-/** A settings section: title + description on the left, fields on the right. */
+/** A settings section: a title/description header over a responsive grid of fields. */
 function FormSection({
   title,
   description,
@@ -15,12 +15,14 @@ function FormSection({
   children: ReactNode;
 }) {
   return (
-    <div className="grid gap-x-8 gap-y-3 py-5 md:grid-cols-[13rem_minmax(0,1fr)]">
-      <div>
+    <div className="py-6">
+      <div className="mb-4 max-w-2xl">
         <h2 className="text-body font-semibold text-text">{title}</h2>
-        {description && <p className="mt-1 text-caption text-text-muted">{description}</p>}
+        {description && <p className="mt-0.5 text-caption text-text-muted">{description}</p>}
       </div>
-      <div className="flex flex-col gap-3.5">{children}</div>
+      <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
+        {children}
+      </div>
     </div>
   );
 }
@@ -221,37 +223,35 @@ export function ClinicSettingsForm({ clinic }: ClinicSettingsFormProps) {
         title={t('settings:sections.escalation')}
         description={t('settings:hints.escalation')}
       >
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <Input
-            label={t('settings:fields.notifyMinutes')}
-            type="number"
-            min={0}
-            max={1440}
-            value={form.notifyMinutes}
-            onChange={set('notifyMinutes')}
-            aria-invalid={timingInvalid || undefined}
-          />
-          <Input
-            label={t('settings:fields.ackMinutes')}
-            type="number"
-            min={0}
-            max={1440}
-            value={form.ackMinutes}
-            onChange={set('ackMinutes')}
-            aria-invalid={timingInvalid || undefined}
-          />
-          <Input
-            label={t('settings:fields.breachMinutes')}
-            type="number"
-            min={0}
-            max={1440}
-            value={form.breachMinutes}
-            onChange={set('breachMinutes')}
-            aria-invalid={timingInvalid || undefined}
-          />
-        </div>
+        <Input
+          label={t('settings:fields.notifyMinutes')}
+          type="number"
+          min={0}
+          max={1440}
+          value={form.notifyMinutes}
+          onChange={set('notifyMinutes')}
+          aria-invalid={timingInvalid || undefined}
+        />
+        <Input
+          label={t('settings:fields.ackMinutes')}
+          type="number"
+          min={0}
+          max={1440}
+          value={form.ackMinutes}
+          onChange={set('ackMinutes')}
+          aria-invalid={timingInvalid || undefined}
+        />
+        <Input
+          label={t('settings:fields.breachMinutes')}
+          type="number"
+          min={0}
+          max={1440}
+          value={form.breachMinutes}
+          onChange={set('breachMinutes')}
+          aria-invalid={timingInvalid || undefined}
+        />
         {timingInvalid && (
-          <p role="alert" className="text-caption text-destructive">
+          <p role="alert" className="col-span-full text-caption text-destructive">
             {t('settings:timing.order')}
           </p>
         )}
