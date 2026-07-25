@@ -20,7 +20,7 @@ function FormSection({
         <h2 className="text-body font-semibold text-text">{title}</h2>
         {description && <p className="mt-1 text-caption text-text-muted">{description}</p>}
       </div>
-      <div className="flex flex-col gap-4 md:col-span-2">{children}</div>
+      <div className="flex flex-col gap-3.5 md:col-span-2">{children}</div>
     </div>
   );
 }
@@ -151,7 +151,7 @@ export function ClinicSettingsForm({ clinic }: ClinicSettingsFormProps) {
   return (
     <form
       onSubmit={onSubmit}
-      className="flex flex-col divide-y divide-border overflow-hidden rounded-input border border-border bg-card px-5 sm:px-6"
+      className="flex flex-col divide-y divide-border overflow-hidden rounded-input border border-border bg-card px-5 [&_input]:h-10 [&_input]:px-3 [&_input]:text-body sm:px-6"
       noValidate
     >
       {/* Clinic details — patient-facing */}

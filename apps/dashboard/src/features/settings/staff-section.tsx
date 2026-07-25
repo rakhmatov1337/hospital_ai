@@ -220,7 +220,11 @@ export function StaffSection() {
             </DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={(e) => void onSubmit(e)} className="flex flex-col gap-4" noValidate>
+          <form
+            onSubmit={(e) => void onSubmit(e)}
+            className="flex flex-col gap-3.5 [&_input]:h-10 [&_input]:px-3 [&_input]:text-body"
+            noValidate
+          >
             <Input
               label={t('settings:staff.name')}
               value={form.name}
