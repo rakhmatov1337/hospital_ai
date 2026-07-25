@@ -114,7 +114,7 @@ export function StaffSection() {
   }
 
   return (
-    <Card className="flex flex-col gap-4">
+    <Card className="flex min-w-0 flex-col gap-4">
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-h2 font-semibold text-text">{t('settings:sections.staff')}</h2>
         {isLead && (
@@ -137,7 +137,7 @@ export function StaffSection() {
       ) : (staffQuery.data?.length ?? 0) === 0 ? (
         <p className="text-body text-text-muted">{t('settings:staff.empty')}</p>
       ) : (
-        <div className="overflow-hidden rounded-card border border-border">
+        <div className="overflow-x-auto rounded-card border border-border">
           <Table className="text-body">
             <TableHeader>
               <TableRow className="border-border">

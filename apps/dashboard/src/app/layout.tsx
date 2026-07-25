@@ -239,7 +239,7 @@ export function AppLayout() {
           </div>
         </header>
 
-        <main className="flex flex-1 flex-col gap-6 p-6">
+        <main className="flex min-w-0 flex-1 flex-col gap-6 p-6">
           <PlaceholderBanner />
           <Outlet />
         </main>

@@ -14,7 +14,7 @@ export function SettingsPage() {
   const clinicQuery = useClinic();
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6">
+    <div className="mx-auto flex w-full min-w-0 max-w-3xl flex-col gap-6">
       <header>
         <h1 className="text-h1 font-bold text-text">{t('settings:title')}</h1>
         <p className="mt-1 text-body text-text-muted">{t('settings:subtitle')}</p>
