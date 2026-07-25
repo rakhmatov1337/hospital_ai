@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Language, type ContentListItem } from '@hospital-ai/shared-types';
-import { Banner, Button, Card, DataTable, Spinner, type Column } from '../../ui';
+import { Banner, Button, DataTable, Spinner, type Column } from '../../ui';
 import { cn } from '../../lib/cn';
 import { ContentStatusBadge } from './ContentStatusBadge';
 import { ContentDetail } from './ContentDetail';
@@ -131,7 +131,7 @@ export function ContentPage() {
   const total = count.data?.totalItems ?? 0;
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-6">
       <header>
         <h1 className="text-display font-bold text-text">{t('title')}</h1>
         <p className="mt-1 text-body text-text-muted">{t('subtitle')}</p>
@@ -191,9 +191,17 @@ export function ContentPage() {
         </div>
       )}
       {list.isError && (
-        <Card>
-          <p className="text-body text-tier-emergency">{t('toast.error')}</p>
-        </Card>
+        <Banner
+          tone="danger"
+          title={t('error.title', { defaultValue: "Couldn't load content" })}
+          action={
+            <Button variant="secondary" size="sm" onClick={() => void list.refetch()}>
+              {t('error.retry', { defaultValue: 'Retry' })}
+            </Button>
+          }
+        >
+          {t('toast.error')}
+        </Banner>
       )}
 
       {list.data && (

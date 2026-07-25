@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StaffRole, type StaffAccount } from '@hospital-ai/shared-types';
-import { Banner, Button, Card, Input, Select, SelectItem, Spinner } from '../../ui';
+import { Banner, Button, Card, ConfirmDialog, Input, Select, SelectItem, Spinner } from '../../ui';
 import {
   Table,
   TableBody,
@@ -56,6 +56,10 @@ export function StaffSection() {
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState<StaffFormState>(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
+  // Deactivating a colleague locks them out — confirm it, and surface toggle errors
+  // in the section (the modal `error` above only covers add/edit).
+  const [confirmDeactivate, setConfirmDeactivate] = useState<StaffAccount | null>(null);
+  const [toggleError, setToggleError] = useState<string | null>(null);
 
   const modalOpen = creating || editing !== null;
   const busy = createStaff.isPending || updateStaff.isPending;
@@ -100,10 +104,12 @@ export function StaffSection() {
   }
 
   async function toggleActive(account: StaffAccount): Promise<void> {
+    setToggleError(null);
     try {
       await updateStaff.mutateAsync({ id: account.id, payload: { active: !account.active } });
-    } catch {
-      /* surfaced by the query state on the next render; row stays as-is */
+    } catch (err) {
+      const code = errorCodeOf(err);
+      setToggleError(t(`errors:${code}`, { defaultValue: t('settings:error') }));
     }
   }
 
@@ -121,6 +127,8 @@ export function StaffSection() {
       {!isLead && (
         <Banner tone="info">{t('settings:staff.leadOnly')}</Banner>
       )}
+
+      {toggleError && <Banner tone="danger">{toggleError}</Banner>}
 
       {staffQuery.isLoading ? (
         <Spinner label={t('common:loading')} />
@@ -179,7 +187,11 @@ export function StaffSection() {
                           size="sm"
                           variant="secondary"
                           disabled={busy}
-                          onClick={() => void toggleActive(account)}
+                          onClick={() =>
+                            account.active
+                              ? setConfirmDeactivate(account)
+                              : void toggleActive(account)
+                          }
                         >
                           {account.active
                             ? t('settings:actions.deactivate')
@@ -260,6 +272,27 @@ export function StaffSection() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={confirmDeactivate !== null}
+        tone="danger"
+        title={t('settings:staff.deactivateConfirm.title', {
+          defaultValue: 'Deactivate {{name}}?',
+          name: confirmDeactivate?.name ?? '',
+        })}
+        confirmLabel={t('settings:actions.deactivate')}
+        busy={updateStaff.isPending}
+        onCancel={() => setConfirmDeactivate(null)}
+        onConfirm={() => {
+          const account = confirmDeactivate;
+          setConfirmDeactivate(null);
+          if (account) void toggleActive(account);
+        }}
+      >
+        {t('settings:staff.deactivateConfirm.body', {
+          defaultValue: 'They will immediately lose access to the dashboard until reactivated.',
+        })}
+      </ConfirmDialog>
     </Card>
   );
 }

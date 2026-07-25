@@ -12,12 +12,15 @@
   },
   "empty": {
     "title": "Nothing needs attention",
-    "body": "There are no unresolved check-ins right now."
+    "body": "There are no unresolved check-ins right now.",
+    "bodyAll": "There are no check-ins yet."
   },
   "newArrival": {
     "title": "New urgent check-in",
     "body": "A new urgent or emergency check-in just arrived.",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "emergencyTitle": "New EMERGENCY check-in",
+    "emergencyBody": "A new EMERGENCY check-in just arrived — review it first."
   },
   "error": {
     "title": "Couldn't refresh the queue",

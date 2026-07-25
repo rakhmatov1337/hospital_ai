@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Banner, Button, Card, ConnectionStatus, EmptyState, Spinner } from '../../ui';
+import { apiClient } from '../../lib/api-client';
+import type { ClinicView } from '../../lib/api-types';
 import { cn } from '../../lib/cn';
 import { useEscalationQueue, type QueueFilter } from './api';
 import { QueueBoard } from './QueueBoard';
@@ -23,7 +26,16 @@ export function QueuePage() {
 
   const { data, isLoading, isFetching, isError, dataUpdatedAt, refetch } =
     useEscalationQueue(filter);
-  const alert = useNewArrivalAlert(data, filter);
+  // The shell owns the audible chime app-wide; here we only surface the visual banner.
+  const alert = useNewArrivalAlert(data, filter, { playSound: false });
+
+  // Clinic-configured escalation thresholds drive the breach/urgent visuals; the
+  // clinic is shared-cache with the shell (['clinics','me']).
+  const clinic = useQuery({
+    queryKey: ['clinics', 'me'],
+    queryFn: () => apiClient.get<ClinicView>('/clinics/me'),
+    staleTime: 5 * 60_000,
+  });
 
   return (
     <div className="flex flex-col gap-6">
@@ -74,17 +86,25 @@ export function QueuePage() {
 
       {alert.active && (
         <Banner
-          tone="warning"
-          title={t('newArrival.title', { defaultValue: 'New urgent check-in' })}
+          tone={alert.arrivedTier === 'emergency' ? 'danger' : 'warning'}
+          title={
+            alert.arrivedTier === 'emergency'
+              ? t('newArrival.emergencyTitle', { defaultValue: 'New EMERGENCY check-in' })
+              : t('newArrival.title', { defaultValue: 'New urgent check-in' })
+          }
           action={
             <Button variant="ghost" size="sm" onClick={alert.dismiss}>
               {t('newArrival.dismiss', { defaultValue: 'Dismiss' })}
             </Button>
           }
         >
-          {t('newArrival.body', {
-            defaultValue: 'A new urgent or emergency check-in just arrived.',
-          })}
+          {alert.arrivedTier === 'emergency'
+            ? t('newArrival.emergencyBody', {
+                defaultValue: 'A new EMERGENCY check-in just arrived — review it first.',
+              })
+            : t('newArrival.body', {
+                defaultValue: 'A new urgent check-in just arrived.',
+              })}
         </Banner>
       )}
 
@@ -111,9 +131,11 @@ export function QueuePage() {
       ) : !data ? null : data.total === 0 ? (
         <EmptyState
           title={t('empty.title', { defaultValue: 'Nothing needs attention' })}
-          description={t('empty.body', {
-            defaultValue: 'There are no unresolved check-ins right now.',
-          })}
+          description={
+            filter === 'all'
+              ? t('empty.bodyAll', { defaultValue: 'There are no check-ins yet.' })
+              : t('empty.body', { defaultValue: 'There are no unresolved check-ins right now.' })
+          }
           footer={
             <ConnectionStatus
               isFetching={isFetching}
@@ -123,7 +145,12 @@ export function QueuePage() {
           }
         />
       ) : (
-        <QueueBoard data={data} onRowClick={(id) => navigate(`/escalations/${id}`)} />
+        <QueueBoard
+          data={data}
+          urgentAfterMinutes={clinic.data?.ackMinutes}
+          breachAfterMinutes={clinic.data?.breachMinutes}
+          onRowClick={(id) => navigate(`/escalations/${id}`)}
+        />
       )}
     </div>
   );

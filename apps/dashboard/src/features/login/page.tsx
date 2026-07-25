@@ -31,6 +31,7 @@ export function LoginPage() {
                 key={lng}
                 type="button"
                 onClick={() => setLanguage(lng as DashboardLanguage)}
+                aria-pressed={i18n.resolvedLanguage === lng}
                 className={cn(
                   'rounded-input px-2 py-1 text-caption font-semibold',
                   lng === 'uz' ? 'normal-case' : 'uppercase',

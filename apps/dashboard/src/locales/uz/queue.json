@@ -12,12 +12,15 @@
   },
   "empty": {
     "title": "Hech narsa e'tibor talab qilmaydi",
-    "body": "Hozircha hal qilinmagan ko'riklar yo'q."
+    "body": "Hozircha hal qilinmagan ko'riklar yo'q.",
+    "bodyAll": "Hozircha ko'riklar yo'q."
   },
   "newArrival": {
     "title": "Yangi shoshilinch ko'rik",
     "body": "Hozirgina yangi shoshilinch yoki favqulodda ko'rik keldi.",
-    "dismiss": "Yopish"
+    "dismiss": "Yopish",
+    "emergencyTitle": "Yangi FAVQULODDA ko'rik",
+    "emergencyBody": "Hozirgina yangi FAVQULODDA ko'rik keldi — avval uni ko'rib chiqing."
   },
   "error": {
     "title": "Navbatni yangilab bo'lmadi",

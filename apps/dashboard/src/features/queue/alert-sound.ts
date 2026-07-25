@@ -7,6 +7,26 @@
 
 let ctx: AudioContext | null = null;
 
+const MUTE_KEY = 'hospital_ai.alertMuted';
+
+/** Whether the arrival chime is muted (persisted). The visual alert is unaffected. */
+export function isAlertMuted(): boolean {
+  try {
+    return localStorage.getItem(MUTE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+/** Persist the mute preference for the arrival chime. */
+export function setAlertMuted(muted: boolean): void {
+  try {
+    localStorage.setItem(MUTE_KEY, muted ? '1' : '0');
+  } catch {
+    /* ignore storage failures — mute simply won't persist */
+  }
+}
+
 type AudioWindow = Window & { webkitAudioContext?: typeof AudioContext };
 
 function getContext(): AudioContext | null {
@@ -21,6 +41,7 @@ function getContext(): AudioContext | null {
 /** Play the attention chime. Safe to call repeatedly; never throws. */
 export function playAlertSound(): void {
   try {
+    if (isAlertMuted()) return;
     const audio = getContext();
     if (!audio) return;
     // Some browsers suspend the context until a user gesture — resume best-effort.

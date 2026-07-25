@@ -20,22 +20,38 @@ import { playAlertSound } from './alert-sound';
 export interface NewArrivalAlert {
   /** A new critical item arrived since last acknowledgement — show the banner. */
   active: boolean;
+  /** Which tier the newest arrival was, so the banner can reflect emergency vs urgent. */
+  arrivedTier: 'emergency' | 'urgent' | null;
   /** Dismiss the visual banner (audio is one-shot). */
   dismiss: () => void;
+}
+
+export interface NewArrivalAlertOptions {
+  /**
+   * Play the audible chime on arrival. Set false where a second instance already
+   * owns the sound (the shell plays it app-wide; the Queue shows the visual banner
+   * only) to avoid a double chime.
+   */
+  playSound?: boolean;
 }
 
 export function useNewArrivalAlert(
   data: EscalationQueue | undefined,
   filter: QueueFilter,
+  options: NewArrivalAlertOptions = {},
 ): NewArrivalAlert {
+  const { playSound = true } = options;
   const knownIds = useRef<Set<string> | null>(null);
   const seededFilter = useRef<QueueFilter>(filter);
   const [active, setActive] = useState(false);
+  const [arrivedTier, setArrivedTier] = useState<'emergency' | 'urgent' | null>(null);
 
   useEffect(() => {
     if (!data) return;
 
-    const criticalIds = [...data.sections.emergency, ...data.sections.urgent].map((i) => i.id);
+    const emergencyIds = data.sections.emergency.map((i) => i.id);
+    const urgentIds = data.sections.urgent.map((i) => i.id);
+    const criticalIds = [...emergencyIds, ...urgentIds];
     const current = new Set(criticalIds);
 
     // Seed (first data or a filter switch) — establish a baseline, do not alert.
@@ -46,14 +62,17 @@ export function useNewArrivalAlert(
     }
 
     const previous = knownIds.current;
-    const hasNewArrival = criticalIds.some((id) => !previous.has(id));
+    const newEmergency = emergencyIds.some((id) => !previous.has(id));
+    const newUrgent = urgentIds.some((id) => !previous.has(id));
     knownIds.current = current;
 
-    if (hasNewArrival) {
+    if (newEmergency || newUrgent) {
       setActive(true);
-      playAlertSound();
+      // Emergency takes precedence in the banner tone/copy.
+      setArrivedTier(newEmergency ? 'emergency' : 'urgent');
+      if (playSound) playAlertSound();
     }
-  }, [data, filter]);
+  }, [data, filter, playSound]);
 
-  return { active, dismiss: () => setActive(false) };
+  return { active, arrivedTier, dismiss: () => setActive(false) };
 }
