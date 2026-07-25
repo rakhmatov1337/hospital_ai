@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '../../lib/cn';
+import { procedureLabel } from '../../lib/labels';
 import { errorCodeOf } from '../../lib/api-client';
 import { AdherenceChart } from './AdherenceChart';
 import { formatDate, formatDateTime, formatPercent } from './format';
@@ -146,7 +147,7 @@ export function PatientDetailPage() {
             {t(`patient-detail:languages.${p.language}`, { defaultValue: p.language })}
           </Field>
           <Field label={t('patient-detail:fields.procedureType')}>
-            {t(`patient-detail:procedures.${p.procedureType}`, { defaultValue: p.procedureType })}
+            {procedureLabel(t, p.procedureType)}
           </Field>
           <Field label={t('patient-detail:fields.dischargeDate')}>
             {formatDate(p.dischargeDate, lang)}

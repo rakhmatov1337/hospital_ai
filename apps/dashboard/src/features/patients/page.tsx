@@ -5,6 +5,7 @@ import type { PatientListItem } from '@hospital-ai/shared-types';
 import { Banner, Button, Card, DataTable, Spinner } from '../../ui';
 import type { Column } from '../../ui';
 import { cn } from '../../lib/cn';
+import { procedureLabel } from '../../lib/labels';
 import { errorCodeOf } from '../../lib/api-client';
 import { usePatients } from './api';
 import { filterPatients, PATIENT_FILTERS, type PatientFilter } from './filter';
@@ -12,7 +13,7 @@ import { AttentionBadge, PatientStatusBadge } from './badges';
 
 /** D4 — Patient list. Enriched, filterable, sortable clinic roster. */
 export function PatientsPage() {
-  const { t, i18n } = useTranslation(['patients', 'errors', 'common']);
+  const { t, i18n } = useTranslation(['patients', 'patient-detail', 'errors', 'common']);
   const navigate = useNavigate();
   const [filter, setFilter] = useState<PatientFilter>('all');
 
@@ -49,8 +50,8 @@ export function PatientsPage() {
       key: 'procedure',
       header: t('patients:columns.procedure'),
       sortable: true,
-      sortValue: (p) => p.procedureType.toLowerCase(),
-      render: (p) => <span className="text-text">{p.procedureType}</span>,
+      sortValue: (p) => procedureLabel(t, p.procedureType).toLowerCase(),
+      render: (p) => <span className="text-text">{procedureLabel(t, p.procedureType)}</span>,
     },
     {
       key: 'discharge',

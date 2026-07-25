@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { IconPhone } from '@tabler/icons-react';
 import { Card } from '../../ui';
 import type { DashboardLanguage } from '../../lib/i18n';
+import { procedureLabel } from '../../lib/labels';
 import type { EscalationPatient } from './api';
 import { formatDate } from './format';
 
@@ -13,11 +14,11 @@ export function PatientPanel({
   patient: EscalationPatient;
   lang: DashboardLanguage;
 }) {
-  const { t } = useTranslation('escalation');
+  const { t } = useTranslation(['escalation', 'patient-detail']);
 
   const facts: Array<{ label: string; value: string }> = [
     { label: t('patient.ageBand'), value: patient.ageBand },
-    { label: t('patient.procedure'), value: patient.procedureType },
+    { label: t('patient.procedure'), value: procedureLabel(t, patient.procedureType) },
     { label: t('patient.discharge'), value: formatDate(patient.dischargeDate, lang) },
     { label: t('patient.recoveryDay'), value: t('patient.dayValue', { n: patient.recoveryDay }) },
     { label: t('patient.ref'), value: patient.patientRef },
