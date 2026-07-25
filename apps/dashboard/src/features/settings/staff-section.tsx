@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StaffRole, type StaffAccount } from '@hospital-ai/shared-types';
-import { Banner, Button, Card, ConfirmDialog, Input, Select, SelectItem, Spinner } from '../../ui';
+import { Banner, Button, ConfirmDialog, Input, Select, SelectItem, Spinner } from '../../ui';
 import {
   Table,
   TableBody,
@@ -114,8 +114,8 @@ export function StaffSection() {
   }
 
   return (
-    <Card className="flex min-w-0 flex-col gap-4">
-      <div className="flex items-center justify-between gap-4">
+    <section className="flex min-w-0 flex-col gap-4">
+      <div className="flex items-center justify-between gap-4 border-b border-border pb-4">
         <h2 className="text-h2 font-semibold text-text">{t('settings:sections.staff')}</h2>
         {isLead && (
           <Button size="sm" onClick={() => setCreating(true)}>
@@ -272,7 +272,6 @@ export function StaffSection() {
           </form>
         </DialogContent>
       </Dialog>
-
       <ConfirmDialog
         open={confirmDeactivate !== null}
         tone="danger"
@@ -293,6 +292,6 @@ export function StaffSection() {
           defaultValue: 'They will immediately lose access to the dashboard until reactivated.',
         })}
       </ConfirmDialog>
-    </Card>
+    </section>
   );
 }
