@@ -11,26 +11,17 @@ export interface QueueRowProps {
   submittedAt: string;
   status: EscalationStatus;
   tier: Tier;
-  /** Ladder halted (acknowledged/contacted) → no breach escalation border. */
   acknowledged?: boolean;
-  /** [TEST] rows render dashed + dimmed and are labelled. */
   isTest?: boolean;
-  /** Unacknowledged age (min) that flags an urgent left border. Default 15. */
   urgentAfterMinutes?: number;
-  /** Unacknowledged age (min) that flags a breach. Default 30. */
   breachAfterMinutes?: number;
   onClick?: () => void;
 }
 
 /**
- * Queue row (spec §2) — a scannable card: a left accent bar for the SLA state,
- * patient name + recovery day, a PROMINENT live elapsed counter (the triage
- * metric), and the tier + status. Min height 64.
- *
- * SLA visuals (based on unacknowledged age, NOT the row tier):
- *   ≥ urgentAfterMinutes  → amber accent + amber timer
- *   ≥ breachAfterMinutes  → red accent + red timer + Breached status
- * Acknowledged rows never show these (the ladder is halted).
+ * Queue row — a full-width, table-style row: patient name, recovery day, submitted
+ * time, a live elapsed counter, and tier + status spread across the width (no empty
+ * middle). A thin left accent flags the SLA state (urgent/breach).
  */
 export function QueueRow({
   patientName,
@@ -62,11 +53,7 @@ export function QueueRow({
     : urgentFlag
       ? 'bg-tier-urgent'
       : 'bg-transparent';
-  const timerClass = breached
-    ? 'text-tier-emergency'
-    : urgentFlag
-      ? 'text-tier-urgent'
-      : 'text-text';
+  const timerClass = breached ? 'text-tier-emergency' : urgentFlag ? 'text-tier-urgent' : 'text-text';
 
   return (
     <div
@@ -80,50 +67,54 @@ export function QueueRow({
         }
       }}
       className={cn(
-        'group relative flex min-h-row cursor-pointer items-center gap-3 px-4 py-3',
-        'outline-none transition-colors hover:bg-muted/60',
-        'focus-visible:bg-muted/60 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
+        'group relative grid min-h-row cursor-pointer items-center gap-x-6 px-5 py-3.5',
+        'grid-cols-[minmax(0,1fr)_auto] md:grid-cols-[minmax(0,1fr)_6rem_9rem_minmax(11rem,auto)]',
+        'outline-none transition-colors hover:bg-muted/50',
+        'focus-visible:bg-muted/50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
         isTest && 'opacity-60',
       )}
     >
-      {/* SLA accent — thin left edge, only for urgent/breach */}
       <span aria-hidden="true" className={cn('absolute inset-y-0 left-0 w-[3px]', accentClass)} />
 
-      <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        {/* Patient + meta */}
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <div className="flex items-center gap-2">
-            <span className="truncate text-body font-semibold text-text">{patientName}</span>
-            {isTest && (
-              <span className="shrink-0 rounded-input border border-border px-1.5 py-0.5 text-[0.7rem] font-semibold uppercase text-text-muted">
-                {t('queueRow.testTag', { defaultValue: '[TEST]' })}
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-2 text-caption text-text-muted">
-            <span>{t('queueRow.day', { defaultValue: 'Day {{n}}', n: recoveryDay })}</span>
-            <span aria-hidden="true">·</span>
-            <span>
-              {t('queueRow.submitted', { defaultValue: 'Submitted {{time}}', time: submittedTime })}
+      {/* Patient */}
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="truncate text-body font-semibold text-text">{patientName}</span>
+          {isTest && (
+            <span className="shrink-0 rounded-input border border-border px-1.5 py-0.5 text-[0.7rem] font-semibold uppercase text-text-muted">
+              {t('queueRow.testTag', { defaultValue: '[TEST]' })}
             </span>
-          </div>
+          )}
         </div>
+        {/* Compact meta on small screens (columns are hidden below md). */}
+        <div className="mt-0.5 flex items-center gap-2 text-caption text-text-muted md:hidden">
+          <span>{t('queueRow.day', { defaultValue: 'Day {{n}}', n: recoveryDay })}</span>
+          <span aria-hidden="true">·</span>
+          <span className={cn('font-semibold tabular-nums', timerClass)}>
+            {formatElapsed(submittedAt, now)}
+          </span>
+        </div>
+      </div>
 
-        {/* Elapsed metric + tier/status */}
-        <div className="flex shrink-0 items-center gap-4">
-          <div className="text-right">
-            <div className={cn('text-body font-semibold tabular-nums leading-tight', timerClass)}>
-              {formatElapsed(submittedAt, now)}
-            </div>
-            <div className="text-[0.7rem] uppercase tracking-wide text-text-muted">
-              {t('queueRow.elapsedLabel', { defaultValue: 'Elapsed' })}
-            </div>
-          </div>
-          <div className="flex flex-col items-end gap-1">
-            <TierBadge tier={tier} size="sm" />
-            <StatusChip status={breached ? EscalationStatus.breached : status} />
-          </div>
+      {/* Recovery day */}
+      <div className="hidden text-caption text-text-muted md:block">
+        {t('queueRow.day', { defaultValue: 'Day {{n}}', n: recoveryDay })}
+      </div>
+
+      {/* Elapsed (with submitted time beneath) */}
+      <div className="hidden md:block">
+        <div className={cn('text-body font-semibold tabular-nums leading-tight', timerClass)}>
+          {formatElapsed(submittedAt, now)}
         </div>
+        <div className="text-[0.7rem] uppercase tracking-wide text-text-muted">
+          {t('queueRow.submitted', { defaultValue: 'Submitted {{time}}', time: submittedTime })}
+        </div>
+      </div>
+
+      {/* Tier + status */}
+      <div className="flex items-center justify-end gap-2">
+        <TierBadge tier={tier} size="sm" />
+        <StatusChip status={breached ? EscalationStatus.breached : status} />
       </div>
     </div>
   );

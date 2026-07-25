@@ -27,7 +27,7 @@ export function EscalationDetailPage() {
   const { data, isLoading, isError, error, refetch } = useEscalationDetail(id);
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <div className="flex items-center gap-3">
         <Link
           to="/queue"
