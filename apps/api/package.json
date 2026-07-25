@@ -18,7 +18,8 @@
     "lint": "node scripts/no-patient-literals.mjs",
     "prisma:migrate": "prisma migrate dev",
     "prisma:generate": "prisma generate",
-    "studio": "mastra dev"
+    "studio": "mastra dev",
+    "qa:eval:assistant": "ts-node --transpile-only -P tsconfig.json src/ai/qa/eval-assistant.ts"
   },
   "dependencies": {
     "@hospital-ai/shared-types": "workspace:*",

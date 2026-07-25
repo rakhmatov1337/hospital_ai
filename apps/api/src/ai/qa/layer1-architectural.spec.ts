@@ -13,7 +13,7 @@ import { validateAnswers, contentKeyForTier } from '../../checkins/checkins.serv
 import { CONTENT_KEY_PATTERN } from '../../plans/care-plan-assembler';
 import { Tier } from '@hospital-ai/shared-types';
 
-describe('Layer 1 — Architectural (A1–A5)', () => {
+describe('Layer 1 — Architectural (A1–A6)', () => {
   let byId: Map<string, CaseResult>;
 
   beforeAll(async () => {
@@ -46,6 +46,10 @@ describe('Layer 1 — Architectural (A1–A5)', () => {
 
   it('A5 — survey free-text is write-only (never read by a patient-output path)', () => {
     expectPass('A5');
+  });
+
+  it('A6 — the assistant is the single sanctioned model→patient path, guarded on input and output (EN/RU/UZ)', () => {
+    expectPass('A6');
   });
 
   // --- Direct corroborating assertions (independent of the aggregate result) ---

@@ -19,6 +19,7 @@ import { EscalationsModule } from './escalations/escalations.module';
 import { ContentModule } from './content/content.module';
 import { TelemetryModule } from './telemetry/telemetry.module';
 import { MeModule } from './me/me.module';
+import { AssistantModule } from './assistant/assistant.module';
 import { AiModule } from './ai/ai.module';
 
 @Module({
@@ -41,6 +42,7 @@ import { AiModule } from './ai/ai.module';
     ContentModule,
     TelemetryModule,
     MeModule,
+    AssistantModule,
     AiModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: AppExceptionFilter }],

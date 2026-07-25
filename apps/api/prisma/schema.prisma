@@ -98,13 +98,14 @@ model Clinic {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
-  staff           Staff[]
-  patients        Patient[]
-  recoveryPlans   RecoveryPlan[]
-  escalationRules EscalationRule[]
-  contentItems    ContentItem[]
-  events          Event[]
-  auditLogs       AuditLog[]
+  staff            Staff[]
+  patients         Patient[]
+  recoveryPlans    RecoveryPlan[]
+  escalationRules  EscalationRule[]
+  contentItems     ContentItem[]
+  events           Event[]
+  auditLogs        AuditLog[]
+  assistantThreads AssistantThread[]
 
   @@map("clinic")
 }
@@ -145,13 +146,14 @@ model Patient {
   createdAt      DateTime      @default(now()) @map("created_at")
   updatedAt      DateTime      @updatedAt @map("updated_at")
 
-  clinic          Clinic           @relation(fields: [clinicId], references: [id])
-  plan            RecoveryPlan?    @relation(fields: [planId], references: [id])
-  consents        Consent[]
-  tasks           Task[]
-  checkIns        CheckIn[]
-  escalations     Escalation[]
-  surveyResponses SurveyResponse[]
+  clinic           Clinic            @relation(fields: [clinicId], references: [id])
+  plan             RecoveryPlan?     @relation(fields: [planId], references: [id])
+  consents         Consent[]
+  tasks            Task[]
+  checkIns         CheckIn[]
+  escalations      Escalation[]
+  surveyResponses  SurveyResponse[]
+  assistantThreads AssistantThread[]
 
   @@unique([clinicId, patientRef])
   @@index([clinicId])
@@ -432,4 +434,51 @@ model SurveyResponse {
 
   @@index([patientId])
   @@map("survey_response")
+}
+
+// ---------------------------------------------------------------------------
+// SP7 — Patient Assistant (grounded chat). The ONLY model→patient surface.
+// Messages are immutable after write (no edits); content_refs records which
+// approved content grounded each reply (audit trail), guard_verdict records
+// whether the output guard passed or replaced the reply with contact-clinic
+// content. Clinic-scoped for tenancy; patient-scoped for access.
+// ---------------------------------------------------------------------------
+enum AssistantRole {
+  user
+  assistant
+}
+
+model AssistantThread {
+  id        String   @id @default(uuid(7))
+  clinicId  String   @map("clinic_id")
+  patientId String   @map("patient_id")
+  title     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  clinic   Clinic             @relation(fields: [clinicId], references: [id])
+  patient  Patient            @relation(fields: [patientId], references: [id])
+  messages AssistantMessage[]
+
+  @@index([clinicId])
+  @@index([patientId])
+  @@map("assistant_thread")
+}
+
+model AssistantMessage {
+  id        String        @id @default(uuid(7))
+  threadId  String        @map("thread_id")
+  role      AssistantRole
+  content   String
+  // Approved content keys that grounded this reply (empty for user turns and
+  // for refusals). JSON array of strings.
+  contentRefs Json        @default("[]") @map("content_refs")
+  // 'passed' | 'replaced' | 'red_flag_bypass' | null (user turns).
+  guardVerdict String?    @map("guard_verdict")
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  thread AssistantThread @relation(fields: [threadId], references: [id])
+
+  @@index([threadId])
+  @@map("assistant_message")
 }
