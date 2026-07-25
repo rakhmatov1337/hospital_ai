@@ -84,7 +84,7 @@ describe('QueueBoard (D2) — breach flag thresholds', () => {
         ],
       }),
     );
-    expect(screen.getByText('BREACHED')).toBeInTheDocument();
+    expect(document.querySelector('[data-status="breached"]')).toBeTruthy();
   });
 
   it('does NOT flag BREACHED before 30 minutes (15-min urgent window)', () => {
@@ -99,7 +99,7 @@ describe('QueueBoard (D2) — breach flag thresholds', () => {
         ],
       }),
     );
-    expect(screen.queryByText('BREACHED')).not.toBeInTheDocument();
+    expect(document.querySelector('[data-status="breached"]')).toBeNull();
   });
 
   it('never flags BREACHED once the ladder is halted (acknowledged)', () => {
@@ -114,6 +114,6 @@ describe('QueueBoard (D2) — breach flag thresholds', () => {
         ],
       }),
     );
-    expect(screen.queryByText('BREACHED')).not.toBeInTheDocument();
+    expect(document.querySelector('[data-status="breached"]')).toBeNull();
   });
 });
