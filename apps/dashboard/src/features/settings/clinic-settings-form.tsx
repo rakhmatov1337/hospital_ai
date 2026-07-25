@@ -1,8 +1,29 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Banner, Button, Card, ConfirmDialog, Input } from '../../ui';
+import { Banner, Button, ConfirmDialog, Input } from '../../ui';
 import { errorCodeOf } from '../../lib/api-client';
 import { useUpdateClinic, type ClinicUpdatePayload, type ClinicView } from './api';
+
+/** A settings section: title + description on the left, fields on the right. */
+function FormSection({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="grid gap-x-8 gap-y-4 py-6 md:grid-cols-3">
+      <div className="md:col-span-1">
+        <h2 className="text-body font-semibold text-text">{title}</h2>
+        {description && <p className="mt-1 text-caption text-text-muted">{description}</p>}
+      </div>
+      <div className="flex flex-col gap-4 md:col-span-2">{children}</div>
+    </div>
+  );
+}
 
 /** All clinic fields as strings for controlled inputs (minutes parsed on submit). */
 interface ClinicFormState {
@@ -128,13 +149,16 @@ export function ClinicSettingsForm({ clinic }: ClinicSettingsFormProps) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-6" noValidate>
+    <form
+      onSubmit={onSubmit}
+      className="flex flex-col divide-y divide-border overflow-hidden rounded-input border border-border bg-card px-5 sm:px-6"
+      noValidate
+    >
       {/* Clinic details — patient-facing */}
-      <Card className="flex flex-col gap-4">
-        <div>
-          <h2 className="text-h2 font-semibold text-text">{t('settings:sections.details')}</h2>
-          <p className="mt-1 text-caption text-text-muted">{t('settings:hints.patientFacing')}</p>
-        </div>
+      <FormSection
+        title={t('settings:sections.details')}
+        description={t('settings:hints.patientFacing')}
+      >
         <Input
           label={`${t('settings:fields.name')} · ${t('settings:hints.patientFacingTag')}`}
           value={form.name}
@@ -152,11 +176,10 @@ export function ClinicSettingsForm({ clinic }: ClinicSettingsFormProps) {
           onChange={set('emergencyNumber')}
           inputMode="tel"
         />
-      </Card>
+      </FormSection>
 
       {/* Working hours */}
-      <Card className="flex flex-col gap-4">
-        <h2 className="text-h2 font-semibold text-text">{t('settings:sections.hours')}</h2>
+      <FormSection title={t('settings:sections.hours')}>
         <Input
           label={t('settings:fields.workingHours')}
           value={form.workingHours}
@@ -169,11 +192,10 @@ export function ClinicSettingsForm({ clinic }: ClinicSettingsFormProps) {
           onChange={set('workingDays')}
           hint={t('settings:hints.workingDays')}
         />
-      </Card>
+      </FormSection>
 
       {/* On-call contacts */}
-      <Card className="flex flex-col gap-4">
-        <h2 className="text-h2 font-semibold text-text">{t('settings:sections.contacts')}</h2>
+      <FormSection title={t('settings:sections.contacts')}>
         <Input
           label={t('settings:fields.onDutyContact')}
           value={form.onDutyContact}
@@ -192,15 +214,14 @@ export function ClinicSettingsForm({ clinic }: ClinicSettingsFormProps) {
           onChange={set('headContact')}
           inputMode="tel"
         />
-      </Card>
+      </FormSection>
 
       {/* Escalation timings */}
-      <Card className="flex flex-col gap-4">
-        <div>
-          <h2 className="text-h2 font-semibold text-text">{t('settings:sections.escalation')}</h2>
-          <p className="mt-1 text-caption text-text-muted">{t('settings:hints.escalation')}</p>
-        </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <FormSection
+        title={t('settings:sections.escalation')}
+        description={t('settings:hints.escalation')}
+      >
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Input
             label={t('settings:fields.notifyMinutes')}
             type="number"
@@ -234,13 +255,17 @@ export function ClinicSettingsForm({ clinic }: ClinicSettingsFormProps) {
             {t('settings:timing.order')}
           </p>
         )}
-      </Card>
+      </FormSection>
 
-      {error && <Banner tone="danger">{error}</Banner>}
-      {saved && !isDirty && <Banner tone="success">{t('settings:saved')}</Banner>}
+      {(error || (saved && !isDirty)) && (
+        <div className="py-4">
+          {error && <Banner tone="danger">{error}</Banner>}
+          {saved && !isDirty && <Banner tone="success">{t('settings:saved')}</Banner>}
+        </div>
+      )}
 
-      <div className="flex items-center justify-end gap-3">
-        <Button type="submit" size="lg" disabled={!isDirty || updateClinic.isPending || timingInvalid}>
+      <div className="flex items-center justify-end gap-3 py-4">
+        <Button type="submit" disabled={!isDirty || updateClinic.isPending || timingInvalid}>
           {updateClinic.isPending ? t('settings:actions.saving') : t('settings:actions.save')}
         </Button>
       </div>
