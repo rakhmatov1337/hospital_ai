@@ -132,7 +132,7 @@ function MetricsBody({
   return (
     <div className="flex flex-col gap-6">
       {/* Headline metric cards */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-px overflow-hidden rounded-input border border-border bg-border sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           label={t('cards.adherence')}
           value={formatPct(report.adherence.overall)}
@@ -158,7 +158,7 @@ function MetricsBody({
       {/* Escalation summary cards */}
       <div>
         <h2 className="mb-2 text-h2 font-semibold text-text">{t('sections.escalations')}</h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-px overflow-hidden rounded-input border border-border bg-border sm:grid-cols-2 xl:grid-cols-4">
           <MetricCard
             label={t('cards.escalationsTotal')}
             value={String(esc.total)}
@@ -189,7 +189,7 @@ function MetricsBody({
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Card>
           <AdherenceTrendChart
             byRecoveryDay={report.adherence.byRecoveryDay}
@@ -247,7 +247,7 @@ function MetricsBody({
             {t('units.responses', { count: sat.responseCount })}
           </span>
         </h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-px overflow-hidden rounded-input border border-border bg-border sm:grid-cols-2 xl:grid-cols-4">
           {(
             [
               ['q1Helpful', sat.q1Helpful],

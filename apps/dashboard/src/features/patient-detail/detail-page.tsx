@@ -158,7 +158,7 @@ export function PatientDetailPage() {
       </Card>
 
       {/* Enrichment metrics — denominators always shown */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-px overflow-hidden rounded-input border border-border bg-border sm:grid-cols-3">
         <MetricCard
           label={t('patient-detail:metrics.adherence')}
           value={formatPercent(p.adherence)}

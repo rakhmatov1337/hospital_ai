@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import { Card } from '@/components/ui/card';
 import { cn } from '../lib/cn';
 
 export interface MetricCardProps {
@@ -15,20 +14,42 @@ export interface MetricCardProps {
   className?: string;
 }
 
-/** Metric card — Display number, Caption label, denominator beneath (muted). */
+/**
+ * A single stat — label, big value, denominator beneath. Rendered borderless so it
+ * sits as a cell inside a bordered `MetricStrip` (hairline-divided), matching the
+ * flat/editorial queue style rather than a floating card.
+ */
 export function MetricCard({ value, label, denominator, className }: MetricCardProps) {
   return (
-    <Card
-      className={cn(
-        'flex flex-col gap-1 rounded-card border border-border bg-surface p-4 shadow-card',
-        className,
-      )}
-    >
+    <div className={cn('flex flex-col gap-1 bg-card p-4', className)}>
       <span className="text-caption font-semibold uppercase tracking-wide text-text-muted">
         {label}
       </span>
-      <span className="text-display text-text tabular-nums">{value}</span>
+      <span className="text-display text-text tabular-nums leading-none">{value}</span>
       <span className="text-caption text-text-muted">{denominator}</span>
-    </Card>
+    </div>
+  );
+}
+
+/**
+ * Bordered stat strip — wraps `MetricCard` cells with hairline dividers (the
+ * `gap-px` over a `bg-border` container reveals 1px rules between cells).
+ */
+export function MetricStrip({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        'grid grid-cols-1 gap-px overflow-hidden rounded-input border border-border bg-border sm:grid-cols-2 xl:grid-cols-4',
+        className,
+      )}
+    >
+      {children}
+    </div>
   );
 }

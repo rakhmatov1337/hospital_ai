@@ -15,7 +15,7 @@ export { QueueSectionHeader } from './QueueSectionHeader';
 export type { QueueSectionHeaderProps } from './QueueSectionHeader';
 export { QueueRow } from './QueueRow';
 export type { QueueRowProps } from './QueueRow';
-export { MetricCard } from './MetricCard';
+export { MetricCard, MetricStrip } from './MetricCard';
 export type { MetricCardProps } from './MetricCard';
 export { DataTable } from './DataTable';
 export type { DataTableProps, Column } from './DataTable';
