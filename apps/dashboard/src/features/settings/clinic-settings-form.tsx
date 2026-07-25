@@ -15,12 +15,12 @@ function FormSection({
   children: ReactNode;
 }) {
   return (
-    <div className="grid gap-x-8 gap-y-4 py-6 md:grid-cols-3">
-      <div className="md:col-span-1">
+    <div className="grid gap-x-8 gap-y-3 py-5 md:grid-cols-[13rem_minmax(0,1fr)]">
+      <div>
         <h2 className="text-body font-semibold text-text">{title}</h2>
         {description && <p className="mt-1 text-caption text-text-muted">{description}</p>}
       </div>
-      <div className="flex flex-col gap-3.5 md:col-span-2">{children}</div>
+      <div className="flex flex-col gap-3.5">{children}</div>
     </div>
   );
 }
