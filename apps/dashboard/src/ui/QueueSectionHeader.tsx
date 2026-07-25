@@ -10,9 +10,10 @@ export interface QueueSectionHeaderProps {
 }
 
 /**
- * Queue section header — a coloured bar in the tier colour, white text, and a
- * count badge. Sections are always rendered Emergency → Urgent → Routine
- * (ordering is the queue screen's responsibility; see TIER_ORDER).
+ * Queue section header — a quiet, editorial label: a small tier-coloured chip with
+ * the tier icon, the tier name, and a count. The tier colour still reads instantly
+ * (chip + icon) without a loud full-width bar. Sections render Emergency → Urgent →
+ * Routine (ordering is the queue screen's responsibility; see TIER_ORDER).
  */
 export function QueueSectionHeader({ tier, count, className }: QueueSectionHeaderProps) {
   const { t } = useTranslation('common');
@@ -20,23 +21,21 @@ export function QueueSectionHeader({ tier, count, className }: QueueSectionHeade
   const label = t(`tier.${tier}`, { defaultValue: meta.defaultLabel });
 
   return (
-    <div
-      className={cn(
-        'flex items-center justify-between rounded-input px-4 py-2 text-white',
-        meta.bgClass,
-        className,
-      )}
-    >
-      <span className="inline-flex items-center gap-2 text-h2 font-semibold">
-        <span aria-hidden="true">{meta.icon}</span>
-        <span>{label}</span>
-      </span>
+    <div className={cn('flex items-center gap-2.5', className)}>
       <span
-        aria-label={`${count}`}
-        className="inline-flex min-w-[24px] items-center justify-center rounded-full bg-white/25 px-2 py-0.5 text-body font-semibold"
+        aria-hidden="true"
+        className={cn(
+          'flex size-5 items-center justify-center rounded-[5px] text-[0.7rem] leading-none text-white',
+          meta.bgClass,
+        )}
       >
+        {meta.icon}
+      </span>
+      <span className="text-caption font-semibold uppercase tracking-wide text-text">{label}</span>
+      <span aria-label={`${count}`} className="text-caption font-semibold text-text-muted">
         {count}
       </span>
+      <span className="ml-1 h-px flex-1 bg-border" aria-hidden="true" />
     </div>
   );
 }

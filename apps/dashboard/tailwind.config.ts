@@ -136,8 +136,8 @@ const config: Config = {
         row: '64px',
       },
       boxShadow: {
-        // Soft, layered elevation — cards float gently over the tinted canvas.
-        card: '0 1px 2px -1px rgb(15 34 42 / 0.06), 0 6px 18px -6px rgb(15 34 42 / 0.10)',
+        // Near-flat: cards are hairline-bordered panels, not floating bubbles.
+        card: '0 1px 2px 0 rgb(15 23 42 / 0.03)',
       },
     },
   },

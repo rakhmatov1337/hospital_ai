@@ -32,14 +32,14 @@ export function QueueBoard({
       {TIER_ORDER.map((tier) => {
         const items = data.sections[tier];
         return (
-          <section key={tier} aria-label={tier} className="flex flex-col gap-3">
+          <section key={tier} aria-label={tier} className="flex flex-col gap-2.5">
             <QueueSectionHeader tier={tier} count={items.length} />
             {items.length === 0 ? (
-              <p className="px-4 py-2 text-caption text-text-muted">
+              <p className="px-1 text-caption text-text-muted">
                 {t('section.empty', { defaultValue: 'No items in this section' })}
               </p>
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="divide-y divide-border overflow-hidden rounded-input border border-border bg-card">
                 {items.map((item) => (
                   <QueueRow
                     key={item.id}

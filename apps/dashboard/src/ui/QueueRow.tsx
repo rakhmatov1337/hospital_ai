@@ -61,7 +61,7 @@ export function QueueRow({
     ? 'bg-tier-emergency'
     : urgentFlag
       ? 'bg-tier-urgent'
-      : 'bg-border';
+      : 'bg-transparent';
   const timerClass = breached
     ? 'text-tier-emergency'
     : urgentFlag
@@ -80,16 +80,16 @@ export function QueueRow({
         }
       }}
       className={cn(
-        'group flex min-h-row cursor-pointer items-stretch gap-3 overflow-hidden rounded-input border border-border bg-card shadow-card',
-        'outline-none transition-colors hover:border-primary/30 hover:bg-primary/[0.03]',
-        'focus-visible:ring-2 focus-visible:ring-primary',
-        isTest && 'border-dashed opacity-60',
+        'group relative flex min-h-row cursor-pointer items-center gap-3 px-4 py-3',
+        'outline-none transition-colors hover:bg-muted/60',
+        'focus-visible:bg-muted/60 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
+        isTest && 'opacity-60',
       )}
     >
-      {/* SLA accent bar */}
-      <span aria-hidden="true" className={cn('w-1 shrink-0 rounded-full', accentClass)} />
+      {/* SLA accent — thin left edge, only for urgent/breach */}
+      <span aria-hidden="true" className={cn('absolute inset-y-0 left-0 w-[3px]', accentClass)} />
 
-      <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-4 gap-y-2 py-2.5 pr-4">
+      <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-4 gap-y-2">
         {/* Patient + meta */}
         <div className="flex min-w-0 flex-col gap-0.5">
           <div className="flex items-center gap-2">
