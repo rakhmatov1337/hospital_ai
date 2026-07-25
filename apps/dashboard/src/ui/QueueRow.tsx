@@ -23,12 +23,13 @@ export interface QueueRowProps {
 }
 
 /**
- * Queue row (spec §2) — min height 64. Shows patient name (H2), recovery day,
- * submitted time, a LIVE elapsed counter, tier and status.
+ * Queue row (spec §2) — a scannable card: a left accent bar for the SLA state,
+ * patient name + recovery day, a PROMINENT live elapsed counter (the triage
+ * metric), and the tier + status. Min height 64.
  *
- * Escalation-of-SLA visuals (based on unacknowledged age, NOT the row tier):
- *   ≥ urgentAfterMinutes  → urgent 4px left border
- *   ≥ breachAfterMinutes  → emergency 4px left border + BREACHED chip
+ * SLA visuals (based on unacknowledged age, NOT the row tier):
+ *   ≥ urgentAfterMinutes  → amber accent + amber timer
+ *   ≥ breachAfterMinutes  → red accent + red timer + Breached status
  * Acknowledged rows never show these (the ladder is halted).
  */
 export function QueueRow({
@@ -56,11 +57,16 @@ export function QueueRow({
       : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   })();
 
-  const borderClass = breached
-    ? 'border-l-tier-emergency'
+  const accentClass = breached
+    ? 'bg-tier-emergency'
     : urgentFlag
-      ? 'border-l-tier-urgent'
-      : 'border-l-transparent';
+      ? 'bg-tier-urgent'
+      : 'bg-border';
+  const timerClass = breached
+    ? 'text-tier-emergency'
+    : urgentFlag
+      ? 'text-tier-urgent'
+      : 'text-text';
 
   return (
     <div
@@ -74,44 +80,50 @@ export function QueueRow({
         }
       }}
       className={cn(
-        'grid min-h-row cursor-pointer grid-cols-[1fr_auto] items-center gap-3 border border-l-4 border-border bg-surface px-4 py-2',
-        'rounded-input outline-none transition-colors hover:bg-primary/5',
+        'group flex min-h-row cursor-pointer items-stretch gap-3 overflow-hidden rounded-input border border-border bg-card shadow-card',
+        'outline-none transition-colors hover:border-primary/30 hover:bg-primary/[0.03]',
         'focus-visible:ring-2 focus-visible:ring-primary',
-        borderClass,
         isTest && 'border-dashed opacity-60',
       )}
     >
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <div className="flex items-center gap-2">
-          <span className="truncate text-h2 font-semibold text-text">{patientName}</span>
-          {isTest && (
-            <span className="rounded-input border border-border px-1.5 py-0.5 text-caption font-semibold text-text-muted">
-              {t('queueRow.testTag', { defaultValue: '[TEST]' })}
-            </span>
-          )}
-        </div>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-caption text-text-muted">
-          <span>{t('queueRow.day', { defaultValue: 'Day {{n}}', n: recoveryDay })}</span>
-          <span>
-            {t('queueRow.submitted', { defaultValue: 'Submitted {{time}}', time: submittedTime })}
-          </span>
-          <span
-            className="font-semibold tabular-nums text-text"
-            aria-label={t('queueRow.elapsedLabel', { defaultValue: 'Elapsed time' })}
-          >
-            {formatElapsed(submittedAt, now)}
-          </span>
-        </div>
-      </div>
+      {/* SLA accent bar */}
+      <span aria-hidden="true" className={cn('w-1 shrink-0 rounded-full', accentClass)} />
 
-      <div className="flex items-center gap-2">
-        <TierBadge tier={tier} size="sm" />
-        {breached && (
-          <span className="inline-flex items-center rounded-input bg-tier-emergency px-2.5 py-0.5 text-caption font-semibold text-white">
-            {t('queueRow.breached', { defaultValue: 'BREACHED' })}
-          </span>
-        )}
-        <StatusChip status={breached ? EscalationStatus.breached : status} />
+      <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-4 gap-y-2 py-2.5 pr-4">
+        {/* Patient + meta */}
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <div className="flex items-center gap-2">
+            <span className="truncate text-body font-semibold text-text">{patientName}</span>
+            {isTest && (
+              <span className="shrink-0 rounded-input border border-border px-1.5 py-0.5 text-[0.7rem] font-semibold uppercase text-text-muted">
+                {t('queueRow.testTag', { defaultValue: '[TEST]' })}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2 text-caption text-text-muted">
+            <span>{t('queueRow.day', { defaultValue: 'Day {{n}}', n: recoveryDay })}</span>
+            <span aria-hidden="true">·</span>
+            <span>
+              {t('queueRow.submitted', { defaultValue: 'Submitted {{time}}', time: submittedTime })}
+            </span>
+          </div>
+        </div>
+
+        {/* Elapsed metric + tier/status */}
+        <div className="flex shrink-0 items-center gap-4">
+          <div className="text-right">
+            <div className={cn('text-body font-semibold tabular-nums leading-tight', timerClass)}>
+              {formatElapsed(submittedAt, now)}
+            </div>
+            <div className="text-[0.7rem] uppercase tracking-wide text-text-muted">
+              {t('queueRow.elapsedLabel', { defaultValue: 'Elapsed' })}
+            </div>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <TierBadge tier={tier} size="sm" />
+            <StatusChip status={breached ? EscalationStatus.breached : status} />
+          </div>
+        </div>
       </div>
     </div>
   );
