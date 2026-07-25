@@ -7,7 +7,6 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  type TooltipProps,
 } from 'recharts';
 import type { AdherencePoint } from '@hospital-ai/shared-types';
 import {
@@ -125,7 +124,13 @@ export function AdherenceChart({ series }: { series: AdherencePoint[] }) {
   );
 }
 
-function AdherenceTooltip({ active, payload }: TooltipProps<number, string>) {
+function AdherenceTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: Array<{ payload?: ChartRow }>;
+}) {
   const { t } = useTranslation('patient-detail');
   if (!active || !payload || payload.length === 0) return null;
   const row = payload[0].payload as ChartRow;

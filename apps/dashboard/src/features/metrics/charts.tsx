@@ -1,40 +1,28 @@
-import type { ReactNode } from 'react';
+import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, XAxis, YAxis } from 'recharts';
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from '@/components/ui/chart';
 import { TIER_COLOR_HEX, TIER_META, TIER_ORDER } from '../../ui';
 import type { Denominated } from './api';
 import { pctValue } from './format';
 
 /**
- * D6 charts (Recharts, design-system palette). Accessibility:
+ * D6 charts — Recharts wrapped in the shadcn `ChartContainer`/`ChartTooltip`
+ * (theme-aware colours via CSS vars). Accessibility:
  *  - never colour alone — every series is distinguished by an axis category
  *    label (recovery day, day-7/14/30, tier name+icon, language), not hue;
  *  - every tooltip shows the denominator behind the percentage;
  *  - each chart is wrapped in a role="img" figure carrying a text summary.
  */
 
-// Design-system hexes for charts (tier.ts keeps its own `hex` for the same reason).
-const PRIMARY = '#0F5F6B';
-const SUCCESS = '#1B7F5A';
-const AXIS = '#5B6673'; // text-muted
-const GRID = '#C9DBDE'; // border
-
 interface PctDatum {
   label: string;
   pct: number | null;
   num: number;
   den: number;
-  fill?: string;
 }
 
 interface CountDatum {
@@ -44,63 +32,61 @@ interface CountDatum {
   fill?: string;
 }
 
+const AXIS_TICK = { fill: 'var(--muted-foreground)', fontSize: 12 } as const;
+
 /** Accessible chart frame: caption + role="img" wrapper with an offscreen summary. */
 function ChartFrame({
   title,
   summary,
+  config,
   children,
 }: {
   title: string;
   summary: string;
-  children: ReactNode;
+  config: ChartConfig;
+  children: React.ComponentProps<typeof ChartContainer>['children'];
 }) {
   return (
     <figure className="m-0">
-      <figcaption className="mb-2 text-h2 font-semibold text-text">{title}</figcaption>
+      <figcaption className="mb-3 text-h2 font-semibold text-text">{title}</figcaption>
       <div role="img" aria-label={`${title}. ${summary}`}>
-        {children}
+        <ChartContainer config={config} className="aspect-auto h-[240px] w-full">
+          {children}
+        </ChartContainer>
       </div>
     </figure>
   );
 }
 
-/** Minimal shape of the Recharts tooltip render props we actually read. */
-interface TooltipRenderProps {
-  active?: boolean;
-  payload?: Array<{ payload?: unknown }>;
-  unit: string;
+/** Tooltip line for a percentage metric: "82% · 41 of 50 patients". */
+function pctFormatter(unit: string) {
+  return (value: unknown, _name: unknown, item: { payload?: PctDatum }) => {
+    const d = item.payload;
+    if (!d) return null;
+    return (
+      <span className="text-caption">
+        <span className="font-semibold text-text">{d.pct == null ? '—' : `${d.pct}%`}</span>{' '}
+        <span className="text-text-muted">
+          · {d.num} of {d.den} {unit}
+        </span>
+      </span>
+    );
+  };
 }
 
-function PctTooltip({ active, payload, unit }: TooltipRenderProps) {
-  if (!active || !payload || payload.length === 0) return null;
-  const d = payload[0]?.payload as PctDatum | undefined;
-  if (!d) return null;
-  return (
-    <div className="rounded-input border border-border bg-surface p-2 text-caption shadow-card">
-      <p className="font-semibold text-text">{d.label}</p>
-      <p className="text-text">{d.pct == null ? '—' : `${d.pct}%`}</p>
-      <p className="text-text-muted">
-        {d.num} of {d.den} {unit}
-      </p>
-    </div>
-  );
+function countFormatter(unit: string) {
+  return (value: unknown, _name: unknown, item: { payload?: CountDatum }) => {
+    const d = item.payload;
+    if (!d) return null;
+    return (
+      <span className="text-caption text-text-muted">
+        <span className="font-semibold text-text">{d.count}</span> of {d.total} {unit}
+      </span>
+    );
+  };
 }
 
-function CountTooltip({ active, payload, unit }: TooltipRenderProps) {
-  if (!active || !payload || payload.length === 0) return null;
-  const d = payload[0]?.payload as CountDatum | undefined;
-  if (!d) return null;
-  return (
-    <div className="rounded-input border border-border bg-surface p-2 text-caption shadow-card">
-      <p className="font-semibold text-text">{d.label}</p>
-      <p className="text-text">
-        {d.count} of {d.total} {unit}
-      </p>
-    </div>
-  );
-}
-
-/** Adherence % by recovery day — a single primary line; days sit on the X axis. */
+/** Adherence % by recovery day — a single line; days sit on the X axis. */
 export function AdherenceTrendChart({
   byRecoveryDay,
   title,
@@ -110,7 +96,7 @@ export function AdherenceTrendChart({
   title: string;
   unit: string;
 }) {
-  const data: PctDatum[] = Object.entries(byRecoveryDay)
+  const data: Array<PctDatum & { day: number }> = Object.entries(byRecoveryDay)
     .map(([day, d]) => ({
       label: `Day ${day}`,
       day: Number(day),
@@ -118,34 +104,35 @@ export function AdherenceTrendChart({
       num: d.numerator,
       den: d.denominator,
     }))
-    .sort((a, b) => (a as { day: number }).day - (b as { day: number }).day);
+    .sort((a, b) => a.day - b.day);
 
-  const summary = data.map((d) => `${d.label}: ${d.pct == null ? 'n/a' : `${d.pct}%`} (${d.num} of ${d.den})`).join('; ');
+  const summary = data
+    .map((d) => `${d.label}: ${d.pct == null ? 'n/a' : `${d.pct}%`} (${d.num} of ${d.den})`)
+    .join('; ');
+  const config = { pct: { label: unit, color: 'var(--chart-1)' } } satisfies ChartConfig;
 
   return (
-    <ChartFrame title={title} summary={summary}>
-      <ResponsiveContainer width="100%" height={240}>
-        <LineChart data={data} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
-          <CartesianGrid stroke={GRID} strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="label" tick={{ fill: AXIS, fontSize: 12 }} stroke={GRID} />
-          <YAxis domain={[0, 100]} unit="%" tick={{ fill: AXIS, fontSize: 12 }} stroke={GRID} width={44} />
-          <Tooltip content={({ active, payload }) => <PctTooltip active={active} payload={payload} unit={unit} />} />
-          <Line
-            type="monotone"
-            dataKey="pct"
-            stroke={PRIMARY}
-            strokeWidth={2}
-            dot={{ r: 3, fill: PRIMARY }}
-            connectNulls
-            isAnimationActive={false}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+    <ChartFrame title={title} summary={summary} config={config}>
+      <LineChart data={data} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
+        <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+        <XAxis dataKey="label" tick={AXIS_TICK} stroke="var(--border)" tickLine={false} />
+        <YAxis domain={[0, 100]} unit="%" tick={AXIS_TICK} stroke="var(--border)" width={44} tickLine={false} />
+        <ChartTooltip content={<ChartTooltipContent labelKey="label" formatter={pctFormatter(unit)} />} />
+        <Line
+          type="monotone"
+          dataKey="pct"
+          stroke="var(--color-pct)"
+          strokeWidth={2.5}
+          dot={{ r: 3, fill: 'var(--color-pct)' }}
+          connectNulls
+          isAnimationActive={false}
+        />
+      </LineChart>
     </ChartFrame>
   );
 }
 
-/** Retention curve — % active at day 7 / 14 / 30, as labelled bars. */
+/** Retention — % active at day 7 / 14 / 30, as labelled bars. */
 export function RetentionChart({
   points,
   title,
@@ -161,19 +148,20 @@ export function RetentionChart({
     num: p.d.numerator,
     den: p.d.denominator,
   }));
-  const summary = data.map((d) => `${d.label}: ${d.pct == null ? 'n/a' : `${d.pct}%`} (${d.num} of ${d.den})`).join('; ');
+  const summary = data
+    .map((d) => `${d.label}: ${d.pct == null ? 'n/a' : `${d.pct}%`} (${d.num} of ${d.den})`)
+    .join('; ');
+  const config = { pct: { label: unit, color: 'var(--chart-2)' } } satisfies ChartConfig;
 
   return (
-    <ChartFrame title={title} summary={summary}>
-      <ResponsiveContainer width="100%" height={240}>
-        <BarChart data={data} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
-          <CartesianGrid stroke={GRID} strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="label" tick={{ fill: AXIS, fontSize: 12 }} stroke={GRID} />
-          <YAxis domain={[0, 100]} unit="%" tick={{ fill: AXIS, fontSize: 12 }} stroke={GRID} width={44} />
-          <Tooltip cursor={{ fill: 'rgba(15,95,107,0.06)' }} content={({ active, payload }) => <PctTooltip active={active} payload={payload} unit={unit} />} />
-          <Bar dataKey="pct" fill={SUCCESS} radius={[4, 4, 0, 0]} isAnimationActive={false} />
-        </BarChart>
-      </ResponsiveContainer>
+    <ChartFrame title={title} summary={summary} config={config}>
+      <BarChart data={data} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
+        <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+        <XAxis dataKey="label" tick={AXIS_TICK} stroke="var(--border)" tickLine={false} />
+        <YAxis domain={[0, 100]} unit="%" tick={AXIS_TICK} stroke="var(--border)" width={44} tickLine={false} />
+        <ChartTooltip content={<ChartTooltipContent labelKey="label" formatter={pctFormatter(unit)} />} />
+        <Bar dataKey="pct" fill="var(--color-pct)" radius={[6, 6, 0, 0]} isAnimationActive={false} />
+      </BarChart>
     </ChartFrame>
   );
 }
@@ -190,7 +178,6 @@ export function EscalationTierChart({
   total: number;
   title: string;
   unit: string;
-  /** Localised label per tier key. */
   tierLabels: Record<string, string>;
 }) {
   const data: CountDatum[] = TIER_ORDER.map((tier) => ({
@@ -200,22 +187,21 @@ export function EscalationTierChart({
     fill: TIER_COLOR_HEX[tier],
   }));
   const summary = data.map((d) => `${d.label}: ${d.count} of ${d.total}`).join('; ');
+  const config = { count: { label: unit } } satisfies ChartConfig;
 
   return (
-    <ChartFrame title={title} summary={summary}>
-      <ResponsiveContainer width="100%" height={240}>
-        <BarChart data={data} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
-          <CartesianGrid stroke={GRID} strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="label" tick={{ fill: AXIS, fontSize: 12 }} stroke={GRID} />
-          <YAxis allowDecimals={false} tick={{ fill: AXIS, fontSize: 12 }} stroke={GRID} width={44} />
-          <Tooltip cursor={{ fill: 'rgba(15,95,107,0.06)' }} content={({ active, payload }) => <CountTooltip active={active} payload={payload} unit={unit} />} />
-          <Bar dataKey="count" radius={[4, 4, 0, 0]} isAnimationActive={false}>
-            {data.map((d) => (
-              <Cell key={d.label} fill={d.fill} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+    <ChartFrame title={title} summary={summary} config={config}>
+      <BarChart data={data} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
+        <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+        <XAxis dataKey="label" tick={AXIS_TICK} stroke="var(--border)" tickLine={false} />
+        <YAxis allowDecimals={false} tick={AXIS_TICK} stroke="var(--border)" width={44} tickLine={false} />
+        <ChartTooltip content={<ChartTooltipContent labelKey="label" formatter={countFormatter(unit)} />} />
+        <Bar dataKey="count" radius={[6, 6, 0, 0]} isAnimationActive={false}>
+          {data.map((d) => (
+            <Cell key={d.label} fill={d.fill} />
+          ))}
+        </Bar>
+      </BarChart>
     </ChartFrame>
   );
 }
@@ -236,18 +222,17 @@ export function LanguageSplitChart({
     .sort((a, b) => b[1] - a[1])
     .map(([lang, count]) => ({ label: lang.toUpperCase(), count, total: population }));
   const summary = data.map((d) => `${d.label}: ${d.count} of ${d.total}`).join('; ');
+  const config = { count: { label: unit, color: 'var(--chart-3)' } } satisfies ChartConfig;
 
   return (
-    <ChartFrame title={title} summary={summary}>
-      <ResponsiveContainer width="100%" height={240}>
-        <BarChart data={data} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
-          <CartesianGrid stroke={GRID} strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="label" tick={{ fill: AXIS, fontSize: 12 }} stroke={GRID} />
-          <YAxis allowDecimals={false} tick={{ fill: AXIS, fontSize: 12 }} stroke={GRID} width={44} />
-          <Tooltip cursor={{ fill: 'rgba(15,95,107,0.06)' }} content={({ active, payload }) => <CountTooltip active={active} payload={payload} unit={unit} />} />
-          <Bar dataKey="count" fill={PRIMARY} radius={[4, 4, 0, 0]} isAnimationActive={false} />
-        </BarChart>
-      </ResponsiveContainer>
+    <ChartFrame title={title} summary={summary} config={config}>
+      <BarChart data={data} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
+        <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+        <XAxis dataKey="label" tick={AXIS_TICK} stroke="var(--border)" tickLine={false} />
+        <YAxis allowDecimals={false} tick={AXIS_TICK} stroke="var(--border)" width={44} tickLine={false} />
+        <ChartTooltip content={<ChartTooltipContent labelKey="label" formatter={countFormatter(unit)} />} />
+        <Bar dataKey="count" fill="var(--color-count)" radius={[6, 6, 0, 0]} isAnimationActive={false} />
+      </BarChart>
     </ChartFrame>
   );
 }
