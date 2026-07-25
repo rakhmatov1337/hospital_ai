@@ -7,7 +7,6 @@ import {
   IconUsers,
   IconChartBar,
   IconSettings,
-  IconFileText,
   IconActivityHeartbeat,
   IconBell,
   IconBellOff,
@@ -34,7 +33,6 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { cn } from '../lib/cn';
-import { PlaceholderBanner } from './placeholder-banner';
 import { useEscalationQueue } from '../features/queue/api';
 import { useNewArrivalAlert } from '../features/queue/useNewArrivalAlert';
 import { isAlertMuted, setAlertMuted } from '../features/queue/alert-sound';
@@ -44,7 +42,6 @@ const NAV_ITEMS = [
   { to: '/patients', key: 'nav.patients', icon: IconUsers },
   { to: '/metrics', key: 'nav.metrics', icon: IconChartBar },
   { to: '/settings', key: 'nav.settings', icon: IconSettings },
-  { to: '/content', key: 'nav.content', icon: IconFileText },
 ] as const;
 
 /** Authenticated app shell: collapsible shadcn sidebar + topbar + routed content. */
@@ -240,7 +237,6 @@ export function AppLayout() {
         </header>
 
         <main className="flex min-w-0 flex-1 flex-col gap-6 p-6">
-          <PlaceholderBanner />
           <Outlet />
         </main>
       </SidebarInset>

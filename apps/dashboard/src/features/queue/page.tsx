@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Banner, Button, Card, ConnectionStatus, EmptyState, Spinner } from '../../ui';
+import { Banner, Button, ConnectionStatus, EmptyState, Spinner } from '../../ui';
 import { apiClient } from '../../lib/api-client';
 import type { ClinicView } from '../../lib/api-types';
 import { cn } from '../../lib/cn';
@@ -56,32 +56,31 @@ export function QueuePage() {
           />
         </div>
 
-        <Card
+        <div
           role="group"
           aria-label={t('filter.label', { defaultValue: 'Show' })}
-          padded={false}
-          className="inline-flex w-fit gap-1 p-1"
+          className="inline-flex w-fit items-center gap-1 rounded-input border border-border bg-card p-1"
         >
           {FILTERS.map((value) => {
             const selected = filter === value;
             return (
-              <Button
+              <button
                 key={value}
-                variant="ghost"
-                size="sm"
+                type="button"
                 aria-pressed={selected}
                 onClick={() => setFilter(value)}
                 className={cn(
+                  'rounded-[6px] px-3.5 py-1.5 text-caption font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary',
                   selected
-                    ? 'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground'
-                    : 'text-text-muted',
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-text-muted hover:bg-muted hover:text-text',
                 )}
               >
                 {t(`filter.${value}`, { defaultValue: value })}
-              </Button>
+              </button>
             );
           })}
-        </Card>
+        </div>
       </header>
 
       {alert.active && (
